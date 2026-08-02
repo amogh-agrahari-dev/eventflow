@@ -1,0 +1,168 @@
+import { useState } from "react";
+import Head from "next/head";
+import Link from "next/link";
+import toast from "react-hot-toast";
+import { CalendarCheck, ClipboardList, Ticket } from "lucide-react";
+
+import { AuthShell } from "@/components/auth/AuthShell";
+import { Button, Input, Label } from "@/components/ui";
+
+const roles = [
+  { id: "organizer", label: "Organizer", hint: "Create & run events", icon: CalendarCheck },
+  { id: "volunteer", label: "Volunteer", hint: "Take on tasks", icon: ClipboardList },
+  { id: "attendee", label: "Attendee", hint: "Register & check in", icon: Ticket },
+];
+
+export default function RegisterPage() {
+  const [role, setRole] = useState("attendee");
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
+
+  const update = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
+  const registerUser = async (event) => {
+    event.preventDefault();
+    if (!form.name.trim() || !form.email.trim() || !form.password) {
+      toast.error("Please fill in your name, email and password.");
+      return;
+    }
+    if (form.password.length < 8) {
+      toast.error("Password must be at least 8 characters.");
+      return;
+    }
+    if (form.password !== form.confirm) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+    try {
+      const { data } = await fetch("http://localhost:8000/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...form, role }),
+      });
+      toast.success("Account created successfully!");
+
+    } catch (error) {
+      toast.error(error.detail || "An error occurred while creating the account.");
+    }
+
+  }
+  return (
+    <>
+      <Head>
+        <title>Create account — EventHub Campus Portal</title>
+        <meta
+          name="description"
+          content="Register as an organizer, volunteer or attendee to join your college's centralized event and volunteer management portal."
+        />
+        <meta property="og:title" content="Create account — EventHub Campus Portal" />
+        <meta
+          property="og:description"
+          content="Pick your role and get a dashboard built for event management, volunteer tasks or QR check-ins."
+        />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+
+      <AuthShell
+        eyebrow="Get started"
+        title="Create your account"
+        subtitle="Choose your role — access to events, tasks and analytics is granted accordingly."
+        footer={
+          <>
+            Already registered?{" "}
+            <Link href="/auth/login" className="font-medium text-foreground underline underline-offset-4">
+              Sign in instead
+            </Link>
+          </>
+        }
+      >
+        <form
+          className="space-y-5"
+          onSubmit={(e) => registerUser(e)}
+        >
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium text-foreground">I am joining as</legend>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {roles.map(({ id, label, hint, icon: Icon }) => {
+                const active = role === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setRole(id)}
+                    aria-pressed={active}
+                    className={`rounded-xl border p-3 text-left transition-colors ${active
+                        ? "border-accent bg-accent/10 text-foreground"
+                        : "border-border bg-card text-muted-foreground hover:border-accent/50"
+                      }`}
+                  >
+                    <Icon className="size-4" />
+                    <span className="mt-2 block text-sm font-medium text-foreground">{label}</span>
+                    <span className="block text-xs text-muted-foreground">{hint}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          <div className="space-y-2">
+            <Label htmlFor="name">Full name</Label>
+            <Input
+              id="name"
+              value={form.name}
+              maxLength={100}
+              onChange={update("name")}
+              placeholder="Aditi Sharma"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">College email</Label>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              value={form.email}
+              maxLength={255}
+              onChange={update("email")}
+              placeholder="you@college.edu"
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="new-password"
+                value={form.password}
+                maxLength={72}
+                onChange={update("password")}
+                placeholder="8+ characters"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm">Confirm</Label>
+              <Input
+                id="confirm"
+                type="password"
+                autoComplete="new-password"
+                value={form.confirm}
+                maxLength={72}
+                onChange={update("confirm")}
+                placeholder="Repeat password"
+              />
+            </div>
+          </div>
+
+          <Button type="submit" variant="hero" className="w-full">
+            Create account
+          </Button>
+        </form>
+      </AuthShell>
+    </>
+  );
+}
