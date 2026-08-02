@@ -6,6 +6,7 @@ import { CalendarCheck, ClipboardList, Ticket } from "lucide-react";
 
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button, Input, Label } from "@/components/ui";
+import { useRouter } from "next/navigation";
 
 const roles = [
   { id: "organizer", label: "Organizer", hint: "Create & run events", icon: CalendarCheck },
@@ -16,10 +17,12 @@ const roles = [
 export default function RegisterPage() {
   const [role, setRole] = useState("attendee");
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
-
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const update = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
   const registerUser = async (event) => {
     event.preventDefault();
+    setLoading(true);
     if (!form.name.trim() || !form.email.trim() || !form.password) {
       toast.error("Please fill in your name, email and password.");
       return;
@@ -33,15 +36,21 @@ export default function RegisterPage() {
       return;
     }
     try {
-      const { data } = await fetch("http://localhost:8000/register", {
+      const response = await fetch( `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/register`,{
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ ...form, role }),
       });
-      toast.success("Account created successfully!");
-
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.detail || "Registration failed. Please try again.");
+      }else{
+        toast.success("Account created successfully!");
+      }
+      setLoading(false);
+      router.push("/auth/login");
     } catch (error) {
       toast.error(error.detail || "An error occurred while creating the account.");
     }
@@ -161,6 +170,11 @@ export default function RegisterPage() {
           <Button type="submit" variant="hero" className="w-full">
             Create account
           </Button>
+          {loading && (
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-center text-sm text-muted-foreground">Creating account...</p>
+            </div>
+          )}
         </form>
       </AuthShell>
     </>

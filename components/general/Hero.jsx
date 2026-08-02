@@ -30,7 +30,7 @@ export default function Hero() {
             style={{ animationDelay: "380ms" }}
           >
             <Button asChild size="lg" variant="secondary">
-              <Link href="/register">
+              <Link href="/auth/register" className="flex items-center gap-2">
                 Create your account
               </Link>
             </Button>
@@ -40,7 +40,7 @@ export default function Hero() {
               variant="ghost"
               className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
             >
-              <Link href="/login">I already have a login</Link>
+              <Link href="/auth/login">I already have a login</Link>
             </Button>
           </div>
 
