@@ -7,7 +7,6 @@ import { AuthShell } from "@/components/auth/AuthShell";
 import { Button, Checkbox, Input, Label } from "@/components/ui";
 import { useRouter } from "next/navigation";
 import { setToken } from "@/lib/auth";
-import { Bars } from "react-loader-spinner";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -131,15 +130,6 @@ export default function LoginPage() {
           {loading && (
             <div className="flex flex-col items-center gap-2">
             <p className="text-center text-sm text-muted-foreground">Signing in...</p>
-            <Bars
-              height="20"
-              width="full"
-              color="blue"
-              ariaLabel="bars-loading"
-              wrapperStyle={{}}
-              wrapperClass=""
-              visible={true}
-              />
               </div>
           )}
         </form>
