@@ -7,13 +7,14 @@ import { AuthShell } from "@/components/auth/AuthShell";
 import { Button, Checkbox, Input, Label } from "@/components/ui";
 import { useRouter } from "next/navigation";
 import { setToken } from "@/lib/auth";
+import { Bars } from "react-loader-spinner";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-const loginUser = async (event) => {
+  const loginUser = async (event) => {
     event.preventDefault();
     if (!email.trim() || !password) {
       toast.error("Enter your email and password to continue.");
@@ -75,7 +76,7 @@ const loginUser = async (event) => {
           <>
             New to the portal?{" "}
             <Link
-              href="/register"
+              href="/auth/register"
               className="font-medium text-foreground underline underline-offset-4"
             >
               Create an account
@@ -126,6 +127,21 @@ const loginUser = async (event) => {
           <Button type="submit" variant="hero" className="w-full">
             Sign in
           </Button>
+
+          {loading && (
+            <div className="flex flex-col items-center gap-2">
+            <p className="text-center text-sm text-muted-foreground">Signing in...</p>
+            <Bars
+              height="20"
+              width="full"
+              color="blue"
+              ariaLabel="bars-loading"
+              wrapperStyle={{}}
+              wrapperClass=""
+              visible={true}
+              />
+              </div>
+          )}
         </form>
       </AuthShell>
     </>

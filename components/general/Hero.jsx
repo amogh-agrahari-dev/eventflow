@@ -32,7 +32,6 @@ export default function Hero() {
             <Button asChild size="lg" variant="secondary">
               <Link href="/register">
                 Create your account
-                <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
             <Button
