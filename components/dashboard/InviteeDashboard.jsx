@@ -58,7 +58,7 @@ export default function InviteeDashboard({
   const attendedCount = passesList.filter(p => p.checkedIn).length;
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans pb-16">
+    <div className="min-h-screen text-foreground font-sans pb-16" style={{ background: 'linear-gradient(180deg, hsl(222 35% 96%) 0%, hsl(218 30% 93%) 100%)' }}>
       {/* 1. Header Banner */}
       <InviteeHeader
         inviteeProfile={inviteeProfile}
@@ -77,42 +77,57 @@ export default function InviteeDashboard({
           pendingRsvpsCount={eventsList.filter(e => !e.isRegistered).length}
         />
 
-        {/* 3. Navigation Tabs */}
-        <div className="flex items-center justify-between border-b border-border/70 mb-6 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-2 pb-px">
-            <button
-              onClick={() => setActiveTab('passes')}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
-                activeTab === 'passes'
-                  ? 'border-accent text-accent-foreground bg-accent/5 rounded-t-xl'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Ticket className="w-4 h-4" /> My Digital Entry Passes ({passesList.length})
-            </button>
+        <div className="mb-6 flex items-center gap-1 bg-muted/60 p-1.5 rounded-2xl border border-border/60 overflow-x-auto no-scrollbar w-fit max-w-full">
+          <button
+            onClick={() => setActiveTab('passes')}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all duration-200 cursor-pointer ${
+              activeTab === 'passes'
+                ? 'bg-background text-foreground shadow-sm border border-border/60'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Ticket className={`w-3.5 h-3.5 ${activeTab === 'passes' ? 'text-accent' : ''}`} />
+            My Passes
+            {passesList.length > 0 && (
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                activeTab === 'passes' ? 'bg-accent/20 text-accent' : 'bg-muted text-muted-foreground'
+              }`}>{passesList.length}</span>
+            )}
+          </button>
 
-            <button
-              onClick={() => setActiveTab('events')}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
-                activeTab === 'events'
-                  ? 'border-accent text-accent-foreground bg-accent/5 rounded-t-xl'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <CalendarDays className="w-4 h-4" /> Discover & RSVP Events ({eventsList.length})
-            </button>
+          <button
+            onClick={() => setActiveTab('events')}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all duration-200 cursor-pointer ${
+              activeTab === 'events'
+                ? 'bg-background text-foreground shadow-sm border border-border/60'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <CalendarDays className={`w-3.5 h-3.5 ${activeTab === 'events' ? 'text-accent' : ''}`} />
+            Discover & RSVP
+            {eventsList.length > 0 && (
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                activeTab === 'events' ? 'bg-accent/20 text-accent' : 'bg-muted text-muted-foreground'
+              }`}>{eventsList.length}</span>
+            )}
+          </button>
 
-            <button
-              onClick={() => setActiveTab('notifications')}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
-                activeTab === 'notifications'
-                  ? 'border-accent text-accent-foreground bg-accent/5 rounded-t-xl'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Megaphone className="w-4 h-4" /> Updates & Notices ({notifications.length})
-            </button>
-          </div>
+          <button
+            onClick={() => setActiveTab('notifications')}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all duration-200 cursor-pointer ${
+              activeTab === 'notifications'
+                ? 'bg-background text-foreground shadow-sm border border-border/60'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Megaphone className={`w-3.5 h-3.5 ${activeTab === 'notifications' ? 'text-accent' : ''}`} />
+            Updates & Notices
+            {notifications.length > 0 && (
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                activeTab === 'notifications' ? 'bg-accent/20 text-accent' : 'bg-muted text-muted-foreground'
+              }`}>{notifications.length}</span>
+            )}
+          </button>
         </div>
 
         {/* 4. Tab Subviews */}

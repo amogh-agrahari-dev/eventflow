@@ -1,40 +1,79 @@
 import React from 'react';
-import { Megaphone } from 'lucide-react';
+import { Megaphone, Clock, User, AlertCircle, Info, Bell } from 'lucide-react';
 
-export default function VolunteerAnnouncements({
-  announcements = [],
-}) {
+const urgencyConfig = {
+  urgent:  { accent: 'from-red-500/20 to-red-600/5',    border: 'border-red-500/30',    icon: AlertCircle, badge: 'bg-red-500/20 text-red-300 border-red-500/30',    label: 'Urgent'   },
+  info:    { accent: 'from-cyan-500/20 to-cyan-600/5',   border: 'border-cyan-500/30',   icon: Info,        badge: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',   label: 'Info'     },
+  update:  { accent: 'from-indigo-500/20 to-indigo-600/5', border: 'border-indigo-500/30', icon: Bell,      badge: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30', label: 'Update' },
+  default: { accent: 'from-violet-500/20 to-violet-600/5', border: 'border-violet-500/30', icon: Megaphone, badge: 'bg-violet-500/20 text-violet-300 border-violet-500/30', label: 'Notice' },
+};
+
+export default function VolunteerAnnouncements({ announcements = [] }) {
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <div className="p-6 md:p-8 rounded-3xl border border-border/80 bg-card shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 rounded-2xl bg-accent/20 text-accent-foreground">
-            <Megaphone className="w-5 h-5" />
+    <div className="max-w-3xl mx-auto animate-fade-in">
+      <div className="rounded-3xl border border-slate-700/50 overflow-hidden shadow-xl" style={{ background: 'linear-gradient(145deg, hsl(222 47% 14%) 0%, hsl(228 43% 12%) 100%)' }}>
+
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-gradient-to-br from-violet-500/25 to-indigo-500/10 border border-violet-500/20">
+              <Megaphone className="w-5 h-5 text-violet-400" />
+            </div>
+            <div>
+              <h3 className="text-xl font-display font-bold text-white">Organizer Broadcast Notices</h3>
+              <p className="text-xs text-white/40 mt-0.5">Important updates dispatched to all volunteers.</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-display font-bold">Organizer Broadcast Notices</h3>
-            <p className="text-xs text-muted-foreground">Important updates and instructions dispatched to volunteers.</p>
-          </div>
+          {announcements.length > 0 && (
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">
+              {announcements.length} new
+            </span>
+          )}
         </div>
 
-        {announcements.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground border border-dashed border-border/60 rounded-2xl">
-            <Megaphone className="w-8 h-8 mx-auto mb-2 opacity-40" />
-            <p className="text-sm font-medium">No announcements published yet.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {announcements.map((ann) => (
-              <div key={ann.id} className="p-4 rounded-2xl border border-border/60 bg-muted/20 space-y-1">
-                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                  <span className="font-semibold text-primary">{ann.sender || 'Event Lead'}</span>
-                  <span>{ann.time}</span>
-                </div>
-                <p className="text-sm text-foreground leading-relaxed">{ann.message}</p>
+        {/* Content */}
+        <div className="p-5 space-y-3">
+          {announcements.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-white/40">
+              <div className="p-4 rounded-2xl bg-white/5 border border-dashed border-white/10 mb-3">
+                <Megaphone className="w-8 h-8 opacity-30" />
               </div>
-            ))}
-          </div>
-        )}
+              <p className="text-sm font-medium">No announcements yet</p>
+              <p className="text-[11px] text-white/30 mt-1">Organizer broadcasts will appear here in real time.</p>
+            </div>
+          ) : (
+            announcements.map((ann) => {
+              const conf = urgencyConfig[ann.urgency] || urgencyConfig.default;
+              const AnnIcon = conf.icon;
+              return (
+                <div
+                  key={ann.id}
+                  className={`group p-4 rounded-2xl border bg-gradient-to-r ${conf.accent} ${conf.border} hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-xl bg-white/10 shrink-0 mt-0.5">
+                      <AnnIcon className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${conf.badge}`}>{conf.label}</span>
+                        <div className="flex items-center gap-1 text-[10px] text-white/50">
+                          <User className="w-3 h-3" />
+                          <span className="font-semibold text-white/70">{ann.sender || 'Event Lead'}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-white/40 ml-auto">
+                          <Clock className="w-3 h-3" />
+                          {ann.time}
+                        </div>
+                      </div>
+                      <p className="text-sm text-white/80 leading-relaxed">{ann.message}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );

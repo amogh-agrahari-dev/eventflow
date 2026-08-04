@@ -10,6 +10,13 @@ import {
   VolunteerAnnouncements,
 } from '@/components/volunteer';
 
+const TABS = [
+  { id: 'scanner',       label: 'QR Check-in Desk',            icon: QrCode    },
+  { id: 'tasks',         label: 'Task Checklist',               icon: ListTodo  },
+  { id: 'schedule',      label: 'Shift & Contact',              icon: Calendar  },
+  { id: 'announcements', label: 'Broadcasts',                   icon: Megaphone },
+];
+
 export default function VolunteerDashboard({
   volunteerProfile = null,
   assignedEvent = null,
@@ -18,15 +25,13 @@ export default function VolunteerDashboard({
   recentScans = [],
   announcements = [],
 }) {
-  // Navigation & Interactive State
-  const [activeTab, setActiveTab] = useState('scanner'); // 'scanner' | 'tasks' | 'schedule' | 'announcements'
+  const [activeTab, setActiveTab] = useState('scanner');
   const [manualTicket, setManualTicket] = useState('');
   const [tasksList, setTasksList] = useState(assignedTasks);
   const [scanHistory, setScanHistory] = useState(recentScans);
   const [isScanning, setIsScanning] = useState(false);
   const [dutyStatus, setDutyStatus] = useState(shiftDetails?.status || 'On Duty');
 
-  // Manual Check-in Handler
   const handleManualCheckIn = (e) => {
     e.preventDefault();
     if (!manualTicket.trim()) {
@@ -38,14 +43,13 @@ export default function VolunteerDashboard({
       ticketId: manualTicket.trim().toUpperCase(),
       name: 'Checked Attendee',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      status: 'Valid Pass'
+      status: 'Valid Pass',
     };
     setScanHistory([newScan, ...scanHistory]);
     toast.success(`Ticket ${newScan.ticketId} successfully checked in!`);
     setManualTicket('');
   };
 
-  // Task Toggle Handler
   const handleToggleTask = (taskId) => {
     setTasksList(prev => prev.map(t => {
       if (t.id === taskId) {
@@ -57,18 +61,17 @@ export default function VolunteerDashboard({
     }));
   };
 
-  // Duty Status Toggle Handler
   const handleToggleDutyStatus = () => {
     const nextStatus = dutyStatus === 'On Duty' ? 'On Break' : 'On Duty';
     setDutyStatus(nextStatus);
-    toast(`Status changed to ${nextStatus}`, { icon: nextStatus === 'On Duty' ? '🟢' : '🟡' });
+    toast(nextStatus === 'On Duty' ? '🟢 Resumed duty' : '🟡 On break', { duration: 2500 });
   };
 
   const completedTasksCount = tasksList.filter(t => t.completed).length;
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans pb-16">
-      {/* 1. Volunteer Header Banner */}
+    <div className="min-h-screen text-white font-sans pb-16" style={{ background: 'linear-gradient(170deg, hsl(222 47% 11%) 0%, hsl(230 45% 9%) 60%, hsl(225 50% 8%) 100%)' }}>
+      {/* 1. Hero Header */}
       <VolunteerHeader
         volunteerProfile={volunteerProfile}
         assignedEvent={assignedEvent}
@@ -77,10 +80,8 @@ export default function VolunteerDashboard({
         onOpenScanner={() => setActiveTab('scanner')}
       />
 
-      {/* Main Content Container */}
-      <main className="container mx-auto px-4 md:px-6 -mt-6">
-
-        {/* 2. Key Metrics Grid */}
+      <main className="container mx-auto px-4 md:px-6 -mt-6 relative z-10">
+        {/* 2. Metrics */}
         <VolunteerMetrics
           shiftDetails={shiftDetails}
           scanCount={scanHistory.length}
@@ -88,86 +89,60 @@ export default function VolunteerDashboard({
           totalTasksCount={tasksList.length}
         />
 
-        {/* 3. Navigation Tabs */}
-        <div className="flex items-center justify-between border-b border-border/70 mb-6 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-2 pb-px">
-            <button
-              onClick={() => setActiveTab('scanner')}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
-                activeTab === 'scanner'
-                  ? 'border-accent text-accent-foreground bg-accent/5 rounded-t-xl'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <QrCode className="w-4 h-4" /> QR Check-in Desk
-            </button>
-
-            <button
-              onClick={() => setActiveTab('tasks')}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
-                activeTab === 'tasks'
-                  ? 'border-accent text-accent-foreground bg-accent/5 rounded-t-xl'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <ListTodo className="w-4 h-4" /> Task Checklist ({tasksList.length})
-            </button>
-
-            <button
-              onClick={() => setActiveTab('schedule')}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
-                activeTab === 'schedule'
-                  ? 'border-accent text-accent-foreground bg-accent/5 rounded-t-xl'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Calendar className="w-4 h-4" /> Shift Roster & Contact
-            </button>
-
-            <button
-              onClick={() => setActiveTab('announcements')}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
-                activeTab === 'announcements'
-                  ? 'border-accent text-accent-foreground bg-accent/5 rounded-t-xl'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Megaphone className="w-4 h-4" /> Organizer Broadcasts ({announcements.length})
-            </button>
-          </div>
+        {/* 3. Premium Pill Tab Bar — dark theme */}
+        <div className="mb-6 flex items-center gap-1 p-1.5 rounded-2xl border border-white/10 overflow-x-auto no-scrollbar w-fit max-w-full" style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(12px)' }}>
+          {TABS.map(({ id, label, icon: Icon }) => {
+            const isActive = activeTab === id;
+            const badge = id === 'tasks' ? tasksList.length
+              : id === 'announcements' ? announcements.length
+              : id === 'scanner' ? scanHistory.length
+              : null;
+            return (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                  isActive
+                    ? 'bg-white/15 text-white shadow-sm border border-white/20'
+                    : 'text-white/50 hover:text-white/80'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-cyan-400' : ''}`} />
+                {label}
+                {badge != null && badge > 0 && (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                    isActive ? 'bg-cyan-400/25 text-cyan-300' : 'bg-white/10 text-white/40'
+                  }`}>
+                    {badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {/* 4. Tab Views */}
-        {activeTab === 'scanner' && (
-          <QRCheckInDesk
-            isScanning={isScanning}
-            onToggleScanning={() => setIsScanning(!isScanning)}
-            manualTicket={manualTicket}
-            onManualTicketChange={setManualTicket}
-            onManualCheckIn={handleManualCheckIn}
-            scanHistory={scanHistory}
-          />
-        )}
-
-        {activeTab === 'tasks' && (
-          <VolunteerTaskList
-            tasks={tasksList}
-            onToggleTask={handleToggleTask}
-          />
-        )}
-
-        {activeTab === 'schedule' && (
-          <ShiftScheduleRoster
-            assignedEvent={assignedEvent}
-            shiftDetails={shiftDetails}
-          />
-        )}
-
-        {activeTab === 'announcements' && (
-          <VolunteerAnnouncements
-            announcements={announcements}
-          />
-        )}
+        {/* 4. Tab Panels */}
+        <div className="animate-fade-in">
+          {activeTab === 'scanner' && (
+            <QRCheckInDesk
+              isScanning={isScanning}
+              onToggleScanning={() => setIsScanning(!isScanning)}
+              manualTicket={manualTicket}
+              onManualTicketChange={setManualTicket}
+              onManualCheckIn={handleManualCheckIn}
+              scanHistory={scanHistory}
+            />
+          )}
+          {activeTab === 'tasks' && (
+            <VolunteerTaskList tasks={tasksList} onToggleTask={handleToggleTask} />
+          )}
+          {activeTab === 'schedule' && (
+            <ShiftScheduleRoster assignedEvent={assignedEvent} shiftDetails={shiftDetails} />
+          )}
+          {activeTab === 'announcements' && (
+            <VolunteerAnnouncements announcements={announcements} />
+          )}
+        </div>
       </main>
     </div>
   );
