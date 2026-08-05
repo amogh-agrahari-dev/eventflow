@@ -3,7 +3,7 @@ import { Responsive as ResponsiveGridLayout } from 'react-grid-layout';
 import { 
   Home, CalendarDays, PlusSquare, History, Users, ClipboardList, 
   MessageSquare, UserPlus, LogOut, Search, Bell, Plus, MoreHorizontal,
-  MapPin, CheckCircle2, ChevronRight, Settings, BarChart2, Briefcase, Mail, QrCode, X, SlidersHorizontal
+  MapPin, CheckCircle2, ChevronRight, Settings, BarChart2, Briefcase, Mail, QrCode, X, SlidersHorizontal, Menu
 } from 'lucide-react';
 
 function AutoWidthGrid(props) {
@@ -32,6 +32,7 @@ const WIDGETS = [
   { id: 'upcoming-events', title: 'Upcoming Events' },
   { id: 'volunteer-assignments', title: 'Volunteer Assignments' },
   { id: 'live-performance', title: 'Live Performance Hub' },
+  { id: 'live-checkin', title: 'Live Check-in Feed' },
   { id: 'volunteer-central', title: 'Volunteer Central' },
   { id: 'event-analytics', title: 'Event Analytics' },
   { id: 'recent-registrations', title: 'Recent Registrations' },
@@ -49,7 +50,8 @@ const DEFAULT_LAYOUT = [
   { i: 'recent-registrations', x: 6, y: 4, w: 3, h: 3, minW: 2, minH: 3 },
   { i: 'team-members', x: 9, y: 4, w: 3, h: 3, minW: 2, minH: 3 },
   { i: 'recent-activities', x: 0, y: 7, w: 3, h: 4, minW: 2, minH: 3 },
-  { i: 'calendar', x: 3, y: 7, w: 3, h: 4, minW: 2, minH: 3 }
+  { i: 'calendar', x: 3, y: 7, w: 3, h: 4, minW: 2, minH: 3 },
+  { i: 'live-checkin', x: 6, y: 7, w: 3, h: 4, minW: 2, minH: 3 }
 ];
 
 export default function OrganizerDashboard() {
@@ -57,6 +59,8 @@ export default function OrganizerDashboard() {
   const [layouts, setLayouts] = useState({ lg: DEFAULT_LAYOUT });
   const [visibleWidgets, setVisibleWidgets] = useState(new Set(WIDGETS.map(w => w.id)));
   const [showCustomizePanel, setShowCustomizePanel] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -80,8 +84,26 @@ export default function OrganizerDashboard() {
   const toggleWidget = (id) => {
     setVisibleWidgets(prev => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+        setLayouts(prevLayouts => {
+          const newLayouts = { ...prevLayouts };
+          Object.keys(newLayouts).forEach(breakpoint => {
+             const layoutArr = newLayouts[breakpoint] || [];
+             if (!layoutArr.find(item => item.i === id)) {
+               const defaultItem = DEFAULT_LAYOUT.find(item => item.i === id);
+               if (defaultItem) {
+                 // Push to bottom (y: Infinity is supported by react-grid-layout to append)
+                 newLayouts[breakpoint] = [...layoutArr, { ...defaultItem, y: Infinity }];
+               }
+             }
+          });
+          if (isMounted) localStorage.setItem('organizer_layout', JSON.stringify(newLayouts));
+          return newLayouts;
+        });
+      }
       if (isMounted) localStorage.setItem('organizer_visible', JSON.stringify(Array.from(next)));
       return next;
     });
@@ -102,63 +124,87 @@ export default function OrganizerDashboard() {
   return (
     <div className="flex h-screen bg-[#1c1f26] text-slate-300 font-sans overflow-hidden selection:bg-indigo-500/30">
       
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          onClick={() => setIsMobileMenuOpen(false)} 
+        />
+      )}
+
       {/* 1. Sidebar */}
-      <aside className="w-64 bg-[#232730] border-r border-[#2d323e] flex flex-col shrink-0 overflow-y-auto no-scrollbar">
-        {/* Brand / Logo Area */}
-        <div className="py-8 flex items-center px-6 gap-3 border-b border-[#2d323e]">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <span className="text-white font-bold text-lg">E</span>
+      <aside className={`fixed inset-y-0 left-0 z-50 bg-[#232730] border-[#2d323e] flex flex-col shrink-0 overflow-hidden transform transition-all duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 w-64 border-r' : '-translate-x-full w-64 border-r'} ${isDesktopSidebarCollapsed ? 'md:w-0 md:border-r-0' : 'md:w-64 md:border-r'}`}>
+        <div className="w-64 h-full flex flex-col overflow-y-auto no-scrollbar">
+          {/* Brand / Logo Area */}
+          <div className="py-8 flex items-center px-6 gap-3 border-b border-[#2d323e] shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <span className="text-white font-bold text-lg">E</span>
+              </div>
+              <span className="text-white font-bold text-lg tracking-wide">EventFlow</span>
             </div>
-            <span className="text-white font-bold text-lg tracking-wide">EventFlow</span>
-          </div>
-        </div>
-
-        <div className="p-4 flex flex-col gap-6">
-          <div className="flex items-center gap-3 bg-[#323844] text-white px-4 py-2.5 rounded-lg shadow-sm border border-[#3f4553]">
-            <Home className="w-5 h-5" />
-            <span className="font-semibold text-sm">Dashboard</span>
           </div>
 
-          <NavGroup title="Event Studio">
-            <NavItem icon={<PlusSquare className="w-4 h-4" />} label="Create New" />
-            <NavItem icon={<CalendarDays className="w-4 h-4" />} label="Templates" />
-            <NavItem icon={<History className="w-4 h-4" />} label="Past Events" />
-          </NavGroup>
+          <div className="p-4 flex flex-col gap-6">
+            <div className="flex items-center gap-3 bg-[#323844] text-white px-4 py-2.5 rounded-lg shadow-sm border border-[#3f4553]">
+              <Home className="w-5 h-5" />
+              <span className="font-semibold text-sm">Dashboard</span>
+            </div>
 
-          <NavGroup title="Volunteer Hub">
-            <NavItem icon={<Users className="w-4 h-4" />} label="Directory" />
-            <NavItem icon={<ClipboardList className="w-4 h-4" />} label="Rosters" />
-            <NavItem icon={<MessageSquare className="w-4 h-4" />} label="Feedback" />
-          </NavGroup>
+            <NavGroup title="Event Studio">
+              <NavItem icon={<PlusSquare className="w-4 h-4" />} label="Create New" />
+              <NavItem icon={<CalendarDays className="w-4 h-4" />} label="Templates" />
+              <NavItem icon={<History className="w-4 h-4" />} label="Past Events" />
+            </NavGroup>
 
-          <NavGroup title="Attendee Management">
-            <NavItem icon={<UserPlus className="w-4 h-4" />} label="Registrations" />
-            <NavItem icon={<CheckCircle2 className="w-4 h-4" />} label="Check-In Stations" />
-          </NavGroup>
+            <NavGroup title="Volunteer Hub">
+              <NavItem icon={<Users className="w-4 h-4" />} label="Directory" />
+              <NavItem icon={<ClipboardList className="w-4 h-4" />} label="Rosters" />
+              <NavItem icon={<MessageSquare className="w-4 h-4" />} label="Feedback" />
+            </NavGroup>
 
-          <NavGroup title="Communications">
-            <NavItem icon={<MessageSquare className="w-4 h-4" />} label="Messaging" />
-            <NavItem icon={<Mail className="w-4 h-4" />} label="Email campaigns" />
-          </NavGroup>
+            <NavGroup title="Attendee Management">
+              <NavItem icon={<UserPlus className="w-4 h-4" />} label="Registrations" />
+              <NavItem icon={<CheckCircle2 className="w-4 h-4" />} label="Check-In Stations" />
+            </NavGroup>
 
-          <NavGroup title="Analytics Pro">
-            <NavItem icon={<BarChart2 className="w-4 h-4" />} label="Custom Reports" />
-            <NavItem icon={<Settings className="w-4 h-4" />} label="General" />
-            <NavItem icon={<Briefcase className="w-4 h-4" />} label="Account Settings" />
-          </NavGroup>
+            <NavGroup title="Communications">
+              <NavItem icon={<MessageSquare className="w-4 h-4" />} label="Messaging" />
+              <NavItem icon={<Mail className="w-4 h-4" />} label="Email campaigns" />
+            </NavGroup>
+
+            <NavGroup title="Analytics Pro">
+              <NavItem icon={<BarChart2 className="w-4 h-4" />} label="Custom Reports" />
+              <NavItem icon={<Settings className="w-4 h-4" />} label="General" />
+              <NavItem icon={<Briefcase className="w-4 h-4" />} label="Account Settings" />
+            </NavGroup>
+          </div>
         </div>
       </aside>
 
       {/* 2. Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
+      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0">
         
         {/* Top Header */}
-        <header className="h-16 flex items-center justify-between px-8 bg-[#232730] border-b border-[#2d323e] shrink-0">
-          <h1 className="text-xl font-semibold text-white">Dashboard</h1>
+        <header className="h-16 flex items-center justify-between px-4 md:px-8 bg-[#232730] border-b border-[#2d323e] shrink-0">
+          <div className="flex items-center gap-3">
+            <button 
+              className="md:hidden text-slate-400 hover:text-white transition-colors"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <button 
+              className="hidden md:block text-slate-400 hover:text-white transition-colors"
+              onClick={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <h1 className="text-lg md:text-xl font-semibold text-white truncate">Dashboard</h1>
+          </div>
           
-          <div className="flex items-center gap-4 flex-1 justify-end">
-            <div className="relative w-64 hidden md:block">
+          <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end min-w-0">
+            <div className="relative w-full max-w-[200px] md:w-64 hidden sm:block">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input 
                 type="text" 
@@ -171,12 +217,13 @@ export default function OrganizerDashboard() {
               <Plus className="w-4 h-4" /> Quick-Add
             </button>
             
+            
             {/* Customize Dashboard Button */}
             <button 
               onClick={() => setShowCustomizePanel(true)}
-              className="flex items-center gap-2 bg-[#1c1f26] border border-[#2d323e] hover:bg-[#2d323e] text-slate-300 px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+              className="flex items-center gap-2 bg-[#1c1f26] border border-[#2d323e] hover:bg-[#2d323e] text-slate-300 px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors whitespace-nowrap"
             >
-              <SlidersHorizontal className="w-4 h-4" /> Customize
+              <SlidersHorizontal className="w-4 h-4" /> <span className="hidden sm:inline">Customize</span>
             </button>
             
             <button className="relative p-2 text-slate-400 hover:text-white transition-colors">
@@ -191,7 +238,7 @@ export default function OrganizerDashboard() {
         </header>
 
         {/* Dashboard Grid Content */}
-        <div className="flex-1 overflow-y-auto p-6 no-scrollbar relative">
+        <div className="flex-1 overflow-y-auto p-6 no-scrollbar relative flex flex-col">
           <AutoWidthGrid
             className="layout"
             layouts={layouts}
@@ -203,6 +250,7 @@ export default function OrganizerDashboard() {
             margin={[20, 20]}
             isResizable={true}
             isDraggable={true}
+            resizeHandles={['s', 'w', 'e', 'n', 'sw', 'nw', 'se', 'ne']}
           >
             {DEFAULT_LAYOUT.filter(l => visibleWidgets.has(l.i)).map(l => (
               <div key={l.i} className="flex flex-col h-full w-full bg-[#1c1f26]">
@@ -210,12 +258,13 @@ export default function OrganizerDashboard() {
               </div>
             ))}
           </AutoWidthGrid>
-          
-          <div className="mt-8 flex justify-end gap-4 text-xs text-slate-500 pb-4 pr-4">
-            <span className="hover:text-slate-300 cursor-pointer">Help Center</span>
-            <span>|</span>
-            <span className="hover:text-slate-300 cursor-pointer">API Docs</span>
-          </div>
+        </div>
+        
+        {/* Fixed Footer */}
+        <div className="absolute bottom-4 right-6 flex items-center gap-3 text-[10px] text-slate-500 bg-[#1c1f26]/80 backdrop-blur px-4 py-1.5 rounded-full border border-[#2d323e] shadow-lg z-10">
+          <span className="hover:text-slate-300 cursor-pointer transition-colors">Help Center</span>
+          <span className="w-px h-3 bg-slate-600"></span>
+          <span className="hover:text-slate-300 cursor-pointer transition-colors">API Docs</span>
         </div>
 
         {/* Customize Panel Overlay */}
@@ -272,6 +321,8 @@ function renderWidget(id) {
       return <VolunteerAssignmentsWidget />;
     case 'live-performance':
       return <LivePerformanceWidget />;
+    case 'live-checkin':
+      return <LiveCheckInWidget />;
     case 'volunteer-central':
       return <VolunteerCentralWidget />;
     case 'event-analytics':
@@ -327,49 +378,51 @@ function VolunteerAssignmentsWidget() {
 
 function LivePerformanceWidget() {
   return (
-    <div className="flex flex-col h-full gap-4">
-      <Card title="Live Performance Hub" action={<MoreHorizontal className="w-4 h-4 text-slate-500" />}>
-        <div className="mt-2 flex justify-between items-end">
-          <div>
-            <p className="text-xs text-slate-400 mb-1">Live Attendance Counter</p>
-            <div className="text-3xl font-bold text-white flex items-baseline gap-1">
-              2,354 <span className="text-xs text-slate-400 font-normal">attendees</span>
-            </div>
-          </div>
-          <div className="w-20 h-8 flex items-end justify-between gap-0.5">
-            {[3,5,4,7,5,8,6].map((h, i) => (
-              <div key={i} className="w-full bg-emerald-500/50 rounded-t-sm" style={{ height: `${h}0%` }} />
-            ))}
+    <Card title="Live Performance Hub" action={<MoreHorizontal className="w-4 h-4 text-slate-500" />}>
+      <div className="mt-2 flex justify-between items-end">
+        <div>
+          <p className="text-xs text-slate-400 mb-1">Live Attendance Counter</p>
+          <div className="text-3xl font-bold text-white flex items-baseline gap-1">
+            2,354 <span className="text-xs text-slate-400 font-normal">attendees</span>
           </div>
         </div>
-        <div className="mt-3 text-[10px] text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 w-fit px-2 py-1 rounded shrink-0">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> real-time sync
+        <div className="w-20 h-8 flex items-end justify-between gap-0.5">
+          {[3,5,4,7,5,8,6].map((h, i) => (
+            <div key={i} className="w-full bg-emerald-500/50 rounded-t-sm" style={{ height: `${h}0%` }} />
+          ))}
         </div>
-      </Card>
+      </div>
+      <div className="mt-3 text-[10px] text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 w-fit px-2 py-1 rounded shrink-0">
+        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> real-time sync
+      </div>
+    </Card>
+  );
+}
 
-      <Card title="Live Check-in feed" action={<Badge>Check-in ▾</Badge>}>
-        <div className="grid grid-cols-2 gap-4 mt-2 flex-1 overflow-hidden">
-          <div className="text-xs space-y-2 flex flex-col h-full overflow-y-auto no-scrollbar pr-2">
-            <div className="flex justify-between text-slate-500 mb-1 shrink-0">
-              <span>Feed</span><span>Status</span>
-            </div>
-            {['Alex Chen','Maria Nones','Jack Doe','Sarah Connor','Alex Chen'].map((name, i) => (
-              <div key={i} className="flex justify-between items-center text-[10px] shrink-0">
-                <span className="text-slate-300">{name}</span>
-                <span className="flex items-center gap-1 text-emerald-400"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Check-in</span>
-              </div>
-            ))}
+function LiveCheckInWidget() {
+  return (
+    <Card title="Live Check-in feed" action={<Badge>Check-in ▾</Badge>}>
+      <div className="grid grid-cols-2 gap-4 mt-2 flex-1 overflow-hidden">
+        <div className="text-xs space-y-2 flex flex-col h-full overflow-y-auto no-scrollbar pr-2">
+          <div className="flex justify-between text-slate-500 mb-1 shrink-0">
+            <span>Feed</span><span>Status</span>
           </div>
-          <div className="bg-[#1c1f26] rounded-lg border border-[#2d323e] p-2 relative overflow-hidden flex items-center justify-center h-full min-h-[80px]">
-            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-            <div className="w-[80%] h-[80%] border-2 border-slate-600 rounded bg-slate-800/50 transform rotate-12 relative">
-              <div className="absolute top-1/4 left-1/4 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10B981]" />
-              <div className="absolute bottom-1/4 right-1/4 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_#EF4444]" />
+          {['Alex Chen','Maria Nones','Jack Doe','Sarah Connor','Alex Chen'].map((name, i) => (
+            <div key={i} className="flex justify-between items-center text-[10px] shrink-0">
+              <span className="text-slate-300">{name}</span>
+              <span className="flex items-center gap-1 text-emerald-400"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Check-in</span>
             </div>
+          ))}
+        </div>
+        <div className="bg-[#1c1f26] rounded-lg border border-[#2d323e] p-2 relative overflow-hidden flex items-center justify-center h-full min-h-[80px]">
+          <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+          <div className="w-[80%] h-[80%] border-2 border-slate-600 rounded bg-slate-800/50 transform rotate-12 relative">
+            <div className="absolute top-1/4 left-1/4 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10B981]" />
+            <div className="absolute bottom-1/4 right-1/4 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_#EF4444]" />
           </div>
         </div>
-      </Card>
-    </div>
+      </div>
+    </Card>
   );
 }
 
@@ -398,9 +451,9 @@ function VolunteerCentralWidget() {
 function EventAnalyticsWidget() {
   return (
     <Card title="Event Analytics" action={<Badge color="emerald">Active ▾</Badge>}>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2 flex-1">
+      <div className="flex flex-wrap gap-6 mt-2 flex-1">
         {/* Line Chart Area */}
-        <div className="flex flex-col">
+        <div className="flex flex-col flex-1 min-w-[200px]">
           <p className="text-2xl font-bold text-white mb-0.5 shrink-0">2,354</p>
           <p className="text-[10px] text-slate-400 mb-4 shrink-0">Maintenance Growth</p>
           <p className="text-[10px] text-slate-500 mb-2 shrink-0">Attendance Growth Line Chart</p>
@@ -425,7 +478,7 @@ function EventAnalyticsWidget() {
         </div>
 
         {/* Bar Chart Area */}
-        <div className="flex flex-col">
+        <div className="flex flex-col flex-1 min-w-[200px]">
           <p className="text-2xl font-bold text-white mb-0.5 flex justify-between items-center shrink-0">
             581 <BarChart2 className="w-4 h-4 text-fuchsia-500" />
           </p>
@@ -445,7 +498,7 @@ function EventAnalyticsWidget() {
         </div>
 
         {/* Pie Chart Area */}
-        <div className="flex flex-col">
+        <div className="flex flex-col flex-1 min-w-[200px]">
           <p className="text-2xl font-bold text-white mb-0.5 flex justify-between items-center shrink-0">
             23% <div className="w-4 h-4 rounded-full bg-indigo-500" />
           </p>
@@ -585,7 +638,7 @@ function Card({ title, action, children }) {
         </h3>
         {action}
       </div>
-      <div className="flex-1 overflow-hidden flex flex-col">
+      <div className="flex-1 min-h-0 overflow-auto no-scrollbar flex flex-col">
         {children}
       </div>
     </div>

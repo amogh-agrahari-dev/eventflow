@@ -1,6 +1,6 @@
 import { getToken, removeToken } from '@/lib/auth';
 import { Button } from '@/components/ui';
-import { CalendarDays, ChevronDown, LogOut, LayoutDashboard, UserCircle2, PlusCircle, ShieldCheck, Ticket } from 'lucide-react';
+import { CalendarDays, ChevronDown, LogOut, LayoutDashboard, UserCircle2, PlusCircle, ShieldCheck, Ticket, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -8,6 +8,7 @@ import React, { useEffect, useRef, useState } from 'react';
 export default function Navbar() {
   const [user, setUser] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const router = useRouter();
   const token = getToken();
@@ -97,18 +98,27 @@ export default function Navbar() {
         </div>
 
         {/* User Account / Sign In */}
-        {user ? (
-          <div className="relative" ref={menuRef}>
-            <button
-              onClick={() => setIsMenuOpen(prev => !prev)}
-              className="flex items-center gap-2.5 rounded-full border border-border/80 bg-background/90 px-3.5 py-2 shadow-sm transition-all hover:shadow-md hover:border-accent/40 cursor-pointer"
-            >
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-r from-accent to-indigo-600 text-xs font-bold text-slate-950">
-                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-              </div>
-              <span className="text-xs font-bold text-foreground">{user?.name || 'User'}</span>
-              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-            </button>
+        <div className="flex items-center gap-2">
+          {user ? (
+            <div className="relative flex items-center gap-2" ref={menuRef}>
+              <button
+                onClick={() => setIsMenuOpen(prev => !prev)}
+                className="flex items-center gap-2.5 rounded-full border border-border/80 bg-background/90 px-3.5 py-2 shadow-sm transition-all hover:shadow-md hover:border-accent/40 cursor-pointer"
+              >
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-r from-accent to-indigo-600 text-xs font-bold text-slate-950">
+                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+                <span className="hidden sm:inline text-xs font-bold text-foreground">{user?.name || 'User'}</span>
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+              
+              {/* Mobile Menu Toggle for Logged In User */}
+              <button 
+                className="md:hidden p-2 text-foreground ml-1"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
 
             {isMenuOpen && (
               <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-border/80 bg-card p-2 shadow-2xl backdrop-blur-xl animate-fade-in">
@@ -155,19 +165,70 @@ export default function Navbar() {
               </div>
             )}
           </div>
-        ) : (
-          <div className="flex items-center gap-4">
-            <Link href="/auth/login" className="text-xs font-bold text-muted-foreground hover:text-foreground transition-colors">
-              Sign In
-            </Link>
-            <Link href="/auth/register">
-              <Button size="sm" variant="hero" className="rounded-xl text-xs px-4 h-9 shadow-md">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link href="/auth/login">
+                <Button variant="outline" className="rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition-all hover:bg-muted hidden sm:flex">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/auth/register">
+                <Button className="rounded-xl bg-gradient-to-r from-accent to-indigo-600 px-4 py-2 text-xs font-bold text-slate-950 shadow-md transition-all hover:scale-105 hover:shadow-lg hidden sm:flex">
+                  Get Started
+                </Button>
+              </Link>
+              
+              {/* Mobile Menu Toggle */}
+              <button 
+                className="md:hidden p-2 text-foreground ml-2"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+      
+      {/* Mobile Navigation Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-border/60 bg-background/95 backdrop-blur-xl absolute top-full left-0 right-0 p-4 flex flex-col gap-2 shadow-xl">
+          <Link
+            href="/dashboard"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="px-4 py-3 text-sm font-bold rounded-xl bg-muted/30 hover:bg-muted transition-colors flex items-center gap-3"
+          >
+            <LayoutDashboard className="w-4 h-4 text-accent" />
+            Organizer Hub
+          </Link>
+          <Link
+            href="/volunteer/dashboard"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="px-4 py-3 text-sm font-bold rounded-xl bg-muted/30 hover:bg-muted transition-colors flex items-center gap-3"
+          >
+            <ShieldCheck className="w-4 h-4 text-accent" />
+            Volunteer Portal
+          </Link>
+          <Link
+            href="/invitee/dashboard"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="px-4 py-3 text-sm font-bold rounded-xl bg-muted/30 hover:bg-muted transition-colors flex items-center gap-3"
+          >
+            <Ticket className="w-4 h-4 text-accent" />
+            Invitee Passes
+          </Link>
+          {!user && (
+            <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-border/60">
+              <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button variant="outline" className="w-full rounded-xl">Sign In</Button>
+              </Link>
+              <Link href="/auth/register" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button className="w-full rounded-xl bg-gradient-to-r from-accent to-indigo-600 text-slate-950">Get Started</Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
     </nav>
   );
 }

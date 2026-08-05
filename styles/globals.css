@@ -13,12 +13,53 @@
     transition-duration: 100ms;
   }
   
-  .react-resizable-handle::after {
+  /* Remove default background icon from all handles */
+  .react-resizable-handle {
+    background-image: none !important;
+  }
+
+  /* Make N and S edge handles span the entire width */
+  .react-resizable-handle-n, .react-resizable-handle-s {
+    width: 100% !important;
+    left: 0 !important;
+    margin-left: 0 !important;
+    height: 12px !important;
+  }
+  .react-resizable-handle-n { top: -6px !important; }
+  .react-resizable-handle-s { bottom: -6px !important; }
+
+  /* Make E and W edge handles span the entire height */
+  .react-resizable-handle-e, .react-resizable-handle-w {
+    height: 100% !important;
+    top: 0 !important;
+    margin-top: 0 !important;
+    width: 12px !important;
+  }
+  .react-resizable-handle-w { left: -6px !important; }
+  .react-resizable-handle-e { right: -6px !important; }
+
+  /* Ensure corner handles have a reasonable clickable area */
+  .react-resizable-handle-se, .react-resizable-handle-sw, 
+  .react-resizable-handle-ne, .react-resizable-handle-nw {
+    width: 20px !important;
+    height: 20px !important;
+    z-index: 10;
+  }
+
+  /* Custom visual indicator for the bottom right handle */
+  .react-resizable-handle-se::after {
+    content: '';
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 10px;
+    height: 10px;
     border-right: 2px solid theme('colors.slate.500') !important;
     border-bottom: 2px solid theme('colors.slate.500') !important;
+    transition: border-color 0.2s;
   }
   
-  .react-resizable-handle:hover::after {
+  .react-resizable-handle-se:hover::after {
     border-color: theme('colors.indigo.400') !important;
   }
 }

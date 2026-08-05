@@ -31,16 +31,14 @@ export default function VolunteerHeader({
                 Volunteer Workspace
               </span>
               <span
-                className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full border backdrop-blur-md ${
-                  isOnDuty
+                className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full border backdrop-blur-md ${isOnDuty
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                     : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                }`}
+                  }`}
               >
                 <span
-                  className={`w-2 h-2 rounded-full ${
-                    isOnDuty ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
-                  }`}
+                  className={`w-2 h-2 rounded-full ${isOnDuty ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                    }`}
                 />
                 {dutyStatus}
               </span>
@@ -72,11 +70,10 @@ export default function VolunteerHeader({
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <button
               onClick={onToggleDutyStatus}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] cursor-pointer ${
-                isOnDuty
+              className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] cursor-pointer ${isOnDuty
                   ? 'bg-amber-500/15 border-amber-400/30 text-amber-300 hover:bg-amber-500/25'
                   : 'bg-emerald-500/15 border-emerald-400/30 text-emerald-300 hover:bg-emerald-500/25'
-              }`}
+                }`}
             >
               <RefreshCw className="w-4 h-4" />
               {isOnDuty ? 'Go On Break' : 'Resume Duty'}
@@ -93,7 +90,7 @@ export default function VolunteerHeader({
         </div>
 
         {/* Decorative stat strip */}
-        <div className="mt-10 grid grid-cols-3 gap-4 max-w-lg">
+        <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4 max-w-lg">
           {[
             { icon: ShieldCheck, label: 'Active Station', value: 'Gate A' },
             { icon: Zap, label: 'Response Time', value: '< 2s' },

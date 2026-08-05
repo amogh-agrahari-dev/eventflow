@@ -25,10 +25,10 @@ export default function Hero() {
 
           {/* Left Column: Text Content */}
           <div className="max-w-xl z-20">
-            <h1 className="text-5xl sm:text-6xl lg:text-[4.5rem] font-bold leading-[1.1] tracking-tight text-white mb-6">
-              Simplify Event <br />
-              <span className="inline-block mt-2">& Volunteer</span> <br />
-              <span className="inline-block mt-2">Management</span>
+            <h1 className="text-4xl sm:text-5xl lg:text-[4.5rem] font-bold leading-[1.1] tracking-tight text-white mb-6">
+              Simplify Event <br className="hidden sm:block" />
+              <span className="inline-block mt-1 sm:mt-2">& Volunteer</span> <br className="hidden sm:block" />
+              <span className="inline-block mt-1 sm:mt-2">Management</span>
             </h1>
             <p className="text-lg sm:text-xl text-slate-300 leading-relaxed mb-10 max-w-lg font-light">
               Manage registrations, volunteers, QR check-ins, schedules, and analytics from one powerful platform built for modern events.
@@ -50,10 +50,10 @@ export default function Hero() {
           </div>
 
           {/* Right Column: Mock UI Visual */}
-          <div className="relative w-full h-[500px] lg:h-[600px] flex items-center justify-center">
+          <div className="relative w-full h-[350px] sm:h-[450px] lg:h-[600px] flex items-center justify-center mt-8 lg:mt-0">
 
             {/* Main Dashboard Window */}
-            <div className="absolute w-[110%] max-w-[700px] aspect-[16/10] bg-[#1a1f2e]/95 backdrop-blur-sm rounded-xl border border-slate-700/60 shadow-2xl overflow-hidden flex flex-col transform translate-x-4 lg:translate-x-12 z-10">
+            <div className="relative lg:absolute w-[95%] sm:w-full max-w-[700px] aspect-[16/10] bg-[#1a1f2e]/95 backdrop-blur-sm rounded-xl border border-slate-700/60 shadow-2xl overflow-hidden flex flex-col transform lg:translate-x-12 z-10">
 
               {/* Window header */}
               <div className="h-8 bg-[#141824]/90 border-b border-slate-700/50 flex items-center px-4 gap-2 shrink-0">
