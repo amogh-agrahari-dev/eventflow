@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Responsive as ResponsiveGridLayout } from 'react-grid-layout';
+import Link from 'next/link';
 import { 
   Home, CalendarDays, PlusSquare, History, Users, ClipboardList, 
   MessageSquare, UserPlus, LogOut, Search, Bell, Plus, MoreHorizontal,
-  MapPin, CheckCircle2, ChevronRight, Settings, BarChart2, Briefcase, Mail, QrCode, X, SlidersHorizontal, Menu
+  MapPin, CheckCircle2, ChevronRight, Settings, BarChart2, Briefcase, Mail, QrCode, X, SlidersHorizontal, Menu,
+  MonitorPlay, LayoutTemplate, MessageCircle, Check
 } from 'lucide-react';
 
 function AutoWidthGrid(props) {
@@ -122,7 +124,7 @@ export default function OrganizerDashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-[#1c1f26] text-slate-300 font-sans overflow-hidden selection:bg-indigo-500/30">
+    <div className="flex h-screen bg-[#161B23] text-slate-300 font-sans overflow-hidden selection:bg-[#6E56CF]/30">
       
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
@@ -133,60 +135,111 @@ export default function OrganizerDashboard() {
       )}
 
       {/* 1. Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 bg-[#232730] border-[#2d323e] flex flex-col shrink-0 overflow-hidden transform transition-all duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 w-64 border-r' : '-translate-x-full w-64 border-r'} ${isDesktopSidebarCollapsed ? 'md:w-0 md:border-r-0' : 'md:w-64 md:border-r'}`}>
-        <div className="w-64 h-full flex flex-col overflow-y-auto no-scrollbar">
+      <aside className={`fixed inset-y-0 left-0 z-50 bg-[#11141A] border-[#1C202B] flex flex-col shrink-0 overflow-hidden transform transition-all duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 w-[260px] border-r' : '-translate-x-full w-[260px] border-r'} ${isDesktopSidebarCollapsed ? 'md:w-0 md:border-r-0' : 'md:w-[260px] md:border-r'}`}>
+        <div className="w-[260px] h-full flex flex-col overflow-y-auto custom-scrollbar">
           {/* Brand / Logo Area */}
-          <div className="py-8 flex items-center px-6 gap-3 border-b border-[#2d323e] shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                <span className="text-white font-bold text-lg">E</span>
-              </div>
-              <span className="text-white font-bold text-lg tracking-wide">EventFlow</span>
+          <div className="p-6 flex items-center gap-3 border-b border-[#1C202B]/60 shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[#6E56CF] flex items-center justify-center text-white font-bold text-lg">
+              E
             </div>
+            <span className="font-semibold text-lg tracking-wide text-white">EventFlow</span>
           </div>
 
-          <div className="p-4 flex flex-col gap-6">
-            <div className="flex items-center gap-3 bg-[#323844] text-white px-4 py-2.5 rounded-lg shadow-sm border border-[#3f4553]">
-              <Home className="w-5 h-5" />
-              <span className="font-semibold text-sm">Dashboard</span>
+          <div className="px-4 py-2 space-y-6">
+            <div>
+              <div className="flex items-center gap-3 px-3 py-2 bg-[#2D3340]/40 text-[#00E5FF] border border-[#3A455A] rounded-lg cursor-pointer">
+                <Home className="w-[18px] h-[18px] text-[#00E5FF]" />
+                <span className="text-[13px] font-medium text-white flex-1">Dashboard</span>
+                <Check className="w-4 h-4 text-[#00E5FF]" />
+              </div>
             </div>
 
-            <NavGroup title="Event Studio">
-              <NavItem icon={<PlusSquare className="w-4 h-4" />} label="Create New" />
-              <NavItem icon={<CalendarDays className="w-4 h-4" />} label="Templates" />
-              <NavItem icon={<History className="w-4 h-4" />} label="Past Events" />
-            </NavGroup>
+            <div>
+              <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">EVENT STUDIO</h3>
+              <div className="space-y-0.5">
+                <Link href="/events/add" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
+                  <PlusSquare className="w-[18px] h-[18px]" />
+                  <span className="text-[13px] font-medium">Create New</span>
+                </Link>
+                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
+                  <LayoutTemplate className="w-[18px] h-[18px]" />
+                  <span className="text-[13px] font-medium">Templates</span>
+                </Link>
+                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
+                  <History className="w-[18px] h-[18px]" />
+                  <span className="text-[13px] font-medium">Past Events</span>
+                </Link>
+              </div>
+            </div>
 
-            <NavGroup title="Volunteer Hub">
-              <NavItem icon={<Users className="w-4 h-4" />} label="Directory" />
-              <NavItem icon={<ClipboardList className="w-4 h-4" />} label="Rosters" />
-              <NavItem icon={<MessageSquare className="w-4 h-4" />} label="Feedback" />
-            </NavGroup>
+            <div>
+              <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">VOLUNTEER HUB</h3>
+              <div className="space-y-0.5">
+                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
+                  <Users className="w-[18px] h-[18px]" />
+                  <span className="text-[13px] font-medium">Directory</span>
+                </Link>
+                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
+                  <ClipboardList className="w-[18px] h-[18px]" />
+                  <span className="text-[13px] font-medium">Rosters</span>
+                </Link>
+                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
+                  <MessageSquare className="w-[18px] h-[18px]" />
+                  <span className="text-[13px] font-medium">Feedback</span>
+                </Link>
+              </div>
+            </div>
 
-            <NavGroup title="Attendee Management">
-              <NavItem icon={<UserPlus className="w-4 h-4" />} label="Registrations" />
-              <NavItem icon={<CheckCircle2 className="w-4 h-4" />} label="Check-In Stations" />
-            </NavGroup>
+            <div>
+              <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">ATTENDEE MANAGEMENT</h3>
+              <div className="space-y-0.5">
+                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
+                  <UserPlus className="w-[18px] h-[18px]" />
+                  <span className="text-[13px] font-medium">Registrations</span>
+                </Link>
+                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
+                  <Check className="w-[18px] h-[18px]" />
+                  <span className="text-[13px] font-medium">Check-in Stations</span>
+                </Link>
+              </div>
+            </div>
 
-            <NavGroup title="Communications">
-              <NavItem icon={<MessageSquare className="w-4 h-4" />} label="Messaging" />
-              <NavItem icon={<Mail className="w-4 h-4" />} label="Email campaigns" />
-            </NavGroup>
-
-            <NavGroup title="Analytics Pro">
-              <NavItem icon={<BarChart2 className="w-4 h-4" />} label="Custom Reports" />
-              <NavItem icon={<Settings className="w-4 h-4" />} label="General" />
-              <NavItem icon={<Briefcase className="w-4 h-4" />} label="Account Settings" />
-            </NavGroup>
+            <div>
+              <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">COMMUNICATIONS</h3>
+              <div className="space-y-0.5">
+                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
+                  <MessageCircle className="w-[18px] h-[18px]" />
+                  <span className="text-[13px] font-medium">Messaging</span>
+                </Link>
+                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
+                  <Mail className="w-[18px] h-[18px]" />
+                  <span className="text-[13px] font-medium">Email campaigns</span>
+                </Link>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">ANALYTICS PRO</h3>
+              <div className="space-y-0.5">
+                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
+                  <BarChart2 className="w-[18px] h-[18px]" />
+                  <span className="text-[13px] font-medium">Custom Reports</span>
+                </Link>
+                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
+                  <Settings className="w-[18px] h-[18px]" />
+                  <span className="text-[13px] font-medium">General</span>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </aside>
 
       {/* 2. Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0">
+      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-[#161B23]">
         
         {/* Top Header */}
-        <header className="h-16 flex items-center justify-between px-4 md:px-8 bg-[#232730] border-b border-[#2d323e] shrink-0">
+        <header className="h-[68px] flex items-center justify-between px-4 md:px-8 bg-[#161B23]/80 backdrop-blur-sm border-b border-[#1C202B] z-10 flex-shrink-0">
           <div className="flex items-center gap-3">
             <button 
               className="md:hidden text-slate-400 hover:text-white transition-colors"
@@ -200,45 +253,44 @@ export default function OrganizerDashboard() {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-lg md:text-xl font-semibold text-white truncate">Dashboard</h1>
+            <h1 className="text-[22px] font-medium text-white truncate">Dashboard</h1>
           </div>
           
           <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end min-w-0">
             <div className="relative w-full max-w-[200px] md:w-64 hidden sm:block">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#5A6B8A]" />
               <input 
                 type="text" 
                 placeholder="Search..." 
-                className="w-full bg-[#1c1f26] border border-[#2d323e] rounded-full py-1.5 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                className="w-full bg-[#11141A] border border-[#2A3140] rounded-full py-2 pl-9 pr-4 text-[13px] text-white focus:outline-none focus:border-[#6E56CF]/50 transition-colors placeholder:text-[#5A6B8A]"
               />
             </div>
             
-            <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-full text-sm font-medium transition-colors shadow-lg shadow-indigo-500/20">
+            <button className="flex items-center gap-2 bg-[#6E56CF] hover:bg-[#5a46aa] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-[0_0_15px_rgba(79,70,229,0.3)]">
               <Plus className="w-4 h-4" /> Quick-Add
             </button>
-            
             
             {/* Customize Dashboard Button */}
             <button 
               onClick={() => setShowCustomizePanel(true)}
-              className="flex items-center gap-2 bg-[#1c1f26] border border-[#2d323e] hover:bg-[#2d323e] text-slate-300 px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors whitespace-nowrap"
+              className="flex items-center gap-2 bg-[#11141A] border border-[#2A3140] hover:bg-[#1C202B] text-slate-300 px-3 md:px-4 py-2 rounded-full text-xs md:text-sm font-medium transition-colors whitespace-nowrap"
             >
               <SlidersHorizontal className="w-4 h-4" /> <span className="hidden sm:inline">Customize</span>
             </button>
             
-            <button className="relative p-2 text-slate-400 hover:text-white transition-colors">
+            <button className="relative p-2 text-[#5A6B8A] hover:text-white transition-colors">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-[#232730]" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-[#161B23]" />
             </button>
             
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 cursor-pointer shadow-sm border border-[#2d323e] flex items-center justify-center text-white text-xs font-bold">
+            <div className="w-8 h-8 rounded-full bg-[#6E56CF] cursor-pointer shadow-sm border border-[#2A3140] flex items-center justify-center text-white text-xs font-bold">
               AM
             </div>
           </div>
         </header>
 
         {/* Dashboard Grid Content */}
-        <div className="flex-1 overflow-y-auto p-6 no-scrollbar relative flex flex-col">
+        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar relative flex flex-col">
           <AutoWidthGrid
             className="layout"
             layouts={layouts}
@@ -253,7 +305,7 @@ export default function OrganizerDashboard() {
             resizeHandles={['s', 'w', 'e', 'n', 'sw', 'nw', 'se', 'ne']}
           >
             {DEFAULT_LAYOUT.filter(l => visibleWidgets.has(l.i)).map(l => (
-              <div key={l.i} className="flex flex-col h-full w-full bg-[#1c1f26]">
+              <div key={l.i} className="flex flex-col h-full w-full bg-transparent">
                 {renderWidget(l.i)}
               </div>
             ))}
@@ -261,7 +313,7 @@ export default function OrganizerDashboard() {
         </div>
         
         {/* Fixed Footer */}
-        <div className="absolute bottom-4 right-6 flex items-center gap-3 text-[10px] text-slate-500 bg-[#1c1f26]/80 backdrop-blur px-4 py-1.5 rounded-full border border-[#2d323e] shadow-lg z-10">
+        <div className="absolute bottom-4 right-6 flex items-center gap-3 text-[10px] text-slate-500 bg-[#161B23]/80 backdrop-blur px-4 py-1.5 rounded-full border border-[#2A3140] shadow-lg z-10">
           <span className="hover:text-slate-300 cursor-pointer transition-colors">Help Center</span>
           <span className="w-px h-3 bg-slate-600"></span>
           <span className="hover:text-slate-300 cursor-pointer transition-colors">API Docs</span>
@@ -273,10 +325,10 @@ export default function OrganizerDashboard() {
         )}
         
         {/* Customize Panel */}
-        <div className={`absolute top-0 right-0 h-full w-80 bg-[#232730] border-l border-[#2d323e] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${showCustomizePanel ? 'translate-x-0' : 'translate-x-full'}`}>
-          <div className="flex items-center justify-between p-4 border-b border-[#2d323e]">
-            <h2 className="text-lg font-semibold text-white">Customize Layout</h2>
-            <button onClick={() => setShowCustomizePanel(false)} className="text-slate-400 hover:text-white">
+        <div className={`absolute top-0 right-0 h-full w-80 bg-[#11141A] border-l border-[#2A3140] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${showCustomizePanel ? 'translate-x-0' : 'translate-x-full'}`}>
+          <div className="flex items-center justify-between p-4 border-b border-[#2A3140]">
+            <h2 className="text-[15px] font-medium text-white">Customize Layout</h2>
+            <button onClick={() => setShowCustomizePanel(false)} className="text-[#8F9BB3] hover:text-white">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -288,7 +340,7 @@ export default function OrganizerDashboard() {
               <label 
                 key={widget.id} 
                 onClick={(e) => { e.preventDefault(); toggleWidget(widget.id); }}
-                className="flex items-center justify-between p-3 rounded-lg border border-[#2d323e] hover:bg-[#323844] cursor-pointer transition-colors group"
+                className="flex items-center justify-between p-3 rounded-lg border border-[#2A3140] hover:bg-[#1C202B] cursor-pointer transition-colors group"
               >
                 <span className="text-sm font-medium text-slate-300 group-hover:text-white">{widget.title}</span>
                 <div className={`w-10 h-5 rounded-full transition-colors relative ${visibleWidgets.has(widget.id) ? 'bg-emerald-500' : 'bg-slate-700'}`}>
@@ -298,7 +350,7 @@ export default function OrganizerDashboard() {
             ))}
           </div>
 
-          <div className="p-4 border-t border-[#2d323e]">
+          <div className="p-4 border-t border-[#2A3140]">
             <button 
               onClick={resetDashboard}
               className="w-full bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white py-2 rounded-lg text-sm font-semibold transition-colors"
@@ -352,7 +404,7 @@ function UpcomingEventsWidget() {
         <EventItem title="Tech Symposium" date="Mon 3, 2024" reg="Leeham" vol="201" color="bg-emerald-500" />
         <EventItem title="NGO Workshop" date="Nov 4, 2024" reg="Leahham" vol="100" color="bg-orange-500" isActive />
       </div>
-      <button className="w-full mt-4 bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1 shrink-0">
+      <button className="w-full mt-4 bg-[#6E56CF]/20 text-[#00E5FF] hover:bg-[#6E56CF] hover:text-white py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1 shrink-0">
         View Details <ChevronRight className="w-4 h-4" />
       </button>
     </Card>
@@ -414,10 +466,10 @@ function LiveCheckInWidget() {
             </div>
           ))}
         </div>
-        <div className="bg-[#1c1f26] rounded-lg border border-[#2d323e] p-2 relative overflow-hidden flex items-center justify-center h-full min-h-[80px]">
+        <div className="bg-[#11141A] rounded-lg border border-[#2A3140] p-2 relative overflow-hidden flex items-center justify-center h-full min-h-[80px]">
           <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-          <div className="w-[80%] h-[80%] border-2 border-slate-600 rounded bg-slate-800/50 transform rotate-12 relative">
-            <div className="absolute top-1/4 left-1/4 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10B981]" />
+          <div className="w-[80%] h-[80%] border-2 border-slate-600 rounded bg-[#1C202B] transform rotate-12 relative">
+            <div className="absolute top-1/4 left-1/4 w-2 h-2 rounded-full bg-[#00E5FF] shadow-[0_0_8px_#00E5FF]" />
             <div className="absolute bottom-1/4 right-1/4 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_#EF4444]" />
           </div>
         </div>
@@ -441,8 +493,8 @@ function VolunteerCentralWidget() {
         <CentralItem name="Alex Chen" event="NGO Events" stat="Status" color="red" />
       </div>
       <div className="mt-4 flex gap-2 shrink-0">
-        <button className="flex-1 bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white py-1.5 rounded-lg text-xs font-medium transition-colors">Chat</button>
-        <button className="flex-1 bg-[#1c1f26] border border-[#2d323e] hover:bg-[#2d323e] text-slate-300 py-1.5 rounded-lg text-xs font-medium transition-colors">More ▾</button>
+        <button className="flex-1 bg-[#6E56CF]/20 text-[#00E5FF] hover:bg-[#6E56CF] hover:text-white py-1.5 rounded-lg text-xs font-medium transition-colors">Chat</button>
+        <button className="flex-1 bg-[#11141A] border border-[#2A3140] hover:bg-[#1C202B] text-slate-300 py-1.5 rounded-lg text-xs font-medium transition-colors">More ▾</button>
       </div>
     </Card>
   );
@@ -517,21 +569,21 @@ function RecentRegistrationsWidget() {
   return (
     <Card title="Recent Registrations">
       <div className="mt-2 space-y-3 flex-1 overflow-y-auto no-scrollbar">
-        <div className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-800/50 transition-colors group cursor-pointer">
+        <div className="flex items-center justify-between p-2 rounded-lg hover:bg-[#11141A] transition-colors group cursor-pointer border border-transparent hover:border-[#2A3140]">
            <div className="flex items-center gap-3">
-              <div className="p-1.5 bg-indigo-500/20 rounded-md text-indigo-400"><History className="w-3.5 h-3.5" /></div>
+              <div className="p-1.5 bg-[#6E56CF]/20 rounded-md text-[#6E56CF]"><History className="w-3.5 h-3.5" /></div>
               <div>
-                <p className="text-xs font-bold text-white group-hover:text-indigo-400 transition-colors">Spring Gala 2024</p>
+                <p className="text-xs font-bold text-white group-hover:text-[#00E5FF] transition-colors">Spring Gala 2024</p>
                 <p className="text-[10px] text-slate-500">Active registrations</p>
               </div>
            </div>
            <ChevronRight className="w-4 h-4 text-slate-600" />
         </div>
-        <div className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-800/50 transition-colors group cursor-pointer">
+        <div className="flex items-center justify-between p-2 rounded-lg hover:bg-[#11141A] transition-colors group cursor-pointer border border-transparent hover:border-[#2A3140]">
            <div className="flex items-center gap-3">
-              <div className="p-1.5 bg-slate-700/50 rounded-md text-slate-400"><ClipboardList className="w-3.5 h-3.5" /></div>
+              <div className="p-1.5 bg-[#1C202B] rounded-md text-slate-400 border border-[#2A3140]"><ClipboardList className="w-3.5 h-3.5" /></div>
               <div>
-                <p className="text-xs font-bold text-white group-hover:text-indigo-400 transition-colors">Draft event "Global Summit"</p>
+                <p className="text-xs font-bold text-white group-hover:text-[#00E5FF] transition-colors">Draft event "Global Summit"</p>
                 <p className="text-[10px] text-slate-500">Team registration</p>
               </div>
            </div>
@@ -574,7 +626,7 @@ function RecentActivitiesWidget() {
         <ActivityItem icon={<PlusSquare className="w-3 h-3 text-fuchsia-400" />} color="bg-fuchsia-500/20" title={<>New extes "Global Summit" saved</>} time="4 days ago" />
         <ActivityItem icon={<ClipboardList className="w-3 h-3 text-slate-400" />} color="bg-slate-700/50" title={<>Draft event "Global Summit" saved</>} time="3 days ago" />
       </div>
-      <button className="mt-4 bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-2 shrink-0">
+      <button className="mt-4 bg-[#6E56CF]/20 text-[#00E5FF] hover:bg-[#6E56CF] hover:text-white py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-2 shrink-0">
         <MessageSquare className="w-4 h-4" /> Chat
       </button>
     </Card>
@@ -588,14 +640,14 @@ function CalendarWidget() {
         <div className="grid grid-cols-7 mb-2 text-center shrink-0">
           <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
         </div>
-        <div className="grid grid-cols-7 gap-[1px] bg-[#2d323e] border border-[#2d323e] flex-1">
+        <div className="grid grid-cols-7 gap-[1px] bg-[#2A3140] border border-[#2A3140] flex-1">
           {/* Calendar blocks mapped efficiently */}
           {Array.from({ length: 28 }).map((_, i) => {
             const num = (i + 29) % 31 || 31;
             const hasEvent = [4, 5, 10, 11, 16, 17, 23, 24, 27].includes(i);
-            const color = i % 3 === 0 ? 'bg-emerald-500' : i % 2 === 0 ? 'bg-fuchsia-500' : 'bg-rose-500';
+            const color = i % 3 === 0 ? 'bg-[#00E5FF]' : i % 2 === 0 ? 'bg-[#6E56CF]' : 'bg-[#1C202B]';
             return (
-              <div key={i} className="bg-[#232730] min-h-[30px] p-1 relative flex items-start justify-start text-slate-300">
+              <div key={i} className="bg-[#11141A] min-h-[30px] p-1 relative flex items-start justify-start text-slate-300">
                 {num}
                 {hasEvent && <div className={`absolute bottom-1 left-1 right-1 h-1 ${color} rounded`} />}
               </div>
@@ -631,14 +683,14 @@ function NavItem({ icon, label }) {
 
 function Card({ title, action, children }) {
   return (
-    <div className="bg-[#232730] rounded-xl border border-[#2d323e] p-4 flex flex-col h-full shadow-lg shadow-black/20 overflow-hidden hover:border-[#3f4553] transition-colors group">
-      <div className="flex justify-between items-center mb-3 drag-handle cursor-move group-hover:bg-[#2d323e]/20 -mx-4 px-4 py-1 -mt-1 rounded-t-lg transition-colors">
-        <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+    <div className="bg-[#1C202B] rounded-xl border border-[#2A3140] p-4 flex flex-col h-full shadow-sm overflow-hidden hover:border-[#6E56CF]/50 transition-colors group">
+      <div className="flex justify-between items-center mb-3 drag-handle cursor-move group-hover:bg-[#11141A]/50 -mx-4 px-4 py-1.5 -mt-1 rounded-t-lg transition-colors">
+        <h3 className="text-[14px] font-medium text-white flex items-center gap-2">
           {title}
         </h3>
         {action}
       </div>
-      <div className="flex-1 min-h-0 overflow-auto no-scrollbar flex flex-col">
+      <div className="flex-1 min-h-0 overflow-auto custom-scrollbar flex flex-col">
         {children}
       </div>
     </div>
@@ -646,7 +698,7 @@ function Card({ title, action, children }) {
 }
 
 function Badge({ children, color = 'slate' }) {
-  const bg = color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-[#1c1f26] text-slate-300 border-[#2d323e] hover:bg-[#2d323e]';
+  const bg = color === 'emerald' ? 'bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/20' : 'bg-[#11141A] text-slate-300 border-[#2A3140] hover:bg-[#2A3140]';
   return (
     <div className={`px-2 py-1 rounded text-[10px] font-medium border transition-colors cursor-pointer ${bg}`}>
       {children}
@@ -656,7 +708,7 @@ function Badge({ children, color = 'slate' }) {
 
 function EventItem({ title, date, reg, vol, color, isActive }) {
   return (
-    <div className={`flex items-center gap-3 p-2 rounded-lg border shrink-0 ${isActive ? 'bg-[#2d323e] border-[#3f4553]' : 'bg-[#1c1f26] border-[#2d323e] hover:border-[#3f4553]'} transition-colors cursor-pointer`}>
+    <div className={`flex items-center gap-3 p-2 rounded-lg border shrink-0 ${isActive ? 'bg-[#11141A] border-[#6E56CF]/50' : 'bg-[#11141A] border-[#2A3140] hover:border-[#3f4553]'} transition-colors cursor-pointer`}>
       <div className={`w-10 h-10 rounded-lg ${color} flex items-center justify-center shrink-0 shadow-inner`}>
         <span className="text-white text-[10px] font-bold">Event</span>
       </div>
@@ -667,7 +719,7 @@ function EventItem({ title, date, reg, vol, color, isActive }) {
         </p>
       </div>
       {isActive && (
-        <span className="text-[10px] text-emerald-400 font-medium px-2 py-0.5 rounded bg-emerald-500/10 shrink-0">Active</span>
+        <span className="text-[10px] text-[#00E5FF] font-medium px-2 py-0.5 rounded bg-[#00E5FF]/10 shrink-0">Active</span>
       )}
     </div>
   );
@@ -675,24 +727,24 @@ function EventItem({ title, date, reg, vol, color, isActive }) {
 
 function AssignmentItem({ name, role }) {
   return (
-    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-[#2d323e] transition-colors group cursor-pointer shrink-0">
+    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-[#11141A] transition-colors group cursor-pointer shrink-0 border border-transparent hover:border-[#2A3140]">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 shrink-0 border border-[#3f4553]" />
+        <div className="w-8 h-8 rounded-full bg-[#6E56CF] shrink-0 border border-[#2A3140]" />
         <div>
-          <p className="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors">{name}</p>
+          <p className="text-xs font-bold text-white group-hover:text-[#00E5FF] transition-colors">{name}</p>
           <p className="text-[10px] text-slate-400">{role}</p>
         </div>
       </div>
-      <button className="text-[10px] bg-[#1c1f26] border border-[#2d323e] text-slate-300 px-3 py-1.5 rounded hover:bg-[#2d323e] hover:text-white transition-colors">Manage</button>
+      <button className="text-[10px] bg-[#11141A] border border-[#2A3140] text-slate-300 px-3 py-1.5 rounded hover:bg-[#1C202B] hover:text-white transition-colors">Manage</button>
     </div>
   );
 }
 
 function CentralItem({ name, event, stat, color }) {
   return (
-    <div className="grid grid-cols-12 gap-2 items-center text-xs hover:bg-[#2d323e] p-1.5 rounded-lg transition-colors cursor-pointer shrink-0">
+    <div className="grid grid-cols-12 gap-2 items-center text-xs hover:bg-[#11141A] p-1.5 rounded-lg transition-colors cursor-pointer shrink-0 border border-transparent hover:border-[#2A3140]">
       <div className="col-span-5 flex items-center gap-2 min-w-0">
-        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 shrink-0" />
+        <div className="w-6 h-6 rounded-full bg-[#6E56CF] shrink-0" />
         <div className="truncate">
           <p className="font-bold text-white truncate">{name}</p>
           <p className="text-[9px] text-slate-500 truncate">Volunteer</p>
@@ -704,9 +756,9 @@ function CentralItem({ name, event, stat, color }) {
       </div>
       <div className="col-span-2 text-right">
         <span className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full font-medium ${
-          color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+          color === 'emerald' ? 'bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
         }`}>
-          <div className={`w-1 h-1 rounded-full ${color === 'emerald' ? 'bg-emerald-400' : 'bg-rose-400'}`} /> {stat}
+          <div className={`w-1 h-1 rounded-full ${color === 'emerald' ? 'bg-[#00E5FF]' : 'bg-rose-400'}`} /> {stat}
         </span>
       </div>
     </div>

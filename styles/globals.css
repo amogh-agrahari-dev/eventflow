@@ -163,6 +163,26 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Global Scrollbar Customization */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2A3140;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3A455A;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #2A3140 transparent;
+  }
 }
 
 /* Reduced Motion Accessibility */

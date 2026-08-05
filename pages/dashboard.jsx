@@ -4,7 +4,7 @@ import OrganizerDashboard from '@/components/dashboard/OrganizerDashboard';
 
 export default function DashboardPage() {
   return (
-    <div className="h-screen bg-[#13161b] text-white font-sans overflow-hidden">
+    <div className="h-screen bg-[#161B23] text-white font-sans overflow-hidden">
       <Head>
         <title>Organizer Dashboard | EventFlow Campus Management</title>
         <meta name="description" content="Centralized event organizer dashboard." />
