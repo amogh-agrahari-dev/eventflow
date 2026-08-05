@@ -41,8 +41,8 @@ export default function LoginPage() {
       // Store Bearer Token
       setToken(data.access_token);
       setLoading(false);
-      // Redirect to Dashboard
-      router.push("/")
+      // Redirect to Role Selection
+      router.push("/select-role")
     } catch (err) {
       toast.error(err.message || "An unexpected error occurred");
     } finally {

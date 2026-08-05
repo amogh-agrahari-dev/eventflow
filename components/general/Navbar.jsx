@@ -63,40 +63,6 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Quick Hub Navigation Links */}
-        <div className="hidden md:flex items-center gap-1 bg-muted/60 p-1.5 rounded-2xl border border-border/60">
-          <Link
-            href="/dashboard"
-            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all ${
-              router.pathname.startsWith('/organizer') || router.pathname === '/dashboard' || router.pathname === '/home' || router.pathname === '/organizer-dashboard'
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Organizer Hub
-          </Link>
-          <Link
-            href="/volunteer/dashboard"
-            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all ${
-              router.pathname.startsWith('/volunteer')
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Volunteer Portal
-          </Link>
-          <Link
-            href="/invitee/dashboard"
-            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all ${
-              router.pathname.startsWith('/invitee')
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Invitee Passes
-          </Link>
-        </div>
-
         {/* User Account / Sign In */}
         <div className="flex items-center gap-2">
           {user ? (
@@ -123,28 +89,12 @@ export default function Navbar() {
             {isMenuOpen && (
               <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-border/80 bg-card p-2 shadow-2xl backdrop-blur-xl animate-fade-in">
                 <Link
-                  href="/dashboard"
+                  href="/select-role"
                   onClick={() => setIsMenuOpen(false)}
                   className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
                 >
                   <LayoutDashboard className="h-4 w-4 text-accent" />
-                  Organizer Hub
-                </Link>
-                <Link
-                  href="/volunteer/dashboard"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
-                >
-                  <ShieldCheck className="h-4 w-4 text-accent" />
-                  Volunteer Portal
-                </Link>
-                <Link
-                  href="/invitee/dashboard"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
-                >
-                  <Ticket className="h-4 w-4 text-accent" />
-                  Invitee Passes
+                  Switch Role
                 </Link>
                 <Link
                   href="/events/add"
@@ -194,28 +144,12 @@ export default function Navbar() {
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-border/60 bg-background/95 backdrop-blur-xl absolute top-full left-0 right-0 p-4 flex flex-col gap-2 shadow-xl">
           <Link
-            href="/dashboard"
+            href="/select-role"
             onClick={() => setIsMobileMenuOpen(false)}
             className="px-4 py-3 text-sm font-bold rounded-xl bg-muted/30 hover:bg-muted transition-colors flex items-center gap-3"
           >
             <LayoutDashboard className="w-4 h-4 text-accent" />
-            Organizer Hub
-          </Link>
-          <Link
-            href="/volunteer/dashboard"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="px-4 py-3 text-sm font-bold rounded-xl bg-muted/30 hover:bg-muted transition-colors flex items-center gap-3"
-          >
-            <ShieldCheck className="w-4 h-4 text-accent" />
-            Volunteer Portal
-          </Link>
-          <Link
-            href="/invitee/dashboard"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="px-4 py-3 text-sm font-bold rounded-xl bg-muted/30 hover:bg-muted transition-colors flex items-center gap-3"
-          >
-            <Ticket className="w-4 h-4 text-accent" />
-            Invitee Passes
+            Switch Role
           </Link>
           {!user && (
             <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-border/60">
