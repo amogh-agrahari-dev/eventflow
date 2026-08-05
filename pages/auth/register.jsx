@@ -8,14 +8,8 @@ import { AuthShell } from "@/components/auth/AuthShell";
 import { Button, Input, Label } from "@/components/ui";
 import { useRouter } from "next/navigation";
 
-const roles = [
-  { id: "organizer", label: "Organizer", hint: "Create & run events", icon: CalendarCheck },
-  { id: "volunteer", label: "Volunteer", hint: "Take on tasks", icon: ClipboardList },
-  { id: "attendee", label: "Attendee", hint: "Register & check in", icon: Ticket },
-];
 
 export default function RegisterPage() {
-  const [role, setRole] = useState("attendee");
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -41,7 +35,7 @@ export default function RegisterPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...form, role }),
+        body: JSON.stringify({ ...form, role: "attendee" }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -91,30 +85,6 @@ export default function RegisterPage() {
           className="space-y-5"
           onSubmit={(e) => registerUser(e)}
         >
-          <fieldset className="space-y-2">
-            <legend className="text-sm font-medium text-foreground">I am joining as</legend>
-            <div className="grid gap-2 sm:grid-cols-3">
-              {roles.map(({ id, label, hint, icon: Icon }) => {
-                const active = role === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setRole(id)}
-                    aria-pressed={active}
-                    className={`rounded-xl border p-3 text-left transition-colors ${active
-                        ? "border-accent bg-accent/10 text-foreground"
-                        : "border-border bg-card text-muted-foreground hover:border-accent/50"
-                      }`}
-                  >
-                    <Icon className="size-4" />
-                    <span className="mt-2 block text-sm font-medium text-foreground">{label}</span>
-                    <span className="block text-xs text-muted-foreground">{hint}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </fieldset>
 
           <div className="space-y-2">
             <Label htmlFor="name">Full name</Label>

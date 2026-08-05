@@ -1,66 +1,136 @@
-import { CheckCircle2, LayoutDashboard, QrCode, Scan } from 'lucide-react'
-import React from 'react'
+import { CheckCircle2, LayoutDashboard, QrCode, Scan, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import React from 'react';
+
+const roles = [
+  {
+    id: 'organizer',
+    icon: LayoutDashboard,
+    title: 'For Organizers',
+    description: 'Complete command center. Create events, monitor registrations, allocate volunteer roles, and view live analytics.',
+    features: ['Full event control', 'Live attendance tracking', 'Volunteer management', 'Broadcast announcements'],
+    href: '/dashboard',
+    gradient: 'from-indigo-500/20 to-violet-500/10',
+    border: 'border-indigo-500/30',
+    iconBg: 'bg-indigo-500/15',
+    iconColor: 'text-indigo-400',
+    accentBar: 'from-indigo-500 to-violet-500',
+    checkColor: 'text-indigo-400',
+    ctaColor: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/25 hover:bg-indigo-500/20',
+    featured: false,
+  },
+  {
+    id: 'volunteer',
+    icon: Scan,
+    title: 'For Volunteers',
+    description: 'Streamlined execution. Scan QR codes at the door, view assigned tasks, and coordinate with your team easily.',
+    features: ['Mobile-first QR scanning', 'Clear task visibility', 'Shift schedule', 'Duty status toggle'],
+    href: '/volunteer/dashboard',
+    gradient: 'from-cyan-500/25 to-accent/10',
+    border: 'border-cyan-500/30',
+    iconBg: 'bg-cyan-500/15',
+    iconColor: 'text-cyan-400',
+    accentBar: 'from-accent to-cyan-400',
+    checkColor: 'text-cyan-400',
+    ctaColor: 'bg-cyan-500/10 text-cyan-700 border-cyan-500/25 hover:bg-cyan-500/20',
+    featured: true,
+  },
+  {
+    id: 'attendee',
+    icon: QrCode,
+    title: 'For Attendees',
+    description: 'Frictionless experience. Register online, receive an instant digital QR ticket, and walk right into the venue.',
+    features: ['1-click registration', 'Digital QR tickets', 'Event discovery', 'Organizer broadcasts'],
+    href: '/invitee/dashboard',
+    gradient: 'from-emerald-500/20 to-teal-500/10',
+    border: 'border-emerald-500/30',
+    iconBg: 'bg-emerald-500/15',
+    iconColor: 'text-emerald-400',
+    accentBar: 'from-emerald-500 to-teal-400',
+    checkColor: 'text-emerald-500',
+    ctaColor: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/25 hover:bg-emerald-500/20',
+    featured: false,
+  },
+];
 
 export default function Roles() {
   return (
-    <section className="py-24 relative border-y border-border/50 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/30 to-transparent -z-10"></div>
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">One Portal, Three Perspectives</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Our role-based dashboards ensure everyone has exactly the tools they need, without the clutter.
-            </p>
-          </div>
+    <section className="py-28 relative overflow-hidden border-y border-border/50">
+      {/* Vivid gradient background */}
+      <div className="absolute inset-0 section-vivid -z-10" />
+      {/* Subtle dot grid */}
+      <div className="absolute inset-0 bg-grid-light opacity-60 -z-10" />
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Organizer */}
-            <div className="bg-card p-8 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all hover:-translate-y-1 group">
-              <div className="h-12 w-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                <LayoutDashboard className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 font-display">For Organizers</h3>
-              <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
-                Complete command center. Create events, monitor registrations, allocate volunteer roles, and view live analytics.
-              </p>
-              <ul className="space-y-2 text-sm font-medium">
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> Full event control</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> Live attendance tracking</li>
-              </ul>
-            </div>
+      {/* Decorative blobs */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent/8 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-indigo-500/8 rounded-full blur-3xl pointer-events-none -z-10" />
 
-            {/* Volunteer */}
-            <div className="bg-card p-8 rounded-2xl border border-border shadow-md hover:shadow-lg transition-all relative md:-translate-y-4 hover:-translate-y-5 group">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-brand rounded-t-2xl opacity-80 group-hover:opacity-100 transition-opacity"></div>
-              <div className="h-12 w-12 bg-primary text-primary-foreground shadow-sm rounded-xl flex items-center justify-center mb-6">
-                <Scan className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 font-display">For Volunteers</h3>
-              <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
-                Streamlined execution. Scan QR codes at the door, view assigned tasks, and coordinate with team members easily.
-              </p>
-              <ul className="space-y-2 text-sm font-medium">
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> Mobile-first QR scanning</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> Clear task visibility</li>
-              </ul>
-            </div>
-
-            {/* Attendee */}
-            <div className="bg-card p-8 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all hover:-translate-y-1 group">
-              <div className="h-12 w-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                <QrCode className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 font-display">For Attendees</h3>
-              <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
-                Frictionless experience. Register online, receive an instant digital QR ticket, and walk right into the venue.
-              </p>
-              <ul className="space-y-2 text-sm font-medium">
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> 1-click registration</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> Digital QR tickets</li>
-              </ul>
-            </div>
-          </div>
+      <div className="container mx-auto px-6">
+        {/* Section header */}
+        <div className="text-center mb-16 max-w-2xl mx-auto">
+          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wide bg-accent/15 text-accent border border-accent/25 mb-4">
+            Role-Based Portals
+          </span>
+          <h2 className="text-4xl md:text-5xl font-display font-extrabold mb-4 tracking-tight">
+            One Portal,{' '}
+            <span className="text-gradient-brand">Three Perspectives</span>
+          </h2>
+          <p className="text-muted-foreground text-base leading-relaxed">
+            Our role-based dashboards ensure everyone has exactly the tools they need, without the clutter.
+          </p>
         </div>
-      </section>
-  )
+
+        {/* Cards grid */}
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
+          {roles.map((role) => {
+            const Icon = role.icon;
+            return (
+              <div
+                key={role.id}
+                className={`group relative bg-card/90 backdrop-blur-md p-8 rounded-3xl border ${role.border} bg-gradient-to-br ${role.gradient} shadow-sm hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 ${role.featured ? 'md:-translate-y-3 ring-1 ring-accent/30' : ''}`}
+              >
+                {/* Top accent bar */}
+                <div className={`absolute top-0 left-6 right-6 h-0.5 rounded-full bg-gradient-to-r ${role.accentBar} opacity-70 group-hover:opacity-100 transition-opacity`} />
+
+                {/* Featured badge */}
+                {role.featured && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-accent to-cyan-400 text-slate-950 shadow-md">
+                    MOST USED
+                  </div>
+                )}
+
+                {/* Icon */}
+                <div className={`w-12 h-12 ${role.iconBg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <Icon className={`h-6 w-6 ${role.iconColor}`} />
+                </div>
+
+                {/* Title & description */}
+                <h3 className="text-xl font-display font-bold mb-3">{role.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed mb-6">{role.description}</p>
+
+                {/* Feature list */}
+                <ul className="space-y-2.5 mb-8">
+                  {role.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm font-medium">
+                      <CheckCircle2 className={`h-4 w-4 shrink-0 ${role.checkColor}`} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA link */}
+                <Link
+                  href={role.href}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all duration-200 hover:gap-3 ${role.ctaColor}`}
+                >
+                  Open {role.title.split(' ')[1]} Dashboard
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
 }

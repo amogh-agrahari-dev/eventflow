@@ -63,7 +63,7 @@ export function AuthShell({ eyebrow, title, subtitle, children, footer }) {
         </p>
       </section>
 
-      <section className="flex items-center justify-center px-6 py-14 sm:px-12">
+      <section className="flex items-center justify-center px-6 py-14 sm:px-12" style={{ background: 'linear-gradient(160deg, hsl(222 35% 96%) 0%, hsl(210 38% 97%) 100%)' }}>
         <div className="w-full max-w-md">
           <p
             className="animate-fade-in text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground"

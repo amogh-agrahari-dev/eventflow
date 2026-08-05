@@ -2,16 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
+@import 'react-grid-layout/css/styles.css';
+@import 'react-resizable/css/styles.css';
+
+@layer components {
+  .react-grid-item.react-grid-placeholder {
+    background: theme('colors.indigo.500') !important;
+    opacity: 0.2 !important;
+    border-radius: 0.75rem;
+    transition-duration: 100ms;
+  }
+  
+  /* Remove default background icon from all handles */
+  .react-resizable-handle {
+    background-image: none !important;
+  }
+
+  /* Make N and S edge handles span the entire width */
+  .react-resizable-handle-n, .react-resizable-handle-s {
+    width: 100% !important;
+    left: 0 !important;
+    margin-left: 0 !important;
+    height: 12px !important;
+  }
+  .react-resizable-handle-n { top: -6px !important; }
+  .react-resizable-handle-s { bottom: -6px !important; }
+
+  /* Make E and W edge handles span the entire height */
+  .react-resizable-handle-e, .react-resizable-handle-w {
+    height: 100% !important;
+    top: 0 !important;
+    margin-top: 0 !important;
+    width: 12px !important;
+  }
+  .react-resizable-handle-w { left: -6px !important; }
+  .react-resizable-handle-e { right: -6px !important; }
+
+  /* Ensure corner handles have a reasonable clickable area */
+  .react-resizable-handle-se, .react-resizable-handle-sw, 
+  .react-resizable-handle-ne, .react-resizable-handle-nw {
+    width: 20px !important;
+    height: 20px !important;
+    z-index: 10;
+  }
+
+  /* Custom visual indicator for the bottom right handle */
+  .react-resizable-handle-se::after {
+    content: '';
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid theme('colors.slate.500') !important;
+    border-bottom: 2px solid theme('colors.slate.500') !important;
+    transition: border-color 0.2s;
+  }
+  
+  .react-resizable-handle-se:hover::after {
+    border-color: theme('colors.indigo.400') !important;
+  }
+}
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* Slightly warm navy-tinted base — not pure white */
+    --background: 222 35% 96%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 215 20% 65%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --border: 214 32% 88%;
+    --input: 214 32% 88%;
+    --ring: 191 91% 55%;
+    --muted: 218 30% 92%;
+    --muted-foreground: 215 16% 44%;
     --primary: 222 47% 15%;
     --primary-foreground: 210 40% 98%;
     --accent: 191 91% 55%;
@@ -24,7 +87,7 @@
     --card: 222 47% 15%;
     --border: 217 33% 22%;
     --input: 217 33% 22%;
-    --ring: 215 20% 45%;
+    --ring: 191 91% 55%;
     --muted: 217 33% 18%;
     --muted-foreground: 215 20% 70%;
     --primary: 210 40% 98%;
@@ -38,19 +101,91 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans antialiased selection:bg-accent/30 selection:text-accent-foreground;
   }
 }
 
 @layer utilities {
+  /* Faint white grid — for dark hero sections */
   .bg-grid-faint {
     background-image:
       linear-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px),
       linear-gradient(90deg, rgb(255 255 255 / 0.05) 1px, transparent 1px);
     background-size: 48px 48px;
   }
+
+  /* Faint dark grid — for light sections */
+  .bg-grid-light {
+    background-image:
+      linear-gradient(hsl(222 47% 11% / 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(222 47% 11% / 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-accent;
+  }
+
+  .text-gradient-brand {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent via-cyan-400 to-indigo-300;
+  }
+
+  .glass-card {
+    @apply bg-card/85 backdrop-blur-xl border border-border/80 shadow-sm hover:shadow-2xl hover:border-accent/40 transition-all duration-300 ease-out;
+  }
+
+  .glass-header {
+    @apply bg-background/80 backdrop-blur-md border-b border-border/50;
+  }
+
+  /* Section alternating backgrounds */
+  .section-alt {
+    background: linear-gradient(160deg,
+      hsl(222 40% 94%) 0%,
+      hsl(210 38% 96%) 50%,
+      hsl(215 36% 93%) 100%
+    );
+  }
+
+  .section-vivid {
+    background: linear-gradient(135deg,
+      hsl(230 50% 96%) 0%,
+      hsl(210 60% 97%) 40%,
+      hsl(191 50% 95%) 100%
+    );
+  }
+
+  /* Custom Hide Scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Global Scrollbar Customization */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2A3140;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3A455A;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #2A3140 transparent;
+  }
 }
 
+/* Reduced Motion Accessibility */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -58,5 +193,6 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
