@@ -3,7 +3,10 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/dashboard": "pages/dashboard.js",
-  "/events/add": "pages/events/add.js",
   "/": "pages/index.js",
+  "/auth/register": "pages/auth/register.js",
+  "/select-role": "pages/select-role.js",
+  "/events/add": "pages/events/add.js",
+  "/volunteer-dashboard": "pages/volunteer-dashboard.js",
   "/auth/login": "pages/auth/login.js"
 }

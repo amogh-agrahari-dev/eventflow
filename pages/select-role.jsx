@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CalendarCheck, ClipboardList, Ticket, LogOut } from "lucide-react";
 import { useUserStore } from "@/store/userStore";
 import { getToken } from "@/lib/auth";
+import Logo from "@/components/general/Logo";
 
 export default function SelectRolePage() {
   const router = useRouter();
