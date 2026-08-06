@@ -1,12 +1,12 @@
 {
   "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/dashboard": "pages/dashboard.js",
+  "/_error": "pages/_error.js",
+  "/all-events": "pages/all-events.js",
+  "/events/[id]": "pages/events/[id].js",
   "/": "pages/index.js",
-  "/auth/register": "pages/auth/register.js",
+  "/dashboard": "pages/dashboard.js",
   "/select-role": "pages/select-role.js",
-  "/events/add": "pages/events/add.js",
-  "/volunteer-dashboard": "pages/volunteer-dashboard.js",
-  "/auth/login": "pages/auth/login.js"
+  "/auth/login": "pages/auth/login.js",
+  "/events/add": "pages/events/add.js"
 }
