@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Responsive as ResponsiveGridLayout } from 'react-grid-layout';
 import Link from 'next/link';
-import { 
-  Home, CalendarDays, PlusSquare, History, Users, ClipboardList, 
+import { useUserStore } from '@/store/userStore';
+import { getToken } from '@/lib/auth';
+import {
+  Home, CalendarDays, PlusSquare, History, Users, ClipboardList,
   MessageSquare, UserPlus, LogOut, Search, Bell, Plus, MoreHorizontal,
   MapPin, CheckCircle2, ChevronRight, Settings, BarChart2, Briefcase, Mail, QrCode, X, SlidersHorizontal, Menu,
   MonitorPlay, LayoutTemplate, MessageCircle, Check
@@ -64,6 +66,15 @@ export default function OrganizerDashboard() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
 
+  const { user, fetchUser } = useUserStore();
+  const token = getToken();
+
+  useEffect(() => {
+    if (token && !user) {
+      fetchUser();
+    }
+  }, [token, user, fetchUser]);
+
   useEffect(() => {
     setIsMounted(true);
     try {
@@ -93,14 +104,14 @@ export default function OrganizerDashboard() {
         setLayouts(prevLayouts => {
           const newLayouts = { ...prevLayouts };
           Object.keys(newLayouts).forEach(breakpoint => {
-             const layoutArr = newLayouts[breakpoint] || [];
-             if (!layoutArr.find(item => item.i === id)) {
-               const defaultItem = DEFAULT_LAYOUT.find(item => item.i === id);
-               if (defaultItem) {
-                 // Push to bottom (y: Infinity is supported by react-grid-layout to append)
-                 newLayouts[breakpoint] = [...layoutArr, { ...defaultItem, y: Infinity }];
-               }
-             }
+            const layoutArr = newLayouts[breakpoint] || [];
+            if (!layoutArr.find(item => item.i === id)) {
+              const defaultItem = DEFAULT_LAYOUT.find(item => item.i === id);
+              if (defaultItem) {
+                // Push to bottom (y: Infinity is supported by react-grid-layout to append)
+                newLayouts[breakpoint] = [...layoutArr, { ...defaultItem, y: Infinity }];
+              }
+            }
           });
           if (isMounted) localStorage.setItem('organizer_layout', JSON.stringify(newLayouts));
           return newLayouts;
@@ -125,12 +136,12 @@ export default function OrganizerDashboard() {
 
   return (
     <div className="flex h-screen bg-[#161B23] text-slate-300 font-sans overflow-hidden selection:bg-[#6E56CF]/30">
-      
+
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
-          onClick={() => setIsMobileMenuOpen(false)} 
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
@@ -217,7 +228,7 @@ export default function OrganizerDashboard() {
                 </Link>
               </div>
             </div>
-            
+
             <div>
               <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">ANALYTICS PRO</h3>
               <div className="space-y-0.5">
@@ -237,54 +248,56 @@ export default function OrganizerDashboard() {
 
       {/* 2. Main Content Area */}
       <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-[#161B23]">
-        
+
         {/* Top Header */}
         <header className="h-[68px] flex items-center justify-between px-4 md:px-8 bg-[#161B23]/80 backdrop-blur-sm border-b border-[#1C202B] z-10 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <button 
+            <button
               className="md:hidden text-slate-400 hover:text-white transition-colors"
               onClick={() => setIsMobileMenuOpen(true)}
             >
               <Menu className="w-5 h-5" />
             </button>
-            <button 
+            <button
               className="hidden md:block text-slate-400 hover:text-white transition-colors"
               onClick={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-[22px] font-medium text-white truncate">Dashboard</h1>
+            <h1 className="text-[22px] font-medium text-white truncate">
+              {user?.name ? `${user.name}'s Dashboard` : "Dashboard"}
+            </h1>
           </div>
-          
+
           <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end min-w-0">
             <div className="relative w-full max-w-[200px] md:w-64 hidden sm:block">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#5A6B8A]" />
-              <input 
-                type="text" 
-                placeholder="Search..." 
+              <input
+                type="text"
+                placeholder="Search..."
                 className="w-full bg-[#11141A] border border-[#2A3140] rounded-full py-2 pl-9 pr-4 text-[13px] text-white focus:outline-none focus:border-[#6E56CF]/50 transition-colors placeholder:text-[#5A6B8A]"
               />
             </div>
-            
+
             <button className="flex items-center gap-2 bg-[#6E56CF] hover:bg-[#5a46aa] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-[0_0_15px_rgba(79,70,229,0.3)]">
               <Plus className="w-4 h-4" /> Quick-Add
             </button>
-            
+
             {/* Customize Dashboard Button */}
-            <button 
+            <button
               onClick={() => setShowCustomizePanel(true)}
               className="flex items-center gap-2 bg-[#11141A] border border-[#2A3140] hover:bg-[#1C202B] text-slate-300 px-3 md:px-4 py-2 rounded-full text-xs md:text-sm font-medium transition-colors whitespace-nowrap"
             >
               <SlidersHorizontal className="w-4 h-4" /> <span className="hidden sm:inline">Customize</span>
             </button>
-            
+
             <button className="relative p-2 text-[#5A6B8A] hover:text-white transition-colors">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-[#161B23]" />
             </button>
-            
-            <div className="w-8 h-8 rounded-full bg-[#6E56CF] cursor-pointer shadow-sm border border-[#2A3140] flex items-center justify-center text-white text-xs font-bold">
-              AM
+
+            <div className="w-8 h-8 rounded-full bg-[#6E56CF] cursor-pointer shadow-sm border border-[#2A3140] flex items-center justify-center text-white text-[11px] font-bold">
+              {user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase() : "U"}
             </div>
           </div>
         </header>
@@ -311,7 +324,7 @@ export default function OrganizerDashboard() {
             ))}
           </AutoWidthGrid>
         </div>
-        
+
         {/* Fixed Footer */}
         <div className="absolute bottom-4 right-6 flex items-center gap-3 text-[10px] text-slate-500 bg-[#161B23]/80 backdrop-blur px-4 py-1.5 rounded-full border border-[#2A3140] shadow-lg z-10">
           <span className="hover:text-slate-300 cursor-pointer transition-colors">Help Center</span>
@@ -323,7 +336,7 @@ export default function OrganizerDashboard() {
         {showCustomizePanel && (
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={() => setShowCustomizePanel(false)} />
         )}
-        
+
         {/* Customize Panel */}
         <div className={`absolute top-0 right-0 h-full w-80 bg-[#11141A] border-l border-[#2A3140] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${showCustomizePanel ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="flex items-center justify-between p-4 border-b border-[#2A3140]">
@@ -332,13 +345,13 @@ export default function OrganizerDashboard() {
               <X className="w-5 h-5" />
             </button>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
             <p className="text-xs text-slate-400 mb-2">Toggle widgets to show or hide them from your dashboard. Drag by headers to rearrange.</p>
-            
+
             {WIDGETS.map(widget => (
-              <label 
-                key={widget.id} 
+              <label
+                key={widget.id}
                 onClick={(e) => { e.preventDefault(); toggleWidget(widget.id); }}
                 className="flex items-center justify-between p-3 rounded-lg border border-[#2A3140] hover:bg-[#1C202B] cursor-pointer transition-colors group"
               >
@@ -351,7 +364,7 @@ export default function OrganizerDashboard() {
           </div>
 
           <div className="p-4 border-t border-[#2A3140]">
-            <button 
+            <button
               onClick={resetDashboard}
               className="w-full bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white py-2 rounded-lg text-sm font-semibold transition-colors"
             >
@@ -397,12 +410,58 @@ function renderWidget(id) {
 /* -------------------------------------------------------------------------- */
 
 function UpcomingEventsWidget() {
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const { user } = useUserStore();
+
+  const fetchUpcomingEvents = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/events/${user.id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      console.log(data)
+      if (Array.isArray(data)) {
+        setUpcomingEvents(data.slice(0, 4));
+      } else if (data && data.success && Array.isArray(data.events)) {
+        setUpcomingEvents(data.events.slice(0, 4));
+      } else if (data && Array.isArray(data.data)) {
+        setUpcomingEvents(data.data.slice(0, 4));
+      }
+    } catch (error) {
+      console.error("Error fetching upcoming events:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchUpcomingEvents();
+    }
+  }, [user?.id]);
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
   return (
     <Card title="Upcoming Events" action={<Badge>Preparing ▾</Badge>}>
       <div className="space-y-3 mt-1 flex-1 overflow-y-auto no-scrollbar">
-        <EventItem title="Spring Gala 2024" date="Mon 3, 2024" reg="354 regs" vol="52" color="bg-indigo-500" />
-        <EventItem title="Tech Symposium" date="Mon 3, 2024" reg="Leeham" vol="201" color="bg-emerald-500" />
-        <EventItem title="NGO Workshop" date="Nov 4, 2024" reg="Leahham" vol="100" color="bg-orange-500" isActive />
+        {upcomingEvents?.map((event, i) => (
+          <EventItem
+            key={event?.id || i}
+            title={event?.title}
+            date={formatDate(event?.start_time)}
+            reg={`${event?.max_attendees || 0} regs`}
+            vol={event?.volunteers_required}
+            color={['bg-indigo-500', 'bg-emerald-500', 'bg-orange-500', 'bg-pink-500'][i % 4]}
+          />
+        ))}
       </div>
       <button className="w-full mt-4 bg-[#6E56CF]/20 text-[#00E5FF] hover:bg-[#6E56CF] hover:text-white py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1 shrink-0">
         View Details <ChevronRight className="w-4 h-4" />
@@ -439,7 +498,7 @@ function LivePerformanceWidget() {
           </div>
         </div>
         <div className="w-20 h-8 flex items-end justify-between gap-0.5">
-          {[3,5,4,7,5,8,6].map((h, i) => (
+          {[3, 5, 4, 7, 5, 8, 6].map((h, i) => (
             <div key={i} className="w-full bg-emerald-500/50 rounded-t-sm" style={{ height: `${h}0%` }} />
           ))}
         </div>
@@ -459,7 +518,7 @@ function LiveCheckInWidget() {
           <div className="flex justify-between text-slate-500 mb-1 shrink-0">
             <span>Feed</span><span>Status</span>
           </div>
-          {['Alex Chen','Maria Nones','Jack Doe','Sarah Connor','Alex Chen'].map((name, i) => (
+          {['Alex Chen', 'Maria Nones', 'Jack Doe', 'Sarah Connor', 'Alex Chen'].map((name, i) => (
             <div key={i} className="flex justify-between items-center text-[10px] shrink-0">
               <span className="text-slate-300">{name}</span>
               <span className="flex items-center gap-1 text-emerald-400"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Check-in</span>
@@ -570,24 +629,24 @@ function RecentRegistrationsWidget() {
     <Card title="Recent Registrations">
       <div className="mt-2 space-y-3 flex-1 overflow-y-auto no-scrollbar">
         <div className="flex items-center justify-between p-2 rounded-lg hover:bg-[#11141A] transition-colors group cursor-pointer border border-transparent hover:border-[#2A3140]">
-           <div className="flex items-center gap-3">
-              <div className="p-1.5 bg-[#6E56CF]/20 rounded-md text-[#6E56CF]"><History className="w-3.5 h-3.5" /></div>
-              <div>
-                <p className="text-xs font-bold text-white group-hover:text-[#00E5FF] transition-colors">Spring Gala 2024</p>
-                <p className="text-[10px] text-slate-500">Active registrations</p>
-              </div>
-           </div>
-           <ChevronRight className="w-4 h-4 text-slate-600" />
+          <div className="flex items-center gap-3">
+            <div className="p-1.5 bg-[#6E56CF]/20 rounded-md text-[#6E56CF]"><History className="w-3.5 h-3.5" /></div>
+            <div>
+              <p className="text-xs font-bold text-white group-hover:text-[#00E5FF] transition-colors">Spring Gala 2024</p>
+              <p className="text-[10px] text-slate-500">Active registrations</p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-slate-600" />
         </div>
         <div className="flex items-center justify-between p-2 rounded-lg hover:bg-[#11141A] transition-colors group cursor-pointer border border-transparent hover:border-[#2A3140]">
-           <div className="flex items-center gap-3">
-              <div className="p-1.5 bg-[#1C202B] rounded-md text-slate-400 border border-[#2A3140]"><ClipboardList className="w-3.5 h-3.5" /></div>
-              <div>
-                <p className="text-xs font-bold text-white group-hover:text-[#00E5FF] transition-colors">Draft event "Global Summit"</p>
-                <p className="text-[10px] text-slate-500">Team registration</p>
-              </div>
-           </div>
-           <ChevronRight className="w-4 h-4 text-slate-600" />
+          <div className="flex items-center gap-3">
+            <div className="p-1.5 bg-[#1C202B] rounded-md text-slate-400 border border-[#2A3140]"><ClipboardList className="w-3.5 h-3.5" /></div>
+            <div>
+              <p className="text-xs font-bold text-white group-hover:text-[#00E5FF] transition-colors">Draft event "Global Summit"</p>
+              <p className="text-[10px] text-slate-500">Team registration</p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-slate-600" />
         </div>
       </div>
     </Card>
@@ -599,18 +658,18 @@ function TeamMembersWidget() {
     <Card title="Team Members">
       <div className="mt-2 space-y-4 flex-1 overflow-y-auto no-scrollbar">
         <div className="flex gap-2">
-           <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center text-xs font-bold text-white">JD</div>
-           <div className="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold text-white">MK</div>
-           <div className="w-7 h-7 rounded-full bg-rose-500 flex items-center justify-center text-xs font-bold text-white">AS</div>
-           <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-300">+2</div>
-           <ChevronRight className="w-4 h-4 text-slate-600 ml-auto my-auto" />
+          <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center text-xs font-bold text-white">JD</div>
+          <div className="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold text-white">MK</div>
+          <div className="w-7 h-7 rounded-full bg-rose-500 flex items-center justify-center text-xs font-bold text-white">AS</div>
+          <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-300">+2</div>
+          <ChevronRight className="w-4 h-4 text-slate-600 ml-auto my-auto" />
         </div>
         <div className="flex items-center gap-3 p-2 bg-[#1c1f26] rounded-lg border border-[#2d323e]">
-           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500" />
-           <div>
-             <p className="text-xs font-bold text-white">Alex Chen</p>
-             <p className="text-[10px] text-slate-500">Volunteer</p>
-           </div>
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500" />
+          <div>
+            <p className="text-xs font-bold text-white">Alex Chen</p>
+            <p className="text-[10px] text-slate-500">Volunteer</p>
+          </div>
         </div>
       </div>
     </Card>
@@ -755,9 +814,8 @@ function CentralItem({ name, event, stat, color }) {
         <p className="text-[9px] text-slate-500 truncate">Mon 3 regs, 52 vol</p>
       </div>
       <div className="col-span-2 text-right">
-        <span className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full font-medium ${
-          color === 'emerald' ? 'bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-        }`}>
+        <span className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full font-medium ${color === 'emerald' ? 'bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+          }`}>
           <div className={`w-1 h-1 rounded-full ${color === 'emerald' ? 'bg-[#00E5FF]' : 'bg-rose-400'}`} /> {stat}
         </span>
       </div>

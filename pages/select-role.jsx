@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CalendarCheck, ClipboardList, Ticket, LogOut } from "lucide-react";
-
-import { getToken, removeToken } from "@/lib/auth";
+import { useUserStore } from "@/store/userStore";
+import { getToken } from "@/lib/auth";
 
 export default function SelectRolePage() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const { user, fetchUser, logout } = useUserStore();
   
   useEffect(() => {
     const token = getToken();
@@ -17,19 +17,13 @@ export default function SelectRolePage() {
       return;
     }
     
-    // Fetch user details to display
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/users/me`, {
-      headers: {
-        'Authorization': `bearer ${token}`
-      }
-    })
-    .then(response => response.json())
-    .then(data => setUser(data))
-    .catch(error => console.error('Error fetching user:', error));
-  }, [router]);
+    if (!user) {
+      fetchUser();
+    }
+  }, [router, user, fetchUser]);
 
   const handleLogout = () => {
-    removeToken();
+    logout();
     router.push("/auth/login");
   };
 

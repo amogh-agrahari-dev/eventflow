@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { getToken } from "@/lib/auth";
 import Head from "next/head";
 import Link from "next/link";
 import {
@@ -38,14 +40,136 @@ import {
   ChevronRight,
   Menu
 } from "lucide-react";
-
+import { useUserStore } from "@/store/userStore";
 export default function AddEventPage() {
-  const [volunteers, setVolunteers] = useState(1);
-  const [ticket1, setTicket1] = useState(10);
-  const [ticket2, setTicket2] = useState(0);
   const [livePerformance, setLivePerformance] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef(null);
+  const [eventTitle, setEventTitle] = useState("");
+  const [eventDescription, setEventDescription] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [eventLocation, setEventLocation] = useState("");
+  const [eventCategory, setEventCategory] = useState("Technical");
+  const [eventFormat, setEventFormat] = useState("online");
+  const [isFree, setIsFree] = useState(true);
+  const [volunteersRequired, setVolunteersRequired] = useState(5);
+  const [maxAttendees, setMaxAttendees] = useState(100);
+  const router = useRouter();
+  const { user, fetchUser } = useUserStore();
+  const token = getToken();
+
+  useEffect(() => {
+    if (token && !user) {
+      fetchUser();
+    } else if (!token) {
+      router.push("/auth/login");
+    }
+  }, [token, user, fetchUser, router]);
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setUploadProgress(20);
+    setUploadError("");
+
+    try {
+      const reader = new FileReader();
+      const fileDataUrl = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Unable to read selected image"));
+        reader.readAsDataURL(file);
+      });
+
+      setUploadProgress(50);
+
+      const response = await fetch("/api/cloudinary-upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          file: fileDataUrl,
+          fileName: file.name,
+          contentType: file.type,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Image upload failed");
+      }
+
+      setUploadedImageUrl(data.secure_url);
+      setUploadProgress(100);
+    } catch (error) {
+      setUploadError(error.message || "Image upload failed");
+      setUploadProgress(0);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const formatDateTime = (value) => {
+    if (!value) return null;
+    // If the input is from datetime-local (YYYY-MM-DDTHH:mm), append seconds.
+    // This ensures it is treated as a naive datetime by the backend.
+    return value.length === 16 ? `${value}:00` : value;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!eventTitle.trim()) {
+      alert("Please enter an event title.");
+      return;
+    }
+
+    if (!startDate || !endDate) {
+      alert("Please select both start and end dates.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/events/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          organizer_id: user?.id || 1,
+          title: eventTitle,
+          description: eventDescription,
+          category: eventCategory || "Technical",
+          location: eventLocation,
+          start_time: formatDateTime(startDate),
+          end_time: formatDateTime(endDate),
+          is_free: isFree,
+          format: eventFormat,
+          max_attendees: Number(maxAttendees) || 100,
+          volunteers_required: Number(volunteersRequired) || 5,
+          banner_url: uploadedImageUrl || null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.log(data.detail || data.message || "Event creation failed. Please try again.");
+        return;
+      }
+
+      alert("Event created successfully!");
+    } catch (error) {
+      console.log(error.message || "Event creation failed. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#11141A] text-slate-200 font-sans flex flex-col md:flex-row overflow-hidden">
@@ -198,8 +322,8 @@ export default function AddEventPage() {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-[#161B23]" />
             </button>
 
-            <div className="w-8 h-8 rounded-full bg-[#6E56CF] cursor-pointer shadow-sm border border-[#2A3140] flex items-center justify-center text-white text-xs font-bold">
-              AM
+            <div className="w-8 h-8 rounded-full bg-[#6E56CF] cursor-pointer shadow-sm border border-[#2A3140] flex items-center justify-center text-white text-[11px] font-bold">
+              {user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase() : "U"}
             </div>
           </div>
         </header>
@@ -220,28 +344,49 @@ export default function AddEventPage() {
                   <div>
                     <label className="block text-[12px] text-[#8F9BB3] mb-1.5">Event Title</label>
                     <input
+                      value={eventTitle}
+                      onChange={(e) => setEventTitle(e.target.value)}
                       type="text"
                       placeholder="Event Title input"
                       className="w-full bg-[#11141A] border border-[#2A3140] rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-[#5A6B8A] focus:outline-none focus:border-[#6E56CF]/50 transition-colors"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-[12px] text-[#8F9BB3] mb-1.5">Event Type</label>
+                    <label className="block text-[12px] text-[#8F9BB3] mb-1.5">Event Category</label>
                     <div className="relative">
-                      <select className="w-full appearance-none bg-[#11141A] border border-[#2A3140] rounded-lg pl-3 pr-8 py-2 text-[13px] text-[#8F9BB3] focus:outline-none focus:border-[#6E56CF]/50 transition-colors">
-                        <option>Gala, Symposium, Workshop, etc.</option>
+                      <select value={eventCategory} onChange={(e) => setEventCategory(e.target.value)} className="w-full appearance-none bg-[#11141A] border border-[#2A3140] rounded-lg pl-3 pr-8 py-2 text-[13px] text-[#8F9BB3] focus:outline-none focus:border-[#6E56CF]/50 transition-colors">
+                        <option value="Technical">Technical</option>
+                        <option value="Corporate">Corporate</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Social">Social</option>
+                        <option value="Educational">Educational</option>
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5A6B8A] pointer-events-none" />
                     </div>
                   </div>
+
                   <div>
-                    <label className="block text-[12px] text-[#8F9BB3] mb-1.5">Event Category</label>
+                    <label className="block text-[12px] text-[#8F9BB3] mb-1.5">Event Format</label>
                     <div className="relative">
-                      <select className="w-full appearance-none bg-[#11141A] border border-[#2A3140] rounded-lg pl-3 pr-8 py-2 text-[13px] text-[#8F9BB3] focus:outline-none focus:border-[#6E56CF]/50 transition-colors">
-                        <option></option>
+                      <select value={eventFormat} onChange={(e) => setEventFormat(e.target.value)} className="w-full appearance-none bg-[#11141A] border border-[#2A3140] rounded-lg pl-3 pr-8 py-2 text-[13px] text-[#8F9BB3] focus:outline-none focus:border-[#6E56CF]/50 transition-colors">
+                        <option value="online">Online</option>
+                        <option value="offline">Offline</option>
+                        <option value="hybrid">Hybrid</option>
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5A6B8A] pointer-events-none" />
                     </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      id="is-free"
+                      type="checkbox"
+                      checked={isFree}
+                      onChange={(e) => setIsFree(e.target.checked)}
+                      className="h-4 w-4 rounded border-[#2A3140] bg-[#11141A] text-[#6E56CF] focus:ring-[#6E56CF]"
+                    />
+                    <label htmlFor="is-free" className="text-[12px] text-[#8F9BB3]">Free event</label>
                   </div>
                 </div>
               </div>
@@ -258,14 +403,9 @@ export default function AddEventPage() {
                     <div className="flex gap-2">
                       <div className="relative flex-1">
                         <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-[14px] h-[14px] text-[#5A6B8A]" />
-                        <input type="text" placeholder="Nov, 2024" className="w-full bg-[#11141A] border border-[#2A3140] rounded-lg pl-8 pr-2 py-2 text-[13px] text-white focus:outline-none" />
+                        <input value={startDate} onChange={(e) => setStartDate(e.target.value)} type="datetime-local" placeholder="Nov, 2024" className="w-full bg-[#11141A] border border-[#2A3140] rounded-lg pl-8 pr-2 py-2 text-[13px] text-white focus:outline-none" />
                       </div>
-                      <div className="relative w-28">
-                        <select className="w-full appearance-none bg-[#11141A] border border-[#2A3140] rounded-lg pl-3 pr-7 py-2 text-[13px] text-white focus:outline-none">
-                          <option>8:00 PM</option>
-                        </select>
-                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5A6B8A] pointer-events-none" />
-                      </div>
+
                     </div>
                   </div>
 
@@ -274,14 +414,9 @@ export default function AddEventPage() {
                     <div className="flex gap-2">
                       <div className="relative flex-1">
                         <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-[14px] h-[14px] text-[#5A6B8A]" />
-                        <input type="text" placeholder="Nov, 2024" className="w-full bg-[#11141A] border border-[#2A3140] rounded-lg pl-8 pr-2 py-2 text-[13px] text-white focus:outline-none" />
+                        <input value={endDate} onChange={(e) => setEndDate(e.target.value)} type="datetime-local" placeholder="Nov, 2024" className="w-full bg-[#11141A] border border-[#2A3140] rounded-lg pl-8 pr-2 py-2 text-[13px] text-white focus:outline-none" />
                       </div>
-                      <div className="relative w-28">
-                        <select className="w-full appearance-none bg-[#11141A] border border-[#2A3140] rounded-lg pl-3 pr-7 py-2 text-[13px] text-white focus:outline-none">
-                          <option>6:00 PM</option>
-                        </select>
-                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5A6B8A] pointer-events-none" />
-                      </div>
+
                     </div>
                   </div>
 
@@ -303,6 +438,8 @@ export default function AddEventPage() {
                     </div>
                     <input
                       type="text"
+                      value={eventLocation}
+                      onChange={(e) => setEventLocation(e.target.value)}
                       placeholder="Address address, lindrese"
                       className="w-full bg-[#11141A] border border-[#2A3140] rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-[#5A6B8A] focus:outline-none"
                     />
@@ -335,6 +472,8 @@ export default function AddEventPage() {
                       <button className="p-1.5 text-[#8F9BB3] hover:text-white hover:bg-[#2A3140] rounded transition-colors"><MoreHorizontal className="w-4 h-4" /></button>
                     </div>
                     <textarea
+                      value={eventDescription}
+                      onChange={(e) => setEventDescription(e.target.value)}
                       placeholder="Add event description"
                       className="w-full flex-1 bg-transparent p-4 text-[14px] text-white placeholder:text-[#5A6B8A] focus:outline-none resize-none custom-scrollbar"
                     ></textarea>
@@ -350,25 +489,61 @@ export default function AddEventPage() {
 
                 <div className="p-5 bg-[#1C202B] flex-1">
                   <h3 className="text-[12px] text-[#8F9BB3] mb-2">Upload Image</h3>
-                  <div className="border-2 border-dashed border-[#3A455A] rounded-lg h-24 flex flex-col items-center justify-center gap-2 text-[#5A6B8A] bg-[#11141A]/50 cursor-pointer hover:bg-[#11141A] hover:border-[#5A6B8A] transition-colors mb-4">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full border-2 border-dashed border-[#3A455A] rounded-lg h-24 flex flex-col items-center justify-center gap-2 text-[#5A6B8A] bg-[#11141A]/50 cursor-pointer hover:bg-[#11141A] hover:border-[#5A6B8A] transition-colors mb-4"
+                  >
                     <Upload className="w-5 h-5" />
-                    <span className="text-[12px] font-medium">Click or drag to upload</span>
-                  </div>
+                    <span className="text-[12px] font-medium">Click to upload to Cloudinary</span>
+                  </button>
+
+                  {uploadError && (
+                    <p className="text-[11px] text-red-400 mb-3">{uploadError}</p>
+                  )}
 
                   <h3 className="text-[12px] text-[#8F9BB3] mb-2">Upload preview</h3>
-                  <div className="relative border border-[#2A3140] rounded-lg h-[120px] overflow-hidden bg-gradient-to-br from-[#1C202B] to-[#2D204A] p-4 flex flex-col justify-end">
+                  <div className="relative border border-[#2A3140] rounded-lg h-[140px] overflow-hidden bg-gradient-to-br from-[#1C202B] to-[#2D204A] p-4 flex flex-col justify-end">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-[#8C52FF]/30 blur-2xl rounded-full"></div>
 
-                    <div className="relative z-10 w-full">
-                      <div className="flex justify-between items-center mb-1.5">
-                        <span className="text-[12px] font-medium text-white">event_banner.png</span>
-                        <span className="text-[11px] font-medium text-[#00E5FF]">15%</span>
+                    {uploadedImageUrl ? (
+                      <img
+                        src={uploadedImageUrl}
+                        alt="Event banner preview"
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="relative z-10 w-full">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <span className="text-[12px] font-medium text-white">No image uploaded yet</span>
+                          <span className="text-[11px] font-medium text-[#00E5FF]">0%</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-[#2A3140] rounded-full overflow-hidden mb-1">
+                          <div className="h-full bg-[#6E56CF] w-[0%] rounded-full"></div>
+                        </div>
+                        <span className="text-[11px] text-[#5A6B8A]">Waiting for upload</span>
                       </div>
-                      <div className="w-full h-1.5 bg-[#2A3140] rounded-full overflow-hidden mb-1">
-                        <div className="h-full bg-[#6E56CF] w-[15%] rounded-full"></div>
+                    )}
+
+                    {uploadingImage && (
+                      <div className="relative z-10 w-full bg-[#11141A]/70 p-3 rounded-lg backdrop-blur-sm">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <span className="text-[12px] font-medium text-white">Uploading...</span>
+                          <span className="text-[11px] font-medium text-[#00E5FF]">{uploadProgress}%</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-[#2A3140] rounded-full overflow-hidden mb-1">
+                          <div className="h-full bg-[#6E56CF] rounded-full transition-all" style={{ width: `${uploadProgress}%` }}></div>
+                        </div>
+                        <span className="text-[11px] text-[#5A6B8A]">Sending to Cloudinary</span>
                       </div>
-                      <span className="text-[11px] text-[#5A6B8A]">Uploading...</span>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -387,8 +562,9 @@ export default function AddEventPage() {
                     <label className="block text-[12px] text-[#8F9BB3] mb-1.5">Number of Volunteers Needed</label>
                     <input
                       type="number"
-                      value={volunteers}
-                      onChange={(e) => setVolunteers(e.target.value)}
+                      min="0"
+                      value={volunteersRequired}
+                      onChange={(e) => setVolunteersRequired(e.target.value)}
                       className="w-full bg-[#11141A] border border-[#2A3140] rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none"
                     />
                   </div>
@@ -431,58 +607,17 @@ export default function AddEventPage() {
                   <h3 className="text-[15px] font-medium text-white tracking-wide">Attendee Management</h3>
                 </div>
 
-                <div className="p-5 space-y-5 bg-[#1C202B] flex-1">
+                <div className="p-5 bg-[#1C202B] flex-1">
                   <div>
-                    <label className="block text-[12px] text-[#8F9BB3] mb-1.5">Registration forms</label>
-                    <div className="relative">
-                      <select className="w-full appearance-none bg-[#11141A] border border-[#2A3140] rounded-lg pl-3 pr-8 py-2 text-[13px] text-white focus:outline-none">
-                        <option>Select registration forms</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5A6B8A] pointer-events-none" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[12px] text-[#8F9BB3] mb-2">Ticket types</label>
-
-                    <div className="space-y-3">
-                      {/* Ticket 1 */}
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-[#11141A] border border-[#2A3140] rounded-lg px-3 py-2 flex items-center justify-between text-[13px]">
-                          <span className="text-slate-300">Ticket 1</span>
-                        </div>
-                        <div className="flex items-center bg-[#11141A] border border-[#2A3140] rounded-lg h-9">
-                          <button onClick={() => setTicket1(Math.max(0, ticket1 - 1))} className="px-2.5 h-full text-[#5A6B8A] hover:text-white transition-colors border-r border-[#2A3140]">
-                            <Minus className="w-[14px] h-[14px]" />
-                          </button>
-                          <div className="w-9 text-center text-[13px] text-white font-medium">
-                            {ticket1}
-                          </div>
-                          <button onClick={() => setTicket1(ticket1 + 1)} className="px-2.5 h-full text-[#5A6B8A] hover:text-white transition-colors relative border-l border-[#2A3140]">
-                            <Plus className="w-[14px] h-[14px]" />
-                            <Star className="absolute top-1 right-1 w-2.5 h-2.5 text-white fill-white" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Ticket 2 */}
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-[#11141A] border border-[#2A3140] rounded-lg px-3 py-2 flex items-center justify-between text-[13px]">
-                          <span className="text-slate-300">Ticket 2</span>
-                        </div>
-                        <div className="flex items-center bg-[#11141A] border border-[#2A3140] rounded-lg h-9">
-                          <button onClick={() => setTicket2(Math.max(0, ticket2 - 1))} className="px-2.5 h-full text-[#5A6B8A] hover:text-white transition-colors border-r border-[#2A3140]">
-                            <Minus className="w-[14px] h-[14px]" />
-                          </button>
-                          <div className="w-9 text-center text-[13px] text-white font-medium">
-                            {ticket2}
-                          </div>
-                          <button onClick={() => setTicket2(ticket2 + 1)} className="px-2.5 h-full text-[#5A6B8A] hover:text-white transition-colors border-l border-[#2A3140]">
-                            <Plus className="w-[14px] h-[14px]" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                    <label className="block text-[12px] text-[#8F9BB3] mb-1.5">Maximum number of attendees</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={maxAttendees}
+                      onChange={(e) => setMaxAttendees(e.target.value)}
+                      placeholder="e.g. 250"
+                      className="w-full bg-[#11141A] border border-[#2A3140] rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-[#5A6B8A] focus:outline-none"
+                    />
                   </div>
                 </div>
               </div>
@@ -510,14 +645,14 @@ export default function AddEventPage() {
         </div>
 
         {/* Fixed Bottom Actions (Sticky in the middle bottom of main content area) */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-[#1C202B]/95 backdrop-blur-md px-6 py-4 rounded-2xl border border-[#3A455A] shadow-2xl z-20">
-          <button className="px-8 py-2.5 rounded-lg text-sm font-medium text-slate-300 border border-[#2A3140] bg-[#11141A] hover:bg-[#2A3140] transition-colors min-w-[150px]">
+        <form onSubmit={handleSubmit} className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-[#1C202B]/95 backdrop-blur-md px-6 py-4 rounded-2xl border border-[#3A455A] shadow-2xl z-20">
+          <button type="button" className="px-8 py-2.5 rounded-lg text-sm font-medium text-slate-300 border border-[#2A3140] bg-[#11141A] hover:bg-[#2A3140] transition-colors min-w-[150px]">
             Save as Draft
           </button>
-          <button className="px-8 py-2.5 rounded-lg text-sm font-medium text-white bg-[#6E56CF] hover:bg-[#5a46aa] transition-colors shadow-[0_0_15px_rgba(79,70,229,0.3)] min-w-[150px]">
+          <button type="submit" className="px-8 py-2.5 rounded-lg text-sm font-medium text-white bg-[#6E56CF] hover:bg-[#5a46aa] transition-colors shadow-[0_0_15px_rgba(79,70,229,0.3)] min-w-[150px]">
             Publish Event
           </button>
-        </div>
+        </form>
       </main>
     </div>
   );

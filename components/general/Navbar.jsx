@@ -1,34 +1,24 @@
-import { getToken, removeToken } from '@/lib/auth';
+import { getToken } from '@/lib/auth';
 import { Button } from '@/components/ui';
 import { CalendarDays, ChevronDown, LogOut, LayoutDashboard, UserCircle2, PlusCircle, ShieldCheck, Ticket, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
+import { useUserStore } from '@/store/userStore';
 
 export default function Navbar() {
-  const [user, setUser] = useState(null);
+  const { user, fetchUser, logout } = useUserStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const router = useRouter();
   const token = getToken();
 
-  function protected1() {
-    fetch('https://eventflow-backend-0ctf.onrender.com/users/me', {
-      headers: {
-        'Authorization': `bearer ${token}`
-      }
-    })
-      .then(response => response.json())
-      .then(data => setUser(data))
-      .catch(error => console.error('Error:', error));
-  }
-
   useEffect(() => {
-    if (token) {
-      protected1();
+    if (token && !user) {
+      fetchUser();
     }
-  }, [token]);
+  }, [token, user, fetchUser]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -42,8 +32,7 @@ export default function Navbar() {
   }, []);
 
   function handleLogout() {
-    removeToken();
-    setUser(null);
+    logout();
     setIsMenuOpen(false);
     router.push('/auth/login');
   }
@@ -77,44 +66,44 @@ export default function Navbar() {
                 <span className="hidden sm:inline text-xs font-bold text-foreground">{user?.name || 'User'}</span>
                 <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
               </button>
-              
+
               {/* Mobile Menu Toggle for Logged In User */}
-              <button 
+              <button
                 className="md:hidden p-2 text-foreground ml-1"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
 
-            {isMenuOpen && (
-              <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-border/80 bg-card p-2 shadow-2xl backdrop-blur-xl animate-fade-in">
-                <Link
-                  href="/select-role"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
-                >
-                  <LayoutDashboard className="h-4 w-4 text-accent" />
-                  Switch Role
-                </Link>
-                <Link
-                  href="/events/add"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
-                >
-                  <PlusCircle className="h-4 w-4 text-accent" />
-                  Create Event
-                </Link>
-                <div className="my-1 border-t border-border/60" />
-                <button
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-red-600 transition-all hover:bg-red-500/10 cursor-pointer"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
+              {isMenuOpen && (
+                <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-border/80 bg-card p-2 shadow-2xl backdrop-blur-xl animate-fade-in">
+                  <Link
+                    href="/select-role"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
+                  >
+                    <LayoutDashboard className="h-4 w-4 text-accent" />
+                    Switch Role
+                  </Link>
+                  <Link
+                    href="/events/add"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
+                  >
+                    <PlusCircle className="h-4 w-4 text-accent" />
+                    Create Event
+                  </Link>
+                  <div className="my-1 border-t border-border/60" />
+                  <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-red-600 transition-all hover:bg-red-500/10 cursor-pointer"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="flex items-center gap-2">
               <Link href="/auth/login">
@@ -127,9 +116,9 @@ export default function Navbar() {
                   Get Started
                 </Button>
               </Link>
-              
+
               {/* Mobile Menu Toggle */}
-              <button 
+              <button
                 className="md:hidden p-2 text-foreground ml-2"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
@@ -139,7 +128,7 @@ export default function Navbar() {
           )}
         </div>
       </div>
-      
+
       {/* Mobile Navigation Dropdown */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-border/60 bg-background/95 backdrop-blur-xl absolute top-full left-0 right-0 p-4 flex flex-col gap-2 shadow-xl">
