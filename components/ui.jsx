@@ -45,7 +45,7 @@ export function Button({ className, variant = "default", children, ...props }) {
     default:
       "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-xl hover:shadow-primary/20",
     hero:
-      "bg-gradient-to-r from-accent via-cyan-500 to-indigo-600 text-slate-950 font-bold shadow-lg shadow-accent/25 hover:shadow-accent/40 hover:brightness-110 border border-accent/30",
+      "bg-gradient-to-r from-blue-600 to-cyan-400 text-white font-bold shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] hover:brightness-110 border-none transition-all duration-300",
     outline:
       "border border-input bg-background/80 text-foreground hover:bg-muted hover:border-accent/40 shadow-xs hover:shadow-md",
     secondary:

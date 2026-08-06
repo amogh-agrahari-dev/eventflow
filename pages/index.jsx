@@ -101,15 +101,17 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="dark min-h-screen bg-background text-foreground selection:bg-primary/30 font-sans">
+    <div className="dark h-screen overflow-hidden bg-background text-foreground selection:bg-primary/30 font-sans flex flex-col relative">
       <Head>
         <title>EventFlow | Campus Event Management Portal</title>
         <meta name="description" content="Centralized event and volunteer management portal for colleges." />
       </Head>
 
-      <Navbar />
-      <Hero />
-      <Roles />
+      <Navbar isPublicPage={true} />
+      
+      <main className="flex-1 overflow-y-auto custom-scrollbar w-full relative">
+        <Hero />
+        <Roles />
 
       {/* ── Features Section ── */}
       <section id="features" className="py-28 relative overflow-hidden">
@@ -170,6 +172,7 @@ export default function LandingPage() {
 
       <CTA />
       <Footer />
+      </main>
     </div>
   );
 }
