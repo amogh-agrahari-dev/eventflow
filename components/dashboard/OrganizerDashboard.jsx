@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Responsive as ResponsiveGridLayout } from 'react-grid-layout';
 import Link from 'next/link';
+import Logo from '@/components/general/Logo';
 import { 
   Home, CalendarDays, PlusSquare, History, Users, ClipboardList, 
   MessageSquare, UserPlus, LogOut, Search, Bell, Plus, MoreHorizontal,
@@ -136,16 +137,13 @@ export default function OrganizerDashboard() {
 
       {/* 1. Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 bg-[#11141A] border-[#1C202B] flex flex-col shrink-0 overflow-hidden transform transition-all duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 w-[260px] border-r' : '-translate-x-full w-[260px] border-r'} ${isDesktopSidebarCollapsed ? 'md:w-0 md:border-r-0' : 'md:w-[260px] md:border-r'}`}>
-        <div className="w-[260px] h-full flex flex-col overflow-y-auto custom-scrollbar">
+        <div className="w-[260px] h-full flex flex-col bg-[#11141A]">
           {/* Brand / Logo Area */}
           <div className="p-6 flex items-center gap-3 border-b border-[#1C202B]/60 shrink-0">
-            <div className="w-8 h-8 rounded-full bg-[#6E56CF] flex items-center justify-center text-white font-bold text-lg">
-              E
-            </div>
-            <span className="font-semibold text-lg tracking-wide text-white">EventFlow</span>
+            <Logo iconSize={32} />
           </div>
 
-          <div className="px-4 py-2 space-y-6">
+          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-2 space-y-6">
             <div>
               <div className="flex items-center gap-3 px-3 py-2 bg-[#2D3340]/40 text-[#00E5FF] border border-[#3A455A] rounded-lg cursor-pointer">
                 <Home className="w-[18px] h-[18px] text-[#00E5FF]" />
@@ -225,9 +223,9 @@ export default function OrganizerDashboard() {
                   <BarChart2 className="w-[18px] h-[18px]" />
                   <span className="text-[13px] font-medium">Custom Reports</span>
                 </Link>
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
+                <Link href="/settings" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
                   <Settings className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">General</span>
+                  <span className="text-[13px] font-medium">General Settings</span>
                 </Link>
               </div>
             </div>

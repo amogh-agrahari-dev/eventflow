@@ -76,7 +76,7 @@ export default function LoginPage() {
             New to the portal?{" "}
             <Link
               href="/auth/register"
-              className="font-medium text-foreground underline underline-offset-4"
+              className="font-medium text-white underline underline-offset-4 hover:text-[#00E5FF] transition-colors"
             >
               Create an account
             </Link>
@@ -88,7 +88,7 @@ export default function LoginPage() {
           onSubmit={(e) => loginUser(e)}
         >
           <div className="space-y-2">
-            <Label htmlFor="email">College email</Label>
+            <Label htmlFor="email" className="text-white/90">College email</Label>
             <Input
               id="email"
               type="email"
@@ -97,13 +97,14 @@ export default function LoginPage() {
               value={email}
               maxLength={255}
               onChange={(e) => setEmail(e.target.value)}
+              className="bg-[#11141A] border-[#2A3140] text-white focus-visible:ring-[#00E5FF]/50 focus-visible:border-[#00E5FF]/50 placeholder:text-[#5A6B8A]"
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <button type="button" className="text-xs text-muted-foreground hover:text-foreground">
+              <Label htmlFor="password" className="text-white/90">Password</Label>
+              <button type="button" className="text-xs text-[#8F9BB3] hover:text-white transition-colors">
                 Forgot password?
               </button>
             </div>
@@ -115,11 +116,12 @@ export default function LoginPage() {
               value={password}
               maxLength={72}
               onChange={(e) => setPassword(e.target.value)}
+              className="bg-[#11141A] border-[#2A3140] text-white focus-visible:ring-[#00E5FF]/50 focus-visible:border-[#00E5FF]/50 placeholder:text-[#5A6B8A]"
             />
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Checkbox id="remember" />
+          <label className="flex items-center gap-2 text-sm text-[#8F9BB3]">
+            <Checkbox id="remember" className="border-[#2A3140] bg-[#11141A]" />
             Keep me signed in on this device
           </label>
 

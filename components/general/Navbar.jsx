@@ -2,10 +2,11 @@ import { getToken, removeToken } from '@/lib/auth';
 import { Button } from '@/components/ui';
 import { CalendarDays, ChevronDown, LogOut, LayoutDashboard, UserCircle2, PlusCircle, ShieldCheck, Ticket, Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import Logo from '@/components/general/Logo';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
 
-export default function Navbar() {
+export default function Navbar({ isPublicPage = false }) {
   const [user, setUser] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -52,20 +53,11 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl shadow-xs">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         {/* Brand Logo */}
-        <Link href="/">
-          <div className="flex items-center gap-2.5 group cursor-pointer">
-            <div className="bg-gradient-to-r from-accent to-indigo-600 text-slate-950 p-2 rounded-xl shadow-md group-hover:scale-105 transition-transform duration-300">
-              <CalendarDays className="h-5 w-5" />
-            </div>
-            <span className="font-display font-extrabold text-xl tracking-tight text-foreground group-hover:text-accent transition-colors">
-              EventFlow
-            </span>
-          </div>
-        </Link>
+        <Logo iconSize={32} />
 
         {/* User Account / Sign In */}
         <div className="flex items-center gap-2">
-          {user ? (
+          {!isPublicPage && user ? (
             <div className="relative flex items-center gap-2" ref={menuRef}>
               <button
                 onClick={() => setIsMenuOpen(prev => !prev)}
@@ -119,12 +111,12 @@ export default function Navbar() {
             <div className="flex items-center gap-2">
               <Link href="/auth/login">
                 <Button variant="outline" className="rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition-all hover:bg-muted hidden sm:flex">
-                  Sign In
+                  Log in
                 </Button>
               </Link>
               <Link href="/auth/register">
                 <Button className="rounded-xl bg-gradient-to-r from-accent to-indigo-600 px-4 py-2 text-xs font-bold text-slate-950 shadow-md transition-all hover:scale-105 hover:shadow-lg hidden sm:flex">
-                  Get Started
+                  Sign up
                 </Button>
               </Link>
               
@@ -143,24 +135,26 @@ export default function Navbar() {
       {/* Mobile Navigation Dropdown */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-border/60 bg-background/95 backdrop-blur-xl absolute top-full left-0 right-0 p-4 flex flex-col gap-2 shadow-xl">
-          <Link
-            href="/select-role"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="px-4 py-3 text-sm font-bold rounded-xl bg-muted/30 hover:bg-muted transition-colors flex items-center gap-3"
-          >
-            <LayoutDashboard className="w-4 h-4 text-accent" />
-            Switch Role
-          </Link>
-          {!user && (
+          {!isPublicPage && (
+            <Link
+              href="/select-role"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="px-4 py-3 text-sm font-bold rounded-xl bg-muted/30 hover:bg-muted transition-colors flex items-center gap-3"
+            >
+              <LayoutDashboard className="w-4 h-4 text-accent" />
+              Switch Role
+            </Link>
+          )}
+          {(!isPublicPage && !user) || isPublicPage ? (
             <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-border/60">
               <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="outline" className="w-full rounded-xl">Sign In</Button>
+                <Button variant="outline" className="w-full rounded-xl">Log in</Button>
               </Link>
               <Link href="/auth/register" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button className="w-full rounded-xl bg-gradient-to-r from-accent to-indigo-600 text-slate-950">Get Started</Button>
+                <Button className="w-full rounded-xl bg-gradient-to-r from-accent to-indigo-600 text-slate-950">Sign up</Button>
               </Link>
             </div>
-          )}
+          ) : null}
         </div>
       )}
     </nav>

@@ -75,7 +75,7 @@ export default function RegisterPage() {
         footer={
           <>
             Already registered?{" "}
-            <Link href="/auth/login" className="font-medium text-foreground underline underline-offset-4">
+            <Link href="/auth/login" className="font-medium text-white underline underline-offset-4 hover:text-[#00E5FF] transition-colors">
               Sign in instead
             </Link>
           </>
@@ -87,18 +87,19 @@ export default function RegisterPage() {
         >
 
           <div className="space-y-2">
-            <Label htmlFor="name">Full name</Label>
+            <Label htmlFor="name" className="text-white/90">Full name</Label>
             <Input
               id="name"
               value={form.name}
               maxLength={100}
               onChange={update("name")}
               placeholder="Aditi Sharma"
+              className="bg-[#11141A] border-[#2A3140] text-white focus-visible:ring-[#00E5FF]/50 focus-visible:border-[#00E5FF]/50 placeholder:text-[#5A6B8A]"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">College email</Label>
+            <Label htmlFor="email" className="text-white/90">College email</Label>
             <Input
               id="email"
               type="email"
@@ -107,12 +108,13 @@ export default function RegisterPage() {
               maxLength={255}
               onChange={update("email")}
               placeholder="you@college.edu"
+              className="bg-[#11141A] border-[#2A3140] text-white focus-visible:ring-[#00E5FF]/50 focus-visible:border-[#00E5FF]/50 placeholder:text-[#5A6B8A]"
             />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-white/90">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -121,10 +123,11 @@ export default function RegisterPage() {
                 maxLength={72}
                 onChange={update("password")}
                 placeholder="8+ characters"
+                className="bg-[#11141A] border-[#2A3140] text-white focus-visible:ring-[#00E5FF]/50 focus-visible:border-[#00E5FF]/50 placeholder:text-[#5A6B8A]"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm">Confirm</Label>
+              <Label htmlFor="confirm" className="text-white/90">Confirm Password</Label>
               <Input
                 id="confirm"
                 type="password"
@@ -133,6 +136,7 @@ export default function RegisterPage() {
                 maxLength={72}
                 onChange={update("confirm")}
                 placeholder="Repeat password"
+                className="bg-[#11141A] border-[#2A3140] text-white focus-visible:ring-[#00E5FF]/50 focus-visible:border-[#00E5FF]/50 placeholder:text-[#5A6B8A]"
               />
             </div>
           </div>
