@@ -1,41 +1,39 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Head from 'next/head';
-import Navbar from '@/components/general/Navbar';
-import Footer from '@/components/general/Footer';
-import { useRouter } from 'next/navigation';
-import { getToken } from '@/lib/auth';
+import AttendeeLayout from '@/components/dashboard/attendee/AttendeeLayout';
+import UpcomingEvents from '@/components/dashboard/attendee/widgets/UpcomingEvents';
+import QuickActions from '@/components/dashboard/attendee/widgets/QuickActions';
+import MyTickets from '@/components/dashboard/attendee/widgets/MyTickets';
+import Announcements from '@/components/dashboard/attendee/widgets/Announcements';
+import MyRegistrations from '@/components/dashboard/attendee/widgets/MyRegistrations';
+import CheckInSummary from '@/components/dashboard/attendee/widgets/CheckInSummary';
+import MyActivity from '@/components/dashboard/attendee/widgets/MyActivity';
+import EventRecommendations from '@/components/dashboard/attendee/widgets/EventRecommendations';
 
 export default function AttendeeDashboard() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      router.push("/auth/login");
-    }
-  }, [router]);
-
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
+    <>
       <Head>
         <title>Attendee Dashboard | EventFlow</title>
       </Head>
-
-      <Navbar />
-
-      <main className="flex-1 container mx-auto px-6 py-24 flex items-center justify-center">
-        <div className="text-center max-w-lg">
-          <h1 className="text-4xl font-display font-bold mb-4">Your Events</h1>
-          <p className="text-muted-foreground mb-8">
-            This is your attendee workspace. View digital passes, browse events, and manage registrations here.
-          </p>
-          <div className="p-8 border border-border bg-card rounded-2xl shadow-sm text-sm text-muted-foreground">
-            Coming Soon: Invitee Events Grid & Digital Passes
+      <AttendeeLayout>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <UpcomingEvents />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <MyTickets />
+              <MyRegistrations />
+            </div>
+            <EventRecommendations />
+          </div>
+          <div className="space-y-6">
+            <QuickActions />
+            <CheckInSummary />
+            <Announcements />
+            <MyActivity />
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </AttendeeLayout>
+    </>
   );
 }
