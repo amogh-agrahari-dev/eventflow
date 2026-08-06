@@ -20,10 +20,10 @@ export default function CTA() {
             Start for free
           </div>
 
-          <h2 className="font-display text-4xl font-extrabold text-primary-foreground sm:text-5xl mb-4">
+          <h2 className="font-display text-4xl font-extrabold text-white sm:text-5xl mb-4">
             Ready for your next event?
           </h2>
-          <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-primary-foreground/70">
+          <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-white/70">
             Set up your portal, invite volunteers and start issuing QR passes today.
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-4">
@@ -36,7 +36,7 @@ export default function CTA() {
             </Link>
             <Link
               href="/auth/login"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl border border-white/20 text-primary-foreground/80 font-bold text-sm hover:bg-white/10 hover:text-white hover:border-white/30 transition-all duration-300"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl border border-white/20 text-white/80 font-bold text-sm hover:bg-white/10 hover:text-white hover:border-white/30 transition-all duration-300"
             >
               Sign in
               <ArrowRight className="w-4 h-4" />

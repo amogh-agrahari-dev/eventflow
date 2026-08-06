@@ -1,5 +1,6 @@
 import { CalendarDays, Github, Twitter, Linkedin, Mail } from 'lucide-react';
 import Link from 'next/link';
+import Logo from '@/components/general/Logo';
 import React from 'react';
 
 export default function Footer() {
@@ -12,12 +13,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Brand Col */}
           <div className="space-y-4 md:col-span-1">
-            <div className="flex items-center gap-2.5">
-              <div className="bg-gradient-to-r from-accent to-indigo-600 text-slate-950 p-2 rounded-xl shadow-md">
-                <CalendarDays className="h-5 w-5" />
-              </div>
-              <span className="font-display font-extrabold text-xl tracking-tight text-foreground">EventFlow</span>
-            </div>
+            <Logo iconSize={32} />
             <p className="text-xs text-muted-foreground leading-relaxed max-w-xs">
               Centralized campus event management, live QR gate check-ins, volunteer tasking, and real-time attendance analytics.
             </p>
