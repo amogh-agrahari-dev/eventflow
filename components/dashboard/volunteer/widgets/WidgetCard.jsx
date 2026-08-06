@@ -2,15 +2,31 @@ import React from 'react';
 import clsx from 'clsx';
 import { motion } from 'framer-motion';
 
-export default function WidgetCard({ title, action, children, className }) {
+export default function WidgetCard({ title, action, children, className, delay = 0 }) {
   return (
-    <motion.div 
-      whileHover={{ y: -2, boxShadow: '0 20px 30px -10px rgba(0, 0, 0, 0.5)' }}
-      className={clsx("bg-vol-card rounded-2xl border border-vol-border overflow-hidden flex flex-col transition-all duration-300", className)}
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay }}
+      whileHover={{
+        y: -3,
+        transition: { duration: 0.25, ease: 'easeOut' }
+      }}
+      className={clsx(
+        "bg-vol-card rounded-2xl border border-vol-border overflow-hidden flex flex-col",
+        "transition-all duration-300",
+        "hover:border-vol-accent/40 hover:shadow-card-lift",
+        "group/widget",
+        className
+      )}
     >
       {(title || action) && (
         <div className="px-5 py-4 flex items-center justify-between border-b border-vol-border/30">
-          {title && <h2 className="text-base font-semibold text-white">{title}</h2>}
+          {title && (
+            <h2 className="text-base font-semibold text-white flex items-center gap-2">
+              {title}
+            </h2>
+          )}
           {action && <div>{action}</div>}
         </div>
       )}

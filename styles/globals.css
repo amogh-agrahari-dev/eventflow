@@ -216,3 +216,46 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Custom Scrollbar for Dashboard Panels */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #1C2333;
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #2A3140;
+}
+
+/* Ticket Carousel — Horizontal Scroll Snap */
+.ticket-carousel {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.ticket-carousel::-webkit-scrollbar {
+  display: none;
+}
+.ticket-carousel > * {
+  scroll-snap-align: start;
+}
+
+/* Shimmer Gradient Utility */
+.shimmer-gradient {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 45%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 55%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+}
+
