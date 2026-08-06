@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Responsive as ResponsiveGridLayout } from 'react-grid-layout';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useUserStore } from '@/store/userStore';
 import { getToken } from '@/lib/auth';
 import {
@@ -30,8 +31,6 @@ function AutoWidthGrid(props) {
     </div>
   );
 }
-
-
 const WIDGETS = [
   { id: 'upcoming-events', title: 'Upcoming Events' },
   { id: 'volunteer-assignments', title: 'Volunteer Assignments' },
@@ -65,8 +64,11 @@ export default function OrganizerDashboard() {
   const [showCustomizePanel, setShowCustomizePanel] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState(2);
 
-  const { user, fetchUser } = useUserStore();
+  const router = useRouter();
+  const { user, fetchUser, logout } = useUserStore();
   const token = getToken();
 
   useEffect(() => {
@@ -86,6 +88,19 @@ export default function OrganizerDashboard() {
       console.error("Could not load layout from local storage", e);
     }
   }, []);
+
+  useEffect(() => {
+    if (!isProfileMenuOpen) return;
+
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('[data-profile-menu]')) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isProfileMenuOpen]);
 
   const handleLayoutChange = (layout, allLayouts) => {
     setLayouts(allLayouts);
@@ -127,6 +142,12 @@ export default function OrganizerDashboard() {
     setVisibleWidgets(new Set(WIDGETS.map(w => w.id)));
     localStorage.removeItem('organizer_layout');
     localStorage.removeItem('organizer_visible');
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsProfileMenuOpen(false);
+    router.push('/auth/login');
   };
 
   // Do not render the grid until client-side hydration is complete to avoid layout mismatch
@@ -296,8 +317,25 @@ export default function OrganizerDashboard() {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-[#161B23]" />
             </button>
 
-            <div className="w-8 h-8 rounded-full bg-[#6E56CF] cursor-pointer shadow-sm border border-[#2A3140] flex items-center justify-center text-white text-[11px] font-bold">
-              {user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase() : "U"}
+            <div className="relative" data-profile-menu>
+              <button
+                onClick={() => setIsProfileMenuOpen(prev => !prev)}
+                className="w-8 h-8 rounded-full bg-[#6E56CF] cursor-pointer shadow-sm border border-[#2A3140] flex items-center justify-center text-white text-[11px] font-bold"
+              >
+                {user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase() : "U"}
+              </button>
+
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 mt-2 w-44 bg-[#11141A] border border-[#2A3140] rounded-xl shadow-xl py-2 z-50">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-300 hover:bg-[#1C202B] hover:text-white transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -319,7 +357,7 @@ export default function OrganizerDashboard() {
           >
             {DEFAULT_LAYOUT.filter(l => visibleWidgets.has(l.i)).map(l => (
               <div key={l.i} className="flex flex-col h-full w-full bg-transparent">
-                {renderWidget(l.i)}
+                {renderWidget(l.i, selectedEventId, setSelectedEventId)}
               </div>
             ))}
           </AutoWidthGrid>
@@ -378,18 +416,18 @@ export default function OrganizerDashboard() {
 }
 
 /* WIDGET RENDERER */
-function renderWidget(id) {
+function renderWidget(id, selectedEventId, setSelectedEventId) {
   switch (id) {
     case 'upcoming-events':
-      return <UpcomingEventsWidget />;
+      return <UpcomingEventsWidget selectedEventId={selectedEventId} onSelectEvent={setSelectedEventId} />;
     case 'volunteer-assignments':
-      return <VolunteerAssignmentsWidget />;
+      return <VolunteerAssignmentsWidget selectedEventId={selectedEventId} />;
     case 'live-performance':
       return <LivePerformanceWidget />;
     case 'live-checkin':
       return <LiveCheckInWidget />;
     case 'volunteer-central':
-      return <VolunteerCentralWidget />;
+      return <VolunteerCentralWidget selectedEventId={selectedEventId} />;
     case 'event-analytics':
       return <EventAnalyticsWidget />;
     case 'recent-registrations':
@@ -409,7 +447,7 @@ function renderWidget(id) {
 /* WIDGET COMPONENTS */
 /* -------------------------------------------------------------------------- */
 
-function UpcomingEventsWidget() {
+function UpcomingEventsWidget({ selectedEventId, onSelectEvent }) {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const { user } = useUserStore();
 
@@ -452,16 +490,28 @@ function UpcomingEventsWidget() {
   return (
     <Card title="Upcoming Events" action={<Badge>Preparing ▾</Badge>}>
       <div className="space-y-3 mt-1 flex-1 overflow-y-auto no-scrollbar">
-        {upcomingEvents?.map((event, i) => (
-          <EventItem
-            key={event?.id || i}
-            title={event?.title}
-            date={formatDate(event?.start_time)}
-            reg={`${event?.max_attendees || 0} regs`}
-            vol={event?.volunteers_required}
-            color={['bg-indigo-500', 'bg-emerald-500', 'bg-orange-500', 'bg-pink-500'][i % 4]}
-          />
-        ))}
+        {upcomingEvents?.map((event, i) => {
+          const eventId = event?.id ?? event?.event_id;
+          const isSelected = Number(selectedEventId) === Number(eventId);
+
+          return (
+            <div key={eventId || i} className="space-y-2">
+              <EventItem
+                title={event?.title}
+                date={formatDate(event?.start_time)}
+                reg={`${event?.max_attendees || 0} regs`}
+                vol={event?.volunteers_required}
+                color={['bg-indigo-500', 'bg-emerald-500', 'bg-orange-500', 'bg-pink-500'][i % 4]}
+              />
+              <button
+                onClick={() => onSelectEvent?.(eventId)}
+                className={`w-full rounded-lg border px-3 py-2 text-xs font-semibold transition-colors ${isSelected ? 'border-[#00E5FF] bg-[#00E5FF]/10 text-[#00E5FF]' : 'border-[#2A3140] bg-[#11141A] text-slate-300 hover:bg-[#1C202B] hover:text-white'}`}
+              >
+                {isSelected ? 'Selected' : 'Select'}
+              </button>
+            </div>
+          );
+        })}
       </div>
       <button className="w-full mt-4 bg-[#6E56CF]/20 text-[#00E5FF] hover:bg-[#6E56CF] hover:text-white py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1 shrink-0">
         View Details <ChevronRight className="w-4 h-4" />
@@ -470,18 +520,36 @@ function UpcomingEventsWidget() {
   );
 }
 
-function VolunteerAssignmentsWidget() {
+function VolunteerAssignmentsWidget({ selectedEventId }) {
+  const [tasks, setTasks] = useState([]);
+  const getTasks = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/tasks/${selectedEventId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      setTasks(data);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  };
+
+  useEffect(() => {
+    getTasks();
+  }, []);
+
   return (
-    <Card title="Volunteer Assignments" action={<Badge color="emerald">Active ▾</Badge>}>
+    <Card title="Volunteer Tasks" action={<Badge color="emerald">Active ▾</Badge>}>
       <div className="flex justify-between text-xs text-slate-500 mb-2 px-1 shrink-0">
         <span>Events</span>
       </div>
       <div className="space-y-3 flex-1 overflow-y-auto no-scrollbar">
-        <AssignmentItem name="Alex Chen" role="Team Volunteer" />
-        <AssignmentItem name="Maria Nones" role="Team Volunteer" />
-        <AssignmentItem name="Alex Chen" role="Team Volunteer" />
-        <AssignmentItem name="Maria Namies" role="Team Volunteer" />
-        <AssignmentItem name="Alex Chen" role="Team Volunteer" />
+        {tasks.map((task) => (
+          <AssignmentItem key={task.id} name={task?.title} role={task?.status} />
+        ))}
       </div>
     </Card>
   );
@@ -537,7 +605,27 @@ function LiveCheckInWidget() {
   );
 }
 
-function VolunteerCentralWidget() {
+function VolunteerCentralWidget({ selectedEventId }) {
+  const [volunteers, setVolunteers] = useState([]);
+  const getVolunteers = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/${selectedEventId}/volunteers`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      setVolunteers(data);
+      console.log(data);
+      
+    } catch (error) {
+      console.error("Error fetching volunteers:", error);
+    }
+  };
+  useEffect(() => {
+    getVolunteers();
+  }, [selectedEventId]);
   return (
     <Card title="Volunteer Central" action={<span className="text-xs text-slate-400">Antoniss ▾</span>}>
       <div className="grid grid-cols-12 text-[10px] text-slate-500 mb-2 px-1 shrink-0">
@@ -546,10 +634,15 @@ function VolunteerCentralWidget() {
         <span className="col-span-2 text-right">Status</span>
       </div>
       <div className="space-y-3 flex-1 overflow-y-auto no-scrollbar">
-        <CentralItem name="Alex Chen" event="Spring Gala 2024" stat="Assign" color="emerald" />
-        <CentralItem name="Maria Nones" event="Tech Symposium" stat="Assign" color="emerald" />
-        <CentralItem name="Maria Namies" event="NGO Symposium" stat="Assign" color="emerald" />
-        <CentralItem name="Alex Chen" event="NGO Events" stat="Status" color="red" />
+        {volunteers.map((volunteer, i) => (
+          <CentralItem
+            key={volunteer.id || i}
+            name={volunteer.name}
+            event={selectedEventId}
+            stat={volunteer.status}
+            color={volunteer.status === 'on-duty' ? 'bg-emerald-500' : volunteer.status === 'inactive' ? 'bg-yellow-500' : 'bg-slate-500'}
+          />
+        ))}
       </div>
       <div className="mt-4 flex gap-2 shrink-0">
         <button className="flex-1 bg-[#6E56CF]/20 text-[#00E5FF] hover:bg-[#6E56CF] hover:text-white py-1.5 rounded-lg text-xs font-medium transition-colors">Chat</button>
@@ -625,29 +718,42 @@ function EventAnalyticsWidget() {
 }
 
 function RecentRegistrationsWidget() {
+  const [registrations, setRegistrations] = useState([]);
+  
+  const fetchRegistrations = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/attendence/${SELECTED_EVENT}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      setRegistrations(data);
+    } catch (error) {
+      console.error("Error fetching registrations:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRegistrations();
+  }, []);
   return (
-    <Card title="Recent Registrations">
+    <Card title="Recent Attendences" action={<Badge color="emerald">Active ▾</Badge>}>
       <div className="mt-2 space-y-3 flex-1 overflow-y-auto no-scrollbar">
-        <div className="flex items-center justify-between p-2 rounded-lg hover:bg-[#11141A] transition-colors group cursor-pointer border border-transparent hover:border-[#2A3140]">
-          <div className="flex items-center gap-3">
-            <div className="p-1.5 bg-[#6E56CF]/20 rounded-md text-[#6E56CF]"><History className="w-3.5 h-3.5" /></div>
-            <div>
-              <p className="text-xs font-bold text-white group-hover:text-[#00E5FF] transition-colors">Spring Gala 2024</p>
-              <p className="text-[10px] text-slate-500">Active registrations</p>
-            </div>
-          </div>
-          <ChevronRight className="w-4 h-4 text-slate-600" />
-        </div>
-        <div className="flex items-center justify-between p-2 rounded-lg hover:bg-[#11141A] transition-colors group cursor-pointer border border-transparent hover:border-[#2A3140]">
+        {registrations.map((reg, i) => (
+          <div className="flex items-center justify-between p-2 rounded-lg hover:bg-[#11141A] transition-colors group cursor-pointer border border-transparent hover:border-[#2A3140]">
           <div className="flex items-center gap-3">
             <div className="p-1.5 bg-[#1C202B] rounded-md text-slate-400 border border-[#2A3140]"><ClipboardList className="w-3.5 h-3.5" /></div>
             <div>
-              <p className="text-xs font-bold text-white group-hover:text-[#00E5FF] transition-colors">Draft event "Global Summit"</p>
-              <p className="text-[10px] text-slate-500">Team registration</p>
+              <p className="text-xs font-bold text-white group-hover:text-[#00E5FF] transition-colors">{reg?.user?.name}</p>
+              
+              <div className="text-[10px] text-slate-400">{new Date(reg?.created_at).toLocaleDateString()}</div>
             </div>
           </div>
-          <ChevronRight className="w-4 h-4 text-slate-600" />
+          <p className="text-[10px] text-emerald-500">{reg?.status}</p>
         </div>
+        ))}
       </div>
     </Card>
   );
@@ -809,14 +915,14 @@ function CentralItem({ name, event, stat, color }) {
           <p className="text-[9px] text-slate-500 truncate">Volunteer</p>
         </div>
       </div>
-      <div className="col-span-5 min-w-0">
+      <div className="col-span-3 min-w-0">
         <p className="text-slate-300 truncate">{event}</p>
-        <p className="text-[9px] text-slate-500 truncate">Mon 3 regs, 52 vol</p>
+        {/* <p className="text-[9px] text-slate-500 truncate">Mon 3 regs, 52 vol</p> */}
       </div>
-      <div className="col-span-2 text-right">
-        <span className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full font-medium ${color === 'emerald' ? 'bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+      <div className="col-span-4 text-right">
+        <span className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full font-medium ${stat === 'on-duty' ? 'bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
           }`}>
-          <div className={`w-1 h-1 rounded-full ${color === 'emerald' ? 'bg-[#00E5FF]' : 'bg-rose-400'}`} /> {stat}
+          <div className={`w-1 h-1 rounded-full ${stat === 'on-duty' ? 'bg-[#00E5FF]' : 'bg-rose-400'}`} /> {stat}
         </span>
       </div>
     </div>
