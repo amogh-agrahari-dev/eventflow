@@ -1,7 +1,10 @@
 import React from 'react';
-import { Menu, Search, Plus, Settings2, Bell } from 'lucide-react';
+import { Menu, Search, Plus, SlidersHorizontal, Bell } from 'lucide-react';
+import { useUserStore } from '@/store/userStore';
 
 export default function AttendeeHeader({ toggleSidebar }) {
+  const { user } = useUserStore();
+
   return (
     <header className="h-[72px] shrink-0 border-b border-vol-border/50 bg-vol-bg/95 backdrop-blur z-10 flex items-center justify-between px-6 sticky top-0">
       <div className="flex items-center gap-4">
@@ -30,7 +33,7 @@ export default function AttendeeHeader({ toggleSidebar }) {
         </button>
 
         <button className="flex items-center gap-2 bg-vol-card hover:bg-vol-card/80 border border-vol-border text-gray-200 px-4 py-2 rounded-full text-sm font-medium transition-colors hidden sm:flex">
-          <Settings2 size={16} />
+          <SlidersHorizontal size={16} />
           <span>Customize</span>
         </button>
 
@@ -39,9 +42,9 @@ export default function AttendeeHeader({ toggleSidebar }) {
           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-vol-warning border-2 border-vol-bg"></span>
         </button>
 
-        <button className="w-8 h-8 rounded-full bg-vol-accent/20 border border-vol-accent2/30 flex items-center justify-center text-vol-accent2 font-semibold text-sm hover:bg-vol-accent/30 transition-colors">
-          AT
-        </button>
+        <div className="w-8 h-8 rounded-full bg-vol-accent/20 border border-vol-accent2/30 flex items-center justify-center text-vol-accent2 font-semibold text-sm hover:bg-vol-accent/30 transition-colors cursor-pointer">
+          {user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase() : "AT"}
+        </div>
       </div>
     </header>
   );

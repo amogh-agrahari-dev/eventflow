@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import Link from 'next/link';
+import Logo from '@/components/general/Logo';
 
 const menuSections = [
   {
@@ -60,15 +61,14 @@ export default function AttendeeSidebar({ isCollapsed }) {
       initial={false}
       animate={{ width: isCollapsed ? 80 : 260 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="h-screen bg-vol-bg border-r border-vol-border flex flex-col hidden md:flex sticky top-0 overflow-y-auto overflow-x-hidden"
+      className="h-screen bg-vol-bg border-r border-vol-border flex flex-col hidden md:flex sticky top-0 overflow-y-auto overflow-x-hidden custom-scrollbar"
     >
-      <div className="p-4 flex items-center h-[72px] shrink-0 border-b border-vol-border/50">
-        <div className="flex items-center gap-3 text-white font-bold text-xl px-2">
-          <div className="w-8 h-8 rounded bg-vol-accent flex items-center justify-center shrink-0">
-            <span className="text-sm">AT</span>
-          </div>
-          {!isCollapsed && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="whitespace-nowrap">EventFlow</motion.span>}
-        </div>
+      <div className="h-[72px] px-6 flex items-center border-b border-vol-border/50 shrink-0">
+        {isCollapsed ? (
+          <Logo iconSize={28} textClassName="hidden" />
+        ) : (
+          <Logo iconSize={28} />
+        )}
       </div>
 
       <div className="flex-1 py-6 flex flex-col gap-6">

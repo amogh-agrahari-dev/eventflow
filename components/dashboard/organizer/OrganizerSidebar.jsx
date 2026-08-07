@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import Link from 'next/link';
+import Logo from '@/components/general/Logo';
 
 const menuSections = [
   {
@@ -67,18 +68,17 @@ export default function OrganizerSidebar({ isCollapsed }) {
       transition={{ duration: 0.3, ease: 'easeInOut' }}
       className="h-screen bg-vol-bg border-r border-vol-border flex flex-col hidden md:flex sticky top-0 overflow-y-auto overflow-x-hidden custom-scrollbar"
     >
-      <div className="p-4 flex items-center h-[72px] shrink-0 border-b border-vol-border/50">
-        <div className="flex items-center gap-3 text-white font-bold text-xl px-2">
-          <div className="w-8 h-8 rounded-full bg-vol-accent flex items-center justify-center shrink-0">
-            <span className="text-sm">E</span>
-          </div>
-          {!isCollapsed && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="whitespace-nowrap">EventFlow</motion.span>}
-        </div>
+      <div className="h-[72px] px-6 flex items-center border-b border-vol-border/50 shrink-0">
+        {isCollapsed ? (
+          <Logo iconSize={28} textClassName="hidden" />
+        ) : (
+          <Logo iconSize={28} />
+        )}
       </div>
 
       <div className="flex-1 py-6 flex flex-col gap-6">
         <div className="px-4">
-          <Link href="/dashboard" className={clsx("flex items-center gap-3 px-3 py-2.5 rounded-lg bg-vol-accent/10 border border-vol-accent2/30 text-white transition-colors", isCollapsed && "justify-center")}>
+          <Link href="/organiser-dashboard" className={clsx("flex items-center gap-3 px-3 py-2.5 rounded-lg bg-vol-accent/10 border border-vol-accent2/30 text-white transition-colors", isCollapsed && "justify-center")}>
             <LayoutDashboard size={20} className="shrink-0 text-vol-accent2" />
             {!isCollapsed && <span className="font-medium whitespace-nowrap">Dashboard</span>}
           </Link>

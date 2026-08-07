@@ -33,6 +33,7 @@ function AutoWidthGrid(props) {
     </div>
   );
 }
+
 const WIDGETS = [
   { id: 'upcoming-events', title: 'Upcoming Events' },
   { id: 'volunteer-assignments', title: 'Volunteer Assignments' },
@@ -125,7 +126,6 @@ export default function OrganizerDashboard() {
             if (!layoutArr.find(item => item.i === id)) {
               const defaultItem = DEFAULT_LAYOUT.find(item => item.i === id);
               if (defaultItem) {
-                // Push to bottom (y: Infinity is supported by react-grid-layout to append)
                 newLayouts[breakpoint] = [...layoutArr, { ...defaultItem, y: Infinity }];
               }
             }
@@ -154,16 +154,16 @@ export default function OrganizerDashboard() {
 
   // Do not render the grid until client-side hydration is complete to avoid layout mismatch
   if (!isMounted) {
-    return <div className="h-screen bg-[#1c1f26]"></div>;
+    return <div className="h-screen bg-vol-bg"></div>;
   }
 
   return (
-    <div className="flex h-screen bg-[#161B23] text-slate-300 font-sans overflow-hidden selection:bg-[#6E56CF]/30">
+    <div className="flex h-screen bg-vol-bg text-slate-300 font-sans overflow-hidden selection:bg-vol-accent2/30">
 
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -172,68 +172,70 @@ export default function OrganizerDashboard() {
       <Sidebar isMobileMenuOpen={isMobileMenuOpen} isDesktopSidebarCollapsed={isDesktopSidebarCollapsed} />
 
       {/* 2. Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-[#161B23]">
+      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-vol-bg">
 
         {/* Top Header */}
-        <header className="h-[68px] flex items-center justify-between px-4 md:px-8 bg-[#161B23]/80 backdrop-blur-sm border-b border-[#1C202B] z-10 flex-shrink-0">
-          <div className="flex items-center gap-3">
+        <header className="h-[72px] shrink-0 border-b border-vol-border/50 bg-vol-bg/95 backdrop-blur z-10 flex items-center justify-between px-6 sticky top-0">
+          <div className="flex items-center gap-4">
             <button
-              className="md:hidden text-slate-400 hover:text-white transition-colors"
+              className="md:hidden p-2 -ml-2 rounded-lg text-gray-400 hover:text-white hover:bg-vol-card transition-colors"
               onClick={() => setIsMobileMenuOpen(true)}
             >
-              <Menu className="w-5 h-5" />
+              <Menu size={20} />
             </button>
             <button
-              className="hidden md:block text-slate-400 hover:text-white transition-colors"
+              className="hidden md:block p-2 -ml-2 rounded-lg text-gray-400 hover:text-white hover:bg-vol-card transition-colors"
               onClick={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
             >
-              <Menu className="w-5 h-5" />
+              <Menu size={20} />
             </button>
-            <h1 className="text-[22px] font-medium text-white truncate">
-              {user?.name ? `${user.name}'s Dashboard` : "Dashboard"}
+            <h1 className="text-xl font-semibold text-white tracking-tight truncate">
+              {user?.name ? `${user.name}'s Dashboard` : "Organizer Dashboard"}
             </h1>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end min-w-0">
-            <div className="relative w-full max-w-[200px] md:w-64 hidden sm:block">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#5A6B8A]" />
+          <div className="flex items-center gap-4">
+            <div className="relative hidden md:block">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search..."
-                className="w-full bg-[#11141A] border border-[#2A3140] rounded-full py-2 pl-9 pr-4 text-[13px] text-white focus:outline-none focus:border-[#6E56CF]/50 transition-colors placeholder:text-[#5A6B8A]"
+                placeholder="Search events, tasks..."
+                className="w-64 bg-vol-card border border-vol-border rounded-full py-2 pl-9 pr-4 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-vol-accent2/50 transition-colors"
               />
             </div>
 
-            <button className="flex items-center gap-2 bg-[#6E56CF] hover:bg-[#5a46aa] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-[0_0_15px_rgba(79,70,229,0.3)]">
-              <Plus className="w-4 h-4" /> Quick-Add
+            <button className="flex items-center gap-2 bg-vol-accent hover:bg-vol-accent2 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-glow-lg">
+              <Plus size={16} />
+              <span>Quick-Add</span>
             </button>
 
             {/* Customize Dashboard Button */}
             <button
               onClick={() => setShowCustomizePanel(true)}
-              className="flex items-center gap-2 bg-[#11141A] border border-[#2A3140] hover:bg-[#1C202B] text-slate-300 px-3 md:px-4 py-2 rounded-full text-xs md:text-sm font-medium transition-colors whitespace-nowrap"
+              className="flex items-center gap-2 bg-vol-card hover:bg-vol-card/80 border border-vol-border text-gray-200 px-4 py-2 rounded-full text-sm font-medium transition-colors hidden sm:flex"
             >
-              <SlidersHorizontal className="w-4 h-4" /> <span className="hidden sm:inline">Customize</span>
+              <SlidersHorizontal size={16} />
+              <span>Customize</span>
             </button>
 
-            <button className="relative p-2 text-[#5A6B8A] hover:text-white transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-[#161B23]" />
+            <button className="relative p-2 rounded-full text-gray-400 hover:text-white hover:bg-vol-card transition-colors">
+              <Bell size={20} />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-vol-warning border-2 border-vol-bg" />
             </button>
 
             <div className="relative" data-profile-menu>
-              <button
+              <div
                 onClick={() => setIsProfileMenuOpen(prev => !prev)}
-                className="w-8 h-8 rounded-full bg-[#6E56CF] cursor-pointer shadow-sm border border-[#2A3140] flex items-center justify-center text-white text-[11px] font-bold"
+                className="w-8 h-8 rounded-full bg-vol-accent/20 border border-vol-accent2/30 flex items-center justify-center text-vol-accent2 font-semibold text-sm hover:bg-vol-accent/30 transition-colors cursor-pointer"
               >
-                {user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase() : "U"}
-              </button>
+                {user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase() : "OR"}
+              </div>
 
               {isProfileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-44 bg-[#11141A] border border-[#2A3140] rounded-xl shadow-xl py-2 z-50">
+                <div className="absolute right-0 mt-3 w-48 bg-vol-card border border-vol-border rounded-2xl shadow-xl py-2 z-50">
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-300 hover:bg-[#1C202B] hover:text-white transition-colors"
+                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-300 hover:bg-vol-border/30 hover:text-white transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
                     Logout
@@ -245,16 +247,16 @@ export default function OrganizerDashboard() {
         </header>
 
         {/* Dashboard Grid Content */}
-        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar relative flex flex-col">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 custom-scrollbar scroll-smooth relative flex flex-col">
           <AutoWidthGrid
             className="layout"
             layouts={layouts}
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
             cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-            rowHeight={90}
+            rowHeight={95}
             onLayoutChange={handleLayoutChange}
             draggableHandle=".drag-handle"
-            margin={[20, 20]}
+            margin={[24, 24]}
             isResizable={true}
             isDraggable={true}
             resizeHandles={['s', 'w', 'e', 'n', 'sw', 'nw', 'se', 'ne']}
@@ -267,48 +269,41 @@ export default function OrganizerDashboard() {
           </AutoWidthGrid>
         </div>
 
-        {/* Fixed Footer */}
-        <div className="absolute bottom-4 right-6 flex items-center gap-3 text-[10px] text-slate-500 bg-[#161B23]/80 backdrop-blur px-4 py-1.5 rounded-full border border-[#2A3140] shadow-lg z-10">
-          <span className="hover:text-slate-300 cursor-pointer transition-colors">Help Center</span>
-          <span className="w-px h-3 bg-slate-600"></span>
-          <span className="hover:text-slate-300 cursor-pointer transition-colors">API Docs</span>
-        </div>
-
         {/* Customize Panel Overlay */}
         {showCustomizePanel && (
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={() => setShowCustomizePanel(false)} />
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={() => setShowCustomizePanel(false)} />
         )}
 
         {/* Customize Panel */}
-        <div className={`absolute top-0 right-0 h-full w-80 bg-[#11141A] border-l border-[#2A3140] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${showCustomizePanel ? 'translate-x-0' : 'translate-x-full'}`}>
-          <div className="flex items-center justify-between p-4 border-b border-[#2A3140]">
-            <h2 className="text-[15px] font-medium text-white">Customize Layout</h2>
-            <button onClick={() => setShowCustomizePanel(false)} className="text-[#8F9BB3] hover:text-white">
+        <div className={`fixed top-0 right-0 h-full w-80 md:w-96 bg-vol-card border-l border-vol-border shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${showCustomizePanel ? 'translate-x-0' : 'translate-x-full'}`}>
+          <div className="flex items-center justify-between p-5 border-b border-vol-border/40">
+            <h2 className="text-base font-semibold text-white">Customize Layout</h2>
+            <button onClick={() => setShowCustomizePanel(false)} className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-vol-border/30 transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
-            <p className="text-xs text-slate-400 mb-2">Toggle widgets to show or hide them from your dashboard. Drag by headers to rearrange.</p>
+          <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-3 custom-scrollbar">
+            <p className="text-xs text-gray-400 mb-2">Toggle widgets to show or hide them from your dashboard. Drag cards by their headers to rearrange.</p>
 
             {WIDGETS.map(widget => (
               <label
                 key={widget.id}
                 onClick={(e) => { e.preventDefault(); toggleWidget(widget.id); }}
-                className="flex items-center justify-between p-3 rounded-lg border border-[#2A3140] hover:bg-[#1C202B] cursor-pointer transition-colors group"
+                className="flex items-center justify-between p-3.5 rounded-xl border border-vol-border bg-vol-bg/60 hover:bg-vol-border/20 cursor-pointer transition-all group"
               >
-                <span className="text-sm font-medium text-slate-300 group-hover:text-white">{widget.title}</span>
-                <div className={`w-10 h-5 rounded-full transition-colors relative ${visibleWidgets.has(widget.id) ? 'bg-emerald-500' : 'bg-slate-700'}`}>
+                <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">{widget.title}</span>
+                <div className={`w-10 h-5 rounded-full transition-colors relative ${visibleWidgets.has(widget.id) ? 'bg-vol-success' : 'bg-vol-border'}`}>
                   <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${visibleWidgets.has(widget.id) ? 'left-6' : 'left-1'}`} />
                 </div>
               </label>
             ))}
           </div>
 
-          <div className="p-4 border-t border-[#2A3140]">
+          <div className="p-5 border-t border-vol-border/40">
             <button
               onClick={resetDashboard}
-              className="w-full bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white py-2 rounded-lg text-sm font-semibold transition-colors"
+              className="w-full bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all border border-rose-500/20"
             >
               Reset to Default Layout
             </button>
@@ -335,7 +330,7 @@ function renderWidget(id, selectedEventId, setSelectedEventId) {
     case 'event-analytics':
       return <EventAnalyticsWidget />;
     case 'recent-registrations':
-      return <RecentRegistrationsWidget />;
+      return <RecentRegistrationsWidget selectedEventId={selectedEventId} />;
     case 'team-members':
       return <TeamMembersWidget />;
     case 'recent-activities':
@@ -365,7 +360,6 @@ function UpcomingEventsWidget({ selectedEventId, onSelectEvent }) {
         },
       });
       const data = await response.json();
-      console.log(data)
       if (Array.isArray(data)) {
         setUpcomingEvents(data.slice(0, 4));
       } else if (data && data.success && Array.isArray(data.events)) {
@@ -393,7 +387,7 @@ function UpcomingEventsWidget({ selectedEventId, onSelectEvent }) {
 
   return (
     <Card title="Upcoming Events" action={<Badge>Preparing ▾</Badge>}>
-      <div className="space-y-3 mt-1 flex-1 overflow-y-auto no-scrollbar">
+      <div className="space-y-3 flex-1 overflow-y-auto custom-scrollbar">
         {upcomingEvents?.map((event, i) => {
           const eventId = event?.id ?? event?.event_id;
           const isSelected = Number(selectedEventId) === Number(eventId);
@@ -403,22 +397,27 @@ function UpcomingEventsWidget({ selectedEventId, onSelectEvent }) {
               <EventItem
                 title={event?.title}
                 date={formatDate(event?.start_time)}
-                reg={`${event?.max_attendees || 0} regs`}
-                vol={event?.volunteers_required}
-                color={['bg-indigo-500', 'bg-emerald-500', 'bg-orange-500', 'bg-pink-500'][i % 4]}
+                reg={`${event?.max_attendees || 0} registered`}
+                vol={`${event?.volunteers_required || 0} volunteers`}
+                color={['bg-gradient-to-br from-indigo-500 to-purple-600', 'bg-gradient-to-br from-emerald-500 to-teal-700', 'bg-gradient-to-br from-orange-500 to-amber-700', 'bg-gradient-to-br from-pink-500 to-rose-700'][i % 4]}
+                isActive={isSelected}
               />
               <button
                 onClick={() => onSelectEvent?.(eventId)}
-                className={`w-full rounded-lg border px-3 py-2 text-xs font-semibold transition-colors ${isSelected ? 'border-[#00E5FF] bg-[#00E5FF]/10 text-[#00E5FF]' : 'border-[#2A3140] bg-[#11141A] text-slate-300 hover:bg-[#1C202B] hover:text-white'}`}
+                className={`w-full rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
+                  isSelected 
+                    ? 'border-vol-accent2/50 bg-vol-accent2/10 text-vol-accent2 shadow-sm' 
+                    : 'border-vol-border bg-vol-bg/60 text-gray-300 hover:bg-vol-border/40 hover:text-white'
+                }`}
               >
-                {isSelected ? 'Selected' : 'Select'}
+                {isSelected ? 'Selected Event' : 'Select Event'}
               </button>
             </div>
           );
         })}
       </div>
-      <button className="w-full mt-4 bg-[#6E56CF]/20 text-[#00E5FF] hover:bg-[#6E56CF] hover:text-white py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1 shrink-0">
-        View Details <ChevronRight className="w-4 h-4" />
+      <button className="w-full mt-2 py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent flex items-center justify-center gap-1.5 shrink-0">
+        View All Events <ChevronRight className="w-4 h-4" />
       </button>
     </Card>
   );
@@ -428,14 +427,16 @@ function VolunteerAssignmentsWidget({ selectedEventId }) {
   const [tasks, setTasks] = useState([]);
   const getTasks = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/tasks/${selectedEventId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/tasks/${selectedEventId || 2}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
       const data = await response.json();
-      setTasks(data);
+      if (Array.isArray(data)) {
+        setTasks(data);
+      }
     } catch (error) {
       console.error("Error fetching tasks:", error);
     }
@@ -443,40 +444,48 @@ function VolunteerAssignmentsWidget({ selectedEventId }) {
 
   useEffect(() => {
     getTasks();
-  }, []);
+  }, [selectedEventId]);
 
   return (
     <Card title="Volunteer Tasks" action={<Badge color="emerald">Active ▾</Badge>}>
-      <div className="flex justify-between text-xs text-slate-500 mb-2 px-1 shrink-0">
-        <span>Events</span>
+      <div className="flex justify-between text-xs text-gray-500 mb-1 px-1 shrink-0 font-medium">
+        <span>Assigned Tasks</span>
+        <span>Status</span>
       </div>
-      <div className="space-y-3 flex-1 overflow-y-auto no-scrollbar">
+      <div className="space-y-2 flex-1 overflow-y-auto custom-scrollbar">
         {tasks.map((task) => (
-          <AssignmentItem key={task.id} name={task?.title} role={task?.status} />
+          <AssignmentItem key={task.id} name={task?.title} role={task?.status || "In Progress"} />
         ))}
       </div>
+      <button className="w-full mt-2 py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent flex items-center justify-center gap-1.5 shrink-0">
+        Manage Tasks <ChevronRight className="w-4 h-4" />
+      </button>
     </Card>
   );
 }
 
 function LivePerformanceWidget() {
   return (
-    <Card title="Live Performance Hub" action={<MoreHorizontal className="w-4 h-4 text-slate-500" />}>
-      <div className="mt-2 flex justify-between items-end">
+    <Card title="Live Performance Hub" action={<Badge color="emerald">Live ▾</Badge>}>
+      <div className="flex justify-between items-end">
         <div>
-          <p className="text-xs text-slate-400 mb-1">Live Attendance Counter</p>
-          <div className="text-3xl font-bold text-white flex items-baseline gap-1">
-            2,354 <span className="text-xs text-slate-400 font-normal">attendees</span>
+          <p className="text-xs text-gray-400 mb-1">Live Attendance Counter</p>
+          <div className="text-3xl font-bold text-white tracking-tight flex items-baseline gap-1.5">
+            2,354 <span className="text-xs text-gray-400 font-normal">attendees</span>
           </div>
         </div>
-        <div className="w-20 h-8 flex items-end justify-between gap-0.5">
+        <div className="w-20 h-10 flex items-end justify-between gap-1">
           {[3, 5, 4, 7, 5, 8, 6].map((h, i) => (
-            <div key={i} className="w-full bg-emerald-500/50 rounded-t-sm" style={{ height: `${h}0%` }} />
+            <div key={i} className="w-full bg-gradient-to-t from-vol-accent/30 to-vol-accent2 rounded-t-sm" style={{ height: `${h}0%` }} />
           ))}
         </div>
       </div>
-      <div className="mt-3 text-[10px] text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 w-fit px-2 py-1 rounded shrink-0">
-        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> real-time sync
+      <div className="mt-4 text-xs text-vol-success font-medium flex items-center gap-1.5 bg-vol-success/10 border border-vol-success/20 w-fit px-3 py-1 rounded-full shrink-0">
+        <div className="w-1.5 h-1.5 rounded-full bg-vol-success animate-pulse" /> Real-time sync active
+      </div>
+      <div className="mt-auto pt-3 border-t border-vol-border/40 flex items-center justify-between text-xs text-gray-400">
+        <span>Capacity Target: 92%</span>
+        <span className="text-vol-accent2 font-semibold">Healthy</span>
       </div>
     </Card>
   );
@@ -484,24 +493,25 @@ function LivePerformanceWidget() {
 
 function LiveCheckInWidget() {
   return (
-    <Card title="Live Check-in feed" action={<Badge>Check-in ▾</Badge>}>
-      <div className="grid grid-cols-2 gap-4 mt-2 flex-1 overflow-hidden">
-        <div className="text-xs space-y-2 flex flex-col h-full overflow-y-auto no-scrollbar pr-2">
-          <div className="flex justify-between text-slate-500 mb-1 shrink-0">
-            <span>Feed</span><span>Status</span>
+    <Card title="Live Check-in Feed" action={<Badge>Check-in ▾</Badge>}>
+      <div className="grid grid-cols-2 gap-4 flex-1 overflow-hidden">
+        <div className="text-xs space-y-2 flex flex-col h-full overflow-y-auto custom-scrollbar pr-2">
+          <div className="flex justify-between text-gray-500 mb-1 shrink-0 text-xs font-semibold">
+            <span>Attendee</span><span>Status</span>
           </div>
           {['Alex Chen', 'Maria Nones', 'Jack Doe', 'Sarah Connor', 'Alex Chen'].map((name, i) => (
-            <div key={i} className="flex justify-between items-center text-[10px] shrink-0">
-              <span className="text-slate-300">{name}</span>
-              <span className="flex items-center gap-1 text-emerald-400"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Check-in</span>
+            <div key={i} className="flex justify-between items-center text-xs shrink-0 py-1 border-b border-vol-border/20 last:border-0">
+              <span className="text-gray-300 font-medium truncate">{name}</span>
+              <span className="flex items-center gap-1.5 text-vol-success font-medium text-[11px] shrink-0">
+                <div className="w-1.5 h-1.5 rounded-full bg-vol-success" /> Checked in
+              </span>
             </div>
           ))}
         </div>
-        <div className="bg-[#11141A] rounded-lg border border-[#2A3140] p-2 relative overflow-hidden flex items-center justify-center h-full min-h-[80px]">
-          <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-          <div className="w-[80%] h-[80%] border-2 border-slate-600 rounded bg-[#1C202B] transform rotate-12 relative">
-            <div className="absolute top-1/4 left-1/4 w-2 h-2 rounded-full bg-[#00E5FF] shadow-[0_0_8px_#00E5FF]" />
-            <div className="absolute bottom-1/4 right-1/4 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_#EF4444]" />
+        <div className="bg-vol-bg/60 rounded-xl border border-vol-border p-3 relative overflow-hidden flex items-center justify-center h-full min-h-[80px]">
+          <div className="w-[80%] h-[80%] border border-vol-border/60 rounded-xl bg-vol-card/80 transform rotate-6 relative shadow-inner flex flex-col items-center justify-center gap-1 p-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-vol-accent2 shadow-[0_0_10px_#00E5FF] mb-1" />
+            <span className="text-[10px] text-gray-400 font-mono">Gate A active</span>
           </div>
         </div>
       </div>
@@ -513,44 +523,50 @@ function VolunteerCentralWidget({ selectedEventId }) {
   const [volunteers, setVolunteers] = useState([]);
   const getVolunteers = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/${selectedEventId}/volunteers`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/${selectedEventId || 2}/volunteers`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
       const data = await response.json();
-      setVolunteers(data);
-      console.log(data);
-      
+      if (Array.isArray(data)) {
+        setVolunteers(data);
+      }
     } catch (error) {
       console.error("Error fetching volunteers:", error);
     }
   };
+
   useEffect(() => {
     getVolunteers();
   }, [selectedEventId]);
+
   return (
-    <Card title="Volunteer Central" action={<span className="text-xs text-slate-400">Antoniss ▾</span>}>
-      <div className="grid grid-cols-12 text-[10px] text-slate-500 mb-2 px-1 shrink-0">
-        <span className="col-span-5">Assignment</span>
-        <span className="col-span-5">Events</span>
-        <span className="col-span-2 text-right">Status</span>
+    <Card title="Volunteer Central" action={<Badge>On-Duty ▾</Badge>}>
+      <div className="grid grid-cols-12 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2 shrink-0">
+        <span className="col-span-5">Volunteer</span>
+        <span className="col-span-4">Assignment</span>
+        <span className="col-span-3 text-right">Status</span>
       </div>
-      <div className="space-y-3 flex-1 overflow-y-auto no-scrollbar">
+      <div className="space-y-1.5 flex-1 overflow-y-auto custom-scrollbar">
         {volunteers.map((volunteer, i) => (
           <CentralItem
             key={volunteer.id || i}
             name={volunteer.name}
-            event={selectedEventId}
-            stat={volunteer.status}
-            color={volunteer.status === 'on-duty' ? 'bg-emerald-500' : volunteer.status === 'inactive' ? 'bg-yellow-500' : 'bg-slate-500'}
+            event={selectedEventId ? `Event #${selectedEventId}` : "Main Hall"}
+            stat={volunteer.status || "on-duty"}
+            color={volunteer.status === 'on-duty' ? 'bg-vol-success' : volunteer.status === 'inactive' ? 'bg-vol-warning' : 'bg-gray-500'}
           />
         ))}
       </div>
-      <div className="mt-4 flex gap-2 shrink-0">
-        <button className="flex-1 bg-[#6E56CF]/20 text-[#00E5FF] hover:bg-[#6E56CF] hover:text-white py-1.5 rounded-lg text-xs font-medium transition-colors">Chat</button>
-        <button className="flex-1 bg-[#11141A] border border-[#2A3140] hover:bg-[#1C202B] text-slate-300 py-1.5 rounded-lg text-xs font-medium transition-colors">More ▾</button>
+      <div className="mt-2 flex gap-2 shrink-0">
+        <button className="flex-1 py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent flex items-center justify-center gap-1.5">
+          <MessageSquare className="w-4 h-4" /> Message
+        </button>
+        <button className="flex-1 py-2.5 rounded-lg bg-vol-card hover:bg-vol-card/80 text-gray-300 border border-vol-border text-sm font-medium transition-all hover:text-white">
+          Roster
+        </button>
       </div>
     </Card>
   );
@@ -558,62 +574,56 @@ function VolunteerCentralWidget({ selectedEventId }) {
 
 function EventAnalyticsWidget() {
   return (
-    <Card title="Event Analytics" action={<Badge color="emerald">Active ▾</Badge>}>
-      <div className="flex flex-wrap gap-6 mt-2 flex-1">
+    <Card title="Event Analytics" action={<Badge color="emerald">Realtime ▾</Badge>}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
         {/* Line Chart Area */}
-        <div className="flex flex-col flex-1 min-w-[200px]">
+        <div className="flex flex-col min-w-0">
           <p className="text-2xl font-bold text-white mb-0.5 shrink-0">2,354</p>
-          <p className="text-[10px] text-slate-400 mb-4 shrink-0">Maintenance Growth</p>
-          <p className="text-[10px] text-slate-500 mb-2 shrink-0">Attendance Growth Line Chart</p>
-          <div className="flex-1 min-h-[60px] w-full relative flex items-end border-l border-b border-[#2d323e] pl-1 pb-1">
-            <svg viewBox="0 0 100 50" className="w-full h-full preserve-3d overflow-visible" preserveAspectRatio="none">
-              <path d="M0,50 L0,40 C20,30 30,45 50,25 C70,5 80,20 100,10 L100,50 Z" fill="url(#grad)" opacity="0.4" />
-              <path d="M0,40 C20,30 30,45 50,25 C70,5 80,20 100,10" fill="none" stroke="#06B6D4" strokeWidth="2" />
+          <p className="text-xs text-gray-400 mb-2 shrink-0">Attendance Growth</p>
+          <div className="flex-1 min-h-[70px] w-full relative flex items-end border-l border-b border-vol-border/60 pl-1 pb-1">
+            <svg viewBox="0 0 100 50" className="w-full h-full overflow-visible" preserveAspectRatio="none">
+              <path d="M0,50 L0,40 C20,30 30,45 50,25 C70,5 80,20 100,10 L100,50 Z" fill="url(#grad)" opacity="0.25" />
+              <path d="M0,40 C20,30 30,45 50,25 C70,5 80,20 100,10" fill="none" stroke="#00E5FF" strokeWidth="2.5" />
               <defs>
                 <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#06B6D4" />
+                  <stop offset="0%" stopColor="#00E5FF" />
                   <stop offset="100%" stopColor="transparent" />
                 </linearGradient>
               </defs>
             </svg>
-            <div className="absolute -left-5 bottom-0 h-full flex flex-col justify-between text-[8px] text-slate-600">
-              <span>100</span><span>50</span><span>20</span><span>0</span>
-            </div>
-            <div className="absolute -bottom-4 left-0 w-full flex justify-between text-[8px] text-slate-600">
-              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span>
-            </div>
+          </div>
+          <div className="flex justify-between text-[9px] text-gray-500 font-mono mt-1">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span>
           </div>
         </div>
 
         {/* Bar Chart Area */}
-        <div className="flex flex-col flex-1 min-w-[200px]">
+        <div className="flex flex-col min-w-0">
           <p className="text-2xl font-bold text-white mb-0.5 flex justify-between items-center shrink-0">
-            581 <BarChart2 className="w-4 h-4 text-fuchsia-500" />
+            581 <BarChart2 className="w-4 h-4 text-vol-accent2" />
           </p>
-          <p className="text-[10px] text-slate-400 mb-4 shrink-0">Volunteer Participation</p>
-          <p className="text-[10px] text-slate-500 mb-2 shrink-0">Volunteer Participation Bar Chart</p>
-          <div className="flex-1 min-h-[60px] w-full relative flex items-end justify-between border-l border-b border-[#2d323e] px-2 pb-1 gap-1">
+          <p className="text-xs text-gray-400 mb-2 shrink-0">Volunteer Participation</p>
+          <div className="flex-1 min-h-[70px] w-full relative flex items-end justify-between border-l border-b border-vol-border/60 px-1 pb-1 gap-1.5">
             {[30, 20, 70, 50, 90, 100, 80].map((h, i) => (
-              <div key={i} className="w-full bg-fuchsia-500 rounded-t-sm hover:opacity-80 transition-opacity" style={{ height: `${h}%` }} />
+              <div key={i} className="w-full bg-gradient-to-t from-vol-accent to-vol-accent2 rounded-t-sm hover:opacity-90 transition-opacity" style={{ height: `${h}%` }} />
             ))}
-            <div className="absolute -left-5 bottom-0 h-full flex flex-col justify-between text-[8px] text-slate-600">
-              <span>150</span><span>100</span><span>50</span><span>0</span>
-            </div>
-            <div className="absolute -bottom-4 left-0 w-full flex justify-between text-[8px] text-slate-600 px-2">
-              <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span>
-            </div>
+          </div>
+          <div className="flex justify-between text-[9px] text-gray-500 font-mono mt-1">
+            <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
           </div>
         </div>
 
         {/* Pie Chart Area */}
-        <div className="flex flex-col flex-1 min-w-[200px]">
+        <div className="flex flex-col min-w-0">
           <p className="text-2xl font-bold text-white mb-0.5 flex justify-between items-center shrink-0">
-            23% <div className="w-4 h-4 rounded-full bg-indigo-500" />
+            94% <span className="w-2.5 h-2.5 rounded-full bg-vol-accent2 shadow-[0_0_8px_#00E5FF]" />
           </p>
-          <p className="text-[10px] text-slate-400 mb-4 shrink-0">Registration State</p>
-          <p className="text-[10px] text-slate-500 mb-2 shrink-0">Registration State Pie Chart</p>
-          <div className="flex-1 min-h-[60px] flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full border-[6px] border-emerald-500 border-t-fuchsia-500 border-l-indigo-500" />
+          <p className="text-xs text-gray-400 mb-2 shrink-0">Check-in Fulfillment</p>
+          <div className="flex-1 min-h-[70px] flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full border-[5px] border-vol-card border-t-vol-accent2 border-r-vol-accent shadow-md" />
+          </div>
+          <div className="text-center text-[11px] text-gray-400 mt-1">
+            2,212 checked-in
           </div>
         </div>
       </div>
@@ -621,19 +631,21 @@ function EventAnalyticsWidget() {
   );
 }
 
-function RecentRegistrationsWidget() {
+function RecentRegistrationsWidget({ selectedEventId }) {
   const [registrations, setRegistrations] = useState([]);
   
   const fetchRegistrations = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/attendence/${SELECTED_EVENT}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/attendence/${selectedEventId || 2}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
       const data = await response.json();
-      setRegistrations(data);
+      if (Array.isArray(data)) {
+        setRegistrations(data);
+      }
     } catch (error) {
       console.error("Error fetching registrations:", error);
     }
@@ -641,62 +653,75 @@ function RecentRegistrationsWidget() {
 
   useEffect(() => {
     fetchRegistrations();
-  }, []);
+  }, [selectedEventId]);
+
   return (
-    <Card title="Recent Attendences" action={<Badge color="emerald">Active ▾</Badge>}>
-      <div className="mt-2 space-y-3 flex-1 overflow-y-auto no-scrollbar">
+    <Card title="Recent Registrations" action={<Badge color="emerald">Active ▾</Badge>}>
+      <div className="space-y-2 flex-1 overflow-y-auto custom-scrollbar">
         {registrations.map((reg, i) => (
-          <div className="flex items-center justify-between p-2 rounded-lg hover:bg-[#11141A] transition-colors group cursor-pointer border border-transparent hover:border-[#2A3140]">
-          <div className="flex items-center gap-3">
-            <div className="p-1.5 bg-[#1C202B] rounded-md text-slate-400 border border-[#2A3140]"><ClipboardList className="w-3.5 h-3.5" /></div>
-            <div>
-              <p className="text-xs font-bold text-white group-hover:text-[#00E5FF] transition-colors">{reg?.user?.name}</p>
-              
-              <div className="text-[10px] text-slate-400">{new Date(reg?.created_at).toLocaleDateString()}</div>
+          <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-vol-border/20 transition-all group cursor-pointer border border-transparent hover:border-vol-border/30 relative">
+            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-vol-accent2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full" />
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-full bg-vol-accent/10 border border-vol-accent/20 flex items-center justify-center shrink-0 text-vol-accent2 group-hover:bg-vol-accent/20 transition-all">
+                <ClipboardList className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white group-hover:text-vol-accent2 transition-colors truncate">{reg?.user?.name || "Attendee"}</p>
+                <div className="text-xs text-gray-400">{reg?.created_at ? new Date(reg?.created_at).toLocaleDateString() : "Recent"}</div>
+              </div>
             </div>
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded border bg-vol-success/10 text-vol-success border-vol-success/20 shrink-0 ml-2">
+              {reg?.status || "Active"}
+            </span>
           </div>
-          <p className="text-[10px] text-emerald-500">{reg?.status}</p>
-        </div>
         ))}
       </div>
+      <button className="w-full mt-2 py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent flex items-center justify-center gap-1.5 shrink-0">
+        All Registrations <ChevronRight className="w-4 h-4" />
+      </button>
     </Card>
   );
 }
 
 function TeamMembersWidget() {
   return (
-    <Card title="Team Members">
-      <div className="mt-2 space-y-4 flex-1 overflow-y-auto no-scrollbar">
-        <div className="flex gap-2">
-          <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center text-xs font-bold text-white">JD</div>
-          <div className="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold text-white">MK</div>
-          <div className="w-7 h-7 rounded-full bg-rose-500 flex items-center justify-center text-xs font-bold text-white">AS</div>
-          <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-300">+2</div>
-          <ChevronRight className="w-4 h-4 text-slate-600 ml-auto my-auto" />
+    <Card title="Team Members" action={<Badge>Admin ▾</Badge>}>
+      <div className="space-y-4 flex-1 overflow-y-auto custom-scrollbar">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xs font-bold text-emerald-400 shadow-sm">JD</div>
+          <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-xs font-bold text-indigo-400 shadow-sm">MK</div>
+          <div className="w-8 h-8 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-xs font-bold text-rose-400 shadow-sm">AS</div>
+          <div className="w-8 h-8 rounded-full bg-vol-border/60 border border-vol-border flex items-center justify-center text-xs font-bold text-gray-300">+2</div>
+          <ChevronRight className="w-4 h-4 text-gray-500 ml-auto my-auto hover:text-white transition-colors cursor-pointer" />
         </div>
-        <div className="flex items-center gap-3 p-2 bg-[#1c1f26] rounded-lg border border-[#2d323e]">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500" />
-          <div>
-            <p className="text-xs font-bold text-white">Alex Chen</p>
-            <p className="text-[10px] text-slate-500">Volunteer</p>
+        <div className="flex items-center gap-3 p-3 bg-vol-bg/60 rounded-xl border border-vol-border hover:border-vol-accent/30 transition-all">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shrink-0 shadow-inner flex items-center justify-center text-white text-xs font-semibold">
+            AC
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-white truncate">Alex Chen</p>
+            <p className="text-xs text-gray-400">Volunteer Lead</p>
           </div>
         </div>
       </div>
+      <button className="w-full mt-2 py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent flex items-center justify-center gap-1.5 shrink-0">
+        Invite Member <Plus className="w-4 h-4" />
+      </button>
     </Card>
   );
 }
 
 function RecentActivitiesWidget() {
   return (
-    <Card title="Recent Activities">
-      <div className="mt-4 space-y-6 flex-1 overflow-y-auto no-scrollbar px-1">
-        <ActivityItem icon={<QrCode className="w-3 h-3 text-indigo-400" />} color="bg-indigo-500/20" title={<><b>Alex Chen</b> updated QR template</>} time="3 days ago" />
-        <ActivityItem icon={<CheckCircle2 className="w-3 h-3 text-emerald-400" />} color="bg-emerald-500/20" title={<>New volunteer approved to <b>center campuses</b>.</>} time="4 days ago" />
-        <ActivityItem icon={<PlusSquare className="w-3 h-3 text-fuchsia-400" />} color="bg-fuchsia-500/20" title={<>New extes "Global Summit" saved</>} time="4 days ago" />
-        <ActivityItem icon={<ClipboardList className="w-3 h-3 text-slate-400" />} color="bg-slate-700/50" title={<>Draft event "Global Summit" saved</>} time="3 days ago" />
+    <Card title="Recent Activities" action={<Badge>Latest ▾</Badge>}>
+      <div className="space-y-4 flex-1 overflow-y-auto custom-scrollbar px-1">
+        <ActivityItem icon={<QrCode className="w-3.5 h-3.5 text-vol-accent2" />} color="bg-vol-accent/15 border border-vol-accent/30 text-vol-accent2" title={<><b>Alex Chen</b> updated QR template</>} time="3 days ago" />
+        <ActivityItem icon={<CheckCircle2 className="w-3.5 h-3.5 text-vol-success" />} color="bg-vol-success/15 border border-vol-success/30 text-vol-success" title={<>New volunteer approved to <b>center campuses</b>.</>} time="4 days ago" />
+        <ActivityItem icon={<PlusSquare className="w-3.5 h-3.5 text-vol-accent2" />} color="bg-vol-accent/15 border border-vol-accent/30 text-vol-accent2" title={<>New event "Global Summit" saved</>} time="4 days ago" />
+        <ActivityItem icon={<ClipboardList className="w-3.5 h-3.5 text-gray-400" />} color="bg-vol-border/40 border border-vol-border text-gray-400" title={<>Draft event "Global Summit" saved</>} time="3 days ago" />
       </div>
-      <button className="mt-4 bg-[#6E56CF]/20 text-[#00E5FF] hover:bg-[#6E56CF] hover:text-white py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-2 shrink-0">
-        <MessageSquare className="w-4 h-4" /> Chat
+      <button className="w-full mt-2 py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent flex items-center justify-center gap-1.5 shrink-0">
+        <MessageSquare className="w-4 h-4" /> Activity Log
       </button>
     </Card>
   );
@@ -705,20 +730,19 @@ function RecentActivitiesWidget() {
 function CalendarWidget() {
   return (
     <Card title="Calendar" action={<Badge>Month ▾</Badge>}>
-      <div className="mt-2 text-[10px] text-slate-500 flex-1 overflow-hidden flex flex-col">
-        <div className="grid grid-cols-7 mb-2 text-center shrink-0">
+      <div className="text-xs text-gray-400 flex-1 overflow-hidden flex flex-col">
+        <div className="grid grid-cols-7 mb-2 text-center shrink-0 font-semibold text-gray-500 uppercase tracking-wider text-[10px]">
           <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
         </div>
-        <div className="grid grid-cols-7 gap-[1px] bg-[#2A3140] border border-[#2A3140] flex-1">
-          {/* Calendar blocks mapped efficiently */}
+        <div className="grid grid-cols-7 gap-1 bg-transparent flex-1">
           {Array.from({ length: 28 }).map((_, i) => {
             const num = (i + 29) % 31 || 31;
             const hasEvent = [4, 5, 10, 11, 16, 17, 23, 24, 27].includes(i);
-            const color = i % 3 === 0 ? 'bg-[#00E5FF]' : i % 2 === 0 ? 'bg-[#6E56CF]' : 'bg-[#1C202B]';
+            const color = i % 3 === 0 ? 'bg-vol-accent2 shadow-[0_0_6px_#00E5FF]' : i % 2 === 0 ? 'bg-vol-accent shadow-[0_0_6px_#6E56CF]' : 'bg-vol-border';
             return (
-              <div key={i} className="bg-[#11141A] min-h-[30px] p-1 relative flex items-start justify-start text-slate-300">
+              <div key={i} className="bg-vol-bg/80 border border-vol-border/60 hover:bg-vol-border/20 min-h-[30px] p-1 rounded-md relative flex items-start justify-start text-gray-300 font-medium text-[10px] transition-colors">
                 {num}
-                {hasEvent && <div className={`absolute bottom-1 left-1 right-1 h-1 ${color} rounded`} />}
+                {hasEvent && <div className={`absolute bottom-1 left-1 right-1 h-1 ${color} rounded-full`} />}
               </div>
             );
           })}
@@ -732,34 +756,20 @@ function CalendarWidget() {
 /* REUSABLE UI PRIMITIVES */
 /* -------------------------------------------------------------------------- */
 
-function NavGroup({ title, children }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-4 mb-1">{title}</h4>
-      {children}
-    </div>
-  );
-}
-
-function NavItem({ icon, label }) {
-  return (
-    <div className="flex items-center gap-3 px-4 py-2 text-sm text-slate-400 hover:bg-[#2d323e]/50 hover:text-white rounded-lg transition-colors cursor-pointer">
-      {icon}
-      <span>{label}</span>
-    </div>
-  );
-}
-
 function Card({ title, action, children }) {
   return (
-    <div className="bg-[#1C202B] rounded-xl border border-[#2A3140] p-4 flex flex-col h-full shadow-sm overflow-hidden hover:border-[#6E56CF]/50 transition-colors group">
-      <div className="flex justify-between items-center mb-3 drag-handle cursor-move group-hover:bg-[#11141A]/50 -mx-4 px-4 py-1.5 -mt-1 rounded-t-lg transition-colors">
-        <h3 className="text-[14px] font-medium text-white flex items-center gap-2">
-          {title}
-        </h3>
-        {action}
-      </div>
-      <div className="flex-1 min-h-0 overflow-auto custom-scrollbar flex flex-col">
+    <div className="bg-vol-card rounded-2xl border border-vol-border overflow-hidden flex flex-col h-full transition-all duration-300 hover:border-vol-accent/40 hover:shadow-card-lift group/widget">
+      {(title || action) && (
+        <div className="px-5 py-4 flex items-center justify-between border-b border-vol-border/30 drag-handle cursor-move bg-vol-card shrink-0">
+          {title && (
+            <h3 className="text-base font-semibold text-white flex items-center gap-2">
+              {title}
+            </h3>
+          )}
+          {action && <div>{action}</div>}
+        </div>
+      )}
+      <div className="flex-1 min-h-0 overflow-auto custom-scrollbar p-5 flex flex-col gap-3">
         {children}
       </div>
     </div>
@@ -767,9 +777,15 @@ function Card({ title, action, children }) {
 }
 
 function Badge({ children, color = 'slate' }) {
-  const bg = color === 'emerald' ? 'bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/20' : 'bg-[#11141A] text-slate-300 border-[#2A3140] hover:bg-[#2A3140]';
+  const bg = color === 'emerald'
+    ? 'bg-vol-success/10 text-vol-success border-vol-success/20'
+    : color === 'cyan'
+    ? 'bg-vol-accent/15 text-vol-accent2 border-vol-accent/20'
+    : color === 'warning'
+    ? 'bg-vol-warning/10 text-vol-warning border-vol-warning/20'
+    : 'bg-vol-border/50 text-gray-300 border-vol-border hover:bg-vol-border hover:text-white';
   return (
-    <div className={`px-2 py-1 rounded text-[10px] font-medium border transition-colors cursor-pointer ${bg}`}>
+    <div className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all cursor-pointer ${bg}`}>
       {children}
     </div>
   );
@@ -777,56 +793,74 @@ function Badge({ children, color = 'slate' }) {
 
 function EventItem({ title, date, reg, vol, color, isActive }) {
   return (
-    <div className={`flex items-center gap-3 p-2 rounded-lg border shrink-0 ${isActive ? 'bg-[#11141A] border-[#6E56CF]/50' : 'bg-[#11141A] border-[#2A3140] hover:border-[#3f4553]'} transition-colors cursor-pointer`}>
-      <div className={`w-10 h-10 rounded-lg ${color} flex items-center justify-center shrink-0 shadow-inner`}>
-        <span className="text-white text-[10px] font-bold">Event</span>
+    <div className={`flex items-center gap-4 p-3 rounded-xl border transition-all duration-200 cursor-pointer relative overflow-hidden group shrink-0 ${
+      isActive 
+        ? 'bg-vol-accent/10 border-vol-accent2/30 shadow-sm' 
+        : 'bg-vol-bg/40 border-vol-border/60 hover:bg-vol-border/20 hover:border-vol-accent/30'
+    }`}>
+      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-vol-accent2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full" />
+      <div className={`w-12 h-12 rounded-lg ${color} shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-300 flex items-center justify-center text-white text-xs font-bold`}>
+        <span>Event</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-white truncate">{title}</p>
-        <p className="text-[10px] text-slate-400 flex items-center gap-2">
-          <span>{date}</span> <span className="w-1 h-1 rounded-full bg-slate-600" /> <span>{reg}</span> <span className="w-1 h-1 rounded-full bg-slate-600" /> <span>{vol} vol</span>
+        <div className="flex items-center justify-between gap-2 mb-0.5">
+          <p className="text-sm font-semibold text-white truncate group-hover:text-vol-accent2 transition-colors">{title}</p>
+          {isActive && (
+            <span className="text-[10px] text-vol-accent2 font-semibold px-2 py-0.5 rounded-full bg-vol-accent/15 border border-vol-accent/25 shrink-0">Active</span>
+          )}
+        </div>
+        <p className="text-xs text-gray-400 flex items-center gap-2">
+          <span>{date}</span> <span className="w-1 h-1 rounded-full bg-gray-600" /> <span>{reg}</span> <span className="w-1 h-1 rounded-full bg-gray-600" /> <span>{vol}</span>
         </p>
       </div>
-      {isActive && (
-        <span className="text-[10px] text-[#00E5FF] font-medium px-2 py-0.5 rounded bg-[#00E5FF]/10 shrink-0">Active</span>
-      )}
     </div>
   );
 }
 
 function AssignmentItem({ name, role }) {
   return (
-    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-[#11141A] transition-colors group cursor-pointer shrink-0 border border-transparent hover:border-[#2A3140]">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-[#6E56CF] shrink-0 border border-[#2A3140]" />
-        <div>
-          <p className="text-xs font-bold text-white group-hover:text-[#00E5FF] transition-colors">{name}</p>
-          <p className="text-[10px] text-slate-400">{role}</p>
+    <div className="flex items-center justify-between p-3 rounded-xl hover:bg-vol-border/20 transition-all group cursor-pointer shrink-0 border border-transparent hover:border-vol-border/30 relative">
+      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-vol-accent2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full" />
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-10 h-10 rounded-full bg-vol-accent/10 border border-vol-accent/20 flex items-center justify-center shrink-0 text-vol-accent2 group-hover:bg-vol-accent/20 transition-all">
+          <ClipboardList className="w-4 h-4" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-white group-hover:text-vol-accent2 transition-colors truncate">{name}</p>
+          <p className="text-xs text-gray-400 truncate">{role}</p>
         </div>
       </div>
-      <button className="text-[10px] bg-[#11141A] border border-[#2A3140] text-slate-300 px-3 py-1.5 rounded hover:bg-[#1C202B] hover:text-white transition-colors">Manage</button>
+      <button className="text-xs bg-vol-border/50 hover:bg-vol-border text-gray-300 px-3 py-1 rounded-full transition-all border border-vol-border hover:border-vol-accent/30 hover:text-white shrink-0 ml-2 font-medium">
+        Manage
+      </button>
     </div>
   );
 }
 
 function CentralItem({ name, event, stat, color }) {
+  const isOnDuty = stat === 'on-duty';
   return (
-    <div className="grid grid-cols-12 gap-2 items-center text-xs hover:bg-[#11141A] p-1.5 rounded-lg transition-colors cursor-pointer shrink-0 border border-transparent hover:border-[#2A3140]">
+    <div className="grid grid-cols-12 gap-2 items-center text-xs hover:bg-vol-border/20 p-2.5 rounded-xl transition-all cursor-pointer shrink-0 border border-transparent hover:border-vol-border/30 group relative">
+      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-vol-accent2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full" />
       <div className="col-span-5 flex items-center gap-2 min-w-0">
-        <div className="w-6 h-6 rounded-full bg-[#6E56CF] shrink-0" />
+        <div className="w-8 h-8 rounded-full bg-vol-accent/15 border border-vol-accent/25 flex items-center justify-center shrink-0 text-vol-accent2 font-semibold text-xs">
+          {name ? name.slice(0, 2).toUpperCase() : 'VO'}
+        </div>
         <div className="truncate">
-          <p className="font-bold text-white truncate">{name}</p>
-          <p className="text-[9px] text-slate-500 truncate">Volunteer</p>
+          <p className="font-semibold text-sm text-white truncate group-hover:text-vol-accent2 transition-colors">{name}</p>
+          <p className="text-xs text-gray-400 truncate">Volunteer</p>
         </div>
       </div>
-      <div className="col-span-3 min-w-0">
-        <p className="text-slate-300 truncate">{event}</p>
-        {/* <p className="text-[9px] text-slate-500 truncate">Mon 3 regs, 52 vol</p> */}
+      <div className="col-span-4 min-w-0">
+        <p className="text-gray-300 truncate text-xs">{event}</p>
       </div>
-      <div className="col-span-4 text-right">
-        <span className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full font-medium ${stat === 'on-duty' ? 'bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-          }`}>
-          <div className={`w-1 h-1 rounded-full ${stat === 'on-duty' ? 'bg-[#00E5FF]' : 'bg-rose-400'}`} /> {stat}
+      <div className="col-span-3 text-right">
+        <span className={`inline-flex items-center gap-1.5 text-[10px] px-2.5 py-0.5 rounded-full font-medium border ${
+          isOnDuty 
+            ? 'bg-vol-success/10 text-vol-success border-vol-success/20' 
+            : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+        }`}>
+          <div className={`w-1.5 h-1.5 rounded-full ${isOnDuty ? 'bg-vol-success' : 'bg-rose-400'}`} /> {stat}
         </span>
       </div>
     </div>
@@ -836,13 +870,13 @@ function CentralItem({ name, event, stat, color }) {
 function ActivityItem({ icon, color, title, time }) {
   return (
     <div className="flex gap-3 relative shrink-0">
-      <div className="absolute left-[11px] top-6 bottom-[-24px] w-px bg-[#2d323e]" />
-      <div className={`w-6 h-6 rounded-full ${color} flex items-center justify-center shrink-0 z-10`}>
+      <div className="absolute left-[15px] top-8 bottom-[-20px] w-px bg-vol-border/60" />
+      <div className={`w-8 h-8 rounded-full ${color} flex items-center justify-center shrink-0 z-10 shadow-sm`}>
         {icon}
       </div>
       <div className="pt-0.5">
-        <p className="text-xs text-slate-300 leading-tight mb-1">{title}</p>
-        <p className="text-[10px] text-slate-500">{time}</p>
+        <p className="text-xs text-gray-300 leading-relaxed mb-0.5">{title}</p>
+        <p className="text-[11px] text-gray-500 font-medium">{time}</p>
       </div>
     </div>
   );

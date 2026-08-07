@@ -9,7 +9,7 @@ const roles = [
     title: 'For Organizers',
     description: 'Complete command center. Create events, monitor registrations, allocate volunteer roles, and view live analytics.',
     features: ['Full event control', 'Live attendance tracking', 'Volunteer management', 'Broadcast announcements'],
-    href: '/dashboard',
+    href: '/organiser-dashboard',
     gradient: 'from-indigo-500/20 to-violet-500/10',
     border: 'border-indigo-500/30',
     iconBg: 'bg-indigo-500/15',

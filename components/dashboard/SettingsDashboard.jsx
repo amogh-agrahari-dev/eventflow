@@ -73,7 +73,7 @@ export default function SettingsDashboard() {
       {/* Sidebar */}
       <aside className="w-64 flex-shrink-0 border-r border-[#1C202B] bg-[#161B23]/95 flex flex-col h-full overflow-y-auto custom-scrollbar">
         <div className="p-4 border-b border-[#1C202B]">
-          <Link href="/dashboard" className="flex items-center gap-2 text-[#8F9BB3] hover:text-white transition-colors text-sm font-medium">
+          <Link href="/organiser-dashboard" className="flex items-center gap-2 text-[#8F9BB3] hover:text-white transition-colors text-sm font-medium">
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </Link>

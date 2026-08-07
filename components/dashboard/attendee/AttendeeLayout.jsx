@@ -9,13 +9,13 @@ export default function AttendeeLayout({ children }) {
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
   return (
-    <div className="flex h-screen bg-[#06090F] overflow-hidden text-white font-sans selection:bg-vol-accent2/30">
+    <div className="flex h-screen bg-vol-bg overflow-hidden text-white font-sans selection:bg-vol-accent2/30">
       <AttendeeSidebar isCollapsed={isCollapsed} />
       
-      <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden relative min-w-0 bg-vol-bg">
         <AttendeeHeader toggleSidebar={toggleSidebar} />
         
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 custom-scrollbar scroll-smooth">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

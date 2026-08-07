@@ -23,7 +23,7 @@ export default function Footer() {
           <div>
             <h4 className="font-display font-bold text-sm text-foreground mb-3">Platform</h4>
             <ul className="space-y-2 text-xs font-medium text-muted-foreground">
-              <li><Link href="/dashboard" className="hover:text-accent transition-colors">Organizer Dashboard</Link></li>
+              <li><Link href="/organiser-dashboard" className="hover:text-accent transition-colors">Organizer Dashboard</Link></li>
               <li><Link href="/volunteer/dashboard" className="hover:text-accent transition-colors">Volunteer Portal</Link></li>
               <li><Link href="/invitee/dashboard" className="hover:text-accent transition-colors">Invitee Pass Hub</Link></li>
               <li><Link href="/events/add" className="hover:text-accent transition-colors">Create Event</Link></li>

@@ -33,7 +33,7 @@ export default function SelectRolePage() {
       id: "organizer",
       label: "Organizer Hub",
       description: "Complete command center. Create events, monitor registrations, allocate volunteer roles, and view live analytics.",
-      href: "/dashboard",
+      href: "/organiser-dashboard",
       icon: CalendarCheck,
       color: "bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/30",
     },
