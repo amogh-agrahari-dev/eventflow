@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
@@ -7,6 +8,7 @@ import {
   BarChart2, Settings, HelpCircle
 } from 'lucide-react';
 import Logo from '@/components/general/Logo';
+import clsx from 'clsx';
 
 export default function Sidebar({ isMobileMenuOpen, isDesktopSidebarCollapsed }) {
   const router = useRouter();
@@ -67,18 +69,30 @@ export default function Sidebar({ isMobileMenuOpen, isDesktopSidebarCollapsed })
   ];
 
   return (
-    <aside className={`fixed inset-y-0 left-0 z-50 bg-vol-bg border-vol-border/60 flex flex-col shrink-0 overflow-hidden transform transition-all duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 w-[260px] border-r' : '-translate-x-full w-[260px] border-r'} ${isDesktopSidebarCollapsed ? 'md:w-0 md:border-r-0' : 'md:w-[260px] md:border-r'}`}>
-      <div className="w-[260px] h-full flex flex-col bg-vol-bg">
+    <motion.aside
+      initial={false}
+      animate={{ width: isDesktopSidebarCollapsed ? 80 : 260 }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
+      className={clsx(
+        "fixed inset-y-0 left-0 z-50 bg-vol-bg border-vol-border/60 flex flex-col shrink-0 overflow-y-auto overflow-x-hidden transform transition-transform duration-300 md:relative md:translate-x-0 border-r",
+        isMobileMenuOpen ? "translate-x-0 w-[260px] md:w-auto" : "-translate-x-full w-[260px] md:translate-x-0 md:w-auto"
+      )}
+    >
+      <div className="w-full h-full flex flex-col bg-vol-bg">
         {/* Brand / Logo Area */}
         <div className="h-[72px] px-6 flex items-center border-b border-vol-border/50 shrink-0">
-          <Logo iconSize={28} />
+          {isDesktopSidebarCollapsed ? (
+            <Logo iconSize={28} textClassName="hidden" />
+          ) : (
+            <Logo iconSize={28} />
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-4 space-y-6">
           {MENU_SECTIONS.map((section, idx) => (
             <div key={idx}>
-              {section.title && (
-                <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              {section.title && !isDesktopSidebarCollapsed && (
+                <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 whitespace-nowrap">
                   {section.title}
                 </h3>
               )}
@@ -89,18 +103,33 @@ export default function Sidebar({ isMobileMenuOpen, isDesktopSidebarCollapsed })
 
                   if (active) {
                     return (
-                      <div key={itemIdx} className="flex items-center gap-3 px-3 py-2.5 bg-vol-card border border-vol-border text-white rounded-lg cursor-pointer shadow-sm">
+                      <div
+                        key={itemIdx}
+                        title={isDesktopSidebarCollapsed ? item.name : undefined}
+                        className={clsx(
+                          "flex items-center gap-3 px-3 py-2.5 bg-vol-card border border-vol-border text-white rounded-lg cursor-pointer shadow-sm transition-all",
+                          isDesktopSidebarCollapsed && "justify-center"
+                        )}
+                      >
                         <Icon className="w-5 h-5 text-vol-accent2 shrink-0" />
-                        <span className="text-sm font-medium flex-1">{item.name}</span>
-                        <Check className="w-4 h-4 text-vol-accent2" />
+                        {!isDesktopSidebarCollapsed && <span className="text-sm font-medium flex-1 whitespace-nowrap">{item.name}</span>}
+                        {!isDesktopSidebarCollapsed && <Check className="w-4 h-4 text-vol-accent2 shrink-0" />}
                       </div>
                     );
                   }
 
                   return (
-                    <Link key={itemIdx} href={item.href} className="flex items-center gap-3 px-3 py-2 text-gray-400 hover:text-white hover:bg-vol-card transition-all duration-200 rounded-lg group">
+                    <Link
+                      key={itemIdx}
+                      href={item.href}
+                      title={isDesktopSidebarCollapsed ? item.name : undefined}
+                      className={clsx(
+                        "flex items-center gap-3 px-3 py-2 text-gray-400 hover:text-white hover:bg-vol-card transition-all duration-200 rounded-lg group",
+                        isDesktopSidebarCollapsed && "justify-center"
+                      )}
+                    >
                       <Icon className="w-5 h-5 text-gray-400 group-hover:text-vol-accent2 transition-colors shrink-0" />
-                      <span className="text-sm font-medium">{item.name}</span>
+                      {!isDesktopSidebarCollapsed && <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>}
                     </Link>
                   );
                 })}
@@ -110,17 +139,19 @@ export default function Sidebar({ isMobileMenuOpen, isDesktopSidebarCollapsed })
         </div>
 
         <div className="p-4 mt-auto">
-          <Link href="#" className="flex items-center gap-3 p-3 rounded-xl bg-vol-card border border-vol-border text-gray-300 hover:text-white hover:border-vol-accent2/50 transition-all">
+          <Link href="#" className={clsx("flex items-center gap-3 p-3 rounded-xl bg-vol-card border border-vol-border text-gray-300 hover:text-white hover:border-vol-accent2/50 transition-all", isDesktopSidebarCollapsed && "justify-center")}>
             <div className="w-8 h-8 rounded-full bg-vol-accent/10 flex items-center justify-center shrink-0">
               <HelpCircle size={18} className="text-vol-accent2" />
             </div>
-            <div className="flex flex-col whitespace-nowrap">
-              <span className="font-medium text-sm">Need Help?</span>
-              <span className="text-xs text-gray-500">Visit our Help Center</span>
-            </div>
+            {!isDesktopSidebarCollapsed && (
+              <div className="flex flex-col whitespace-nowrap">
+                <span className="font-medium text-sm">Need Help?</span>
+                <span className="text-xs text-gray-500">Visit our Help Center</span>
+              </div>
+            )}
           </Link>
         </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 }

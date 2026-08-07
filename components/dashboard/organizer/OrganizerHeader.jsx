@@ -23,7 +23,7 @@ export default function OrganizerHeader({ toggleSidebar, toggleMobileSidebar, on
           <Menu size={20} />
         </button>
         <h1 className="text-xl font-semibold text-white">
-          {user?.name ? `${user.name}'s Dashboard` : "Organizer Dashboard"}
+          Organizer Dashboard
         </h1>
       </div>
 

@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
 import { useRouter } from "next/router";
 import { getToken } from "@/lib/auth";
 import Head from "next/head";
@@ -131,12 +132,12 @@ export default function AddEventPage() {
     e.preventDefault();
 
     if (!eventTitle.trim()) {
-      alert("Please enter an event title.");
+      toast.error("Please enter an event title.");
       return;
     }
 
     if (!startDate || !endDate) {
-      alert("Please select both start and end dates.");
+      toast.error("Please select both start and end dates.");
       return;
     }
 
@@ -165,13 +166,13 @@ export default function AddEventPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        console.log(data.detail || data.message || "Event creation failed. Please try again.");
+        toast.error(data.detail || data.message || "Event creation failed. Please try again.");
         return;
       }
 
-      alert("Event created successfully!");
+      toast.success("Event created successfully!");
     } catch (error) {
-      console.log(error.message || "Event creation failed. Please try again.");
+      toast.error(error.message || "Event creation failed. Please try again.");
     }
   };
 

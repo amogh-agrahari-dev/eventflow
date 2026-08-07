@@ -29,15 +29,6 @@ export default function AttendeeHeader({ toggleSidebar }) {
           />
         </div>
 
-        <button className="flex items-center gap-2 bg-vol-accent hover:bg-vol-accent2 text-white px-3.5 sm:px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-glow-lg cursor-pointer">
-          <Plus size={16} />
-          <span className="hidden sm:inline">Quick-Add</span>
-        </button>
-
-        <button className="flex items-center gap-2 bg-vol-card hover:bg-vol-card/80 border border-vol-border text-gray-200 px-3.5 sm:px-4 py-2 rounded-full text-sm font-medium transition-colors hidden sm:flex cursor-pointer">
-          <SlidersHorizontal size={16} />
-          <span className="hidden sm:inline">Customize</span>
-        </button>
 
         <button className="relative p-2 rounded-full text-gray-400 hover:text-white hover:bg-vol-card transition-colors cursor-pointer">
           <Bell size={20} />

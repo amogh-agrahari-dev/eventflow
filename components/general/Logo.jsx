@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-export default function Logo({ className = "", textClassName = "", iconSize = 36, href = "/" }) {
+export default function Logo({ className = "", textClassName = "", iconSize = 36, href = "/select-role" }) {
   const content = (
     <div className={`flex items-center gap-3 group cursor-pointer select-none ${className}`}>
       {/* SVG Icon */}

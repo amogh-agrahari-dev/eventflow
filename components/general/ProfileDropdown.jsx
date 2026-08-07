@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -21,8 +22,13 @@ export default function ProfileDropdown({
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef(null);
   const token = getToken();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (token && !user) {
@@ -411,7 +417,10 @@ export default function ProfileDropdown({
         )}
       </AnimatePresence>
 
-      {/* Logout Confirmation Modal */}
+      {/* Portaled Modals */}
+      {mounted && typeof document !== 'undefined' && createPortal(
+        <>
+          {/* Logout Confirmation Modal */}
       <AnimatePresence>
         {showLogoutConfirm && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -646,7 +655,10 @@ export default function ProfileDropdown({
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+          </AnimatePresence>
+        </>,
+        document.body
+      )}
     </div>
   );
 }
