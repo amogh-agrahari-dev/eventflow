@@ -40,18 +40,24 @@ const badgeVariants = {
   })
 };
 
-export default function Badges() {
+export default function Badges({ className, delay = 0.3 }) {
   return (
     <WidgetCard 
-      title="Badges & Achievements" 
-      delay={0.15}
+      title={
+        <div className="flex items-center gap-2">
+          <Award size={18} className="text-vol-accent2" />
+          <span>Badges & Achievements</span>
+        </div>
+      } 
+      className={className}
+      delay={delay}
       action={
         <button className="text-xs bg-vol-border/50 hover:bg-vol-border text-gray-300 px-3 py-1 rounded-full transition-all border border-vol-border hover:border-vol-accent/30 hover:text-white">
           View All
         </button>
       }
     >
-      <div className="flex-1 p-5 flex items-center justify-around gap-2">
+      <div className="flex-1 p-5 flex items-center justify-around gap-2 overflow-hidden">
         {badges.map((badge, idx) => {
           const Icon = badge.icon;
           return (
@@ -61,19 +67,19 @@ export default function Badges() {
               initial="hidden"
               animate="visible"
               variants={badgeVariants}
-              whileHover={{ y: -8, rotateY: 10 }}
+              whileHover={{ y: -6, rotateY: 8 }}
               transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-              className="flex flex-col items-center text-center group cursor-default"
+              className="flex flex-col items-center text-center group cursor-default min-w-0 flex-1"
               style={{ perspective: '800px' }}
             >
               <div 
-                className="relative w-16 h-20 mb-3 flex items-center justify-center"
+                className="relative w-14 h-18 sm:w-16 sm:h-20 mb-2.5 flex items-center justify-center shrink-0"
               >
                 {/* Shield Shape */}
                 <div 
                   className={`absolute inset-0 bg-gradient-to-b ${badge.color} rounded-t-xl rounded-b-[2rem] opacity-90 transition-all duration-300 group-hover:opacity-100`}
                   style={{
-                    boxShadow: `0 10px 20px -5px ${badge.glow}`,
+                    boxShadow: `0 8px 18px -4px ${badge.glow}`,
                     transition: 'box-shadow 0.3s ease, opacity 0.3s ease'
                   }}
                 />
@@ -93,19 +99,19 @@ export default function Badges() {
                 </div>
                 
                 {/* Icon */}
-                <Icon size={24} className="text-white z-20 drop-shadow-md group-hover:scale-110 transition-transform duration-300" fill="currentColor" />
+                <Icon size={22} className="text-white z-20 drop-shadow-md group-hover:scale-110 transition-transform duration-300" fill="currentColor" />
               </div>
               
-              <h3 className="text-xs font-semibold text-white mb-0.5 max-w-[80px] leading-tight group-hover:text-vol-accent2 transition-colors">
+              <h3 className="text-xs font-semibold text-white mb-0.5 max-w-[90px] leading-tight group-hover:text-vol-accent2 transition-colors truncate">
                 {badge.name}
               </h3>
-              <p className="text-[10px] text-gray-400">{badge.metric}</p>
+              <p className="text-[10px] text-gray-400 truncate">{badge.metric}</p>
             </motion.div>
           );
         })}
       </div>
 
-      <div className="p-4 pt-0">
+      <div className="p-5 pt-0 mt-auto">
         <motion.button
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}

@@ -24,9 +24,9 @@ const menuSections = [
   {
     title: 'DISCOVER',
     items: [
-      { name: 'Browse Events', icon: Search, href: '#' },
-      { name: 'My Registrations', icon: CalendarCheck, href: '#' },
-      { name: 'My Tickets', icon: Ticket, href: '#' },
+      { name: 'Browse Events', icon: Search, href: '/all-events' },
+      { name: 'My Registrations', icon: CalendarCheck, href: '/passes' },
+      { name: 'My Tickets', icon: Ticket, href: '/passes' },
       { name: 'Wishlisted Events', icon: Heart, href: '#' },
     ]
   },
@@ -50,7 +50,7 @@ const menuSections = [
     title: 'ACCOUNT',
     items: [
       { name: 'My Profile', icon: User, href: '#' },
-      { name: 'Settings', icon: Settings, href: '#' },
+      { name: 'Settings', icon: Settings, href: '/settings' },
     ]
   }
 ];
@@ -73,7 +73,7 @@ export default function AttendeeSidebar({ isCollapsed }) {
 
       <div className="flex-1 py-6 flex flex-col gap-6">
         <div className="px-4">
-          <Link href="#" className={clsx("flex items-center gap-3 px-3 py-2.5 rounded-lg bg-vol-card border border-vol-border text-white transition-colors", isCollapsed && "justify-center")}>
+          <Link href="/attendee-dashboard" className={clsx("flex items-center gap-3 px-3 py-2.5 rounded-lg bg-vol-card border border-vol-border text-white transition-colors", isCollapsed && "justify-center")}>
             <LayoutDashboard size={20} className="shrink-0 text-vol-success" />
             {!isCollapsed && <span className="font-medium whitespace-nowrap">Dashboard</span>}
           </Link>

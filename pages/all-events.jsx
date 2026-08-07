@@ -10,6 +10,8 @@ import {
 import Logo from '@/components/general/Logo';
 import Sidebar from '@/components/general/Sidebar';
 import { Input, Button } from '@/components/ui';
+import SwitchRoleButton from '@/components/general/SwitchRoleButton';
+import ProfileDropdown from '@/components/general/ProfileDropdown';
 
 export default function AllEventsPage() {
   const router = useRouter();
@@ -158,16 +160,17 @@ export default function AllEventsPage() {
             <h1 className="text-[22px] font-medium text-white truncate">All Published Events</h1>
           </div>
           
-          <div className="flex items-center gap-4">
-            <button className="relative p-2 text-[#5A6B8A] hover:text-white transition-colors">
+          <div className="flex items-center gap-3">
+            <button className="relative p-2 text-[#5A6B8A] hover:text-white transition-colors cursor-pointer">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#F59E0B] rounded-full border-2 border-[#161B23]"></span>
             </button>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#6E56CF] to-[#00E5FF] p-[2px] cursor-pointer shadow-lg shadow-[#6E56CF]/20">
-              <div className="w-full h-full bg-[#161B23] rounded-full flex items-center justify-center overflow-hidden">
-                <span className="text-xs font-bold text-white">OR</span>
-              </div>
-            </div>
+
+            {/* Switch Role Button */}
+            <SwitchRoleButton currentRole="Organizer" />
+
+            {/* Profile Dropdown Menu */}
+            <ProfileDropdown currentRole="Organizer" />
           </div>
         </header>
 

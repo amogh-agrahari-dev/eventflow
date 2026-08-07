@@ -43,6 +43,8 @@ import {
   Menu
 } from "lucide-react";
 import { useUserStore } from "@/store/userStore";
+import SwitchRoleButton from '@/components/general/SwitchRoleButton';
+import ProfileDropdown from '@/components/general/ProfileDropdown';
 export default function AddEventPage() {
   const [livePerformance, setLivePerformance] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -220,14 +222,16 @@ export default function AddEventPage() {
 
             <div className="w-px h-6 bg-vol-border mx-1"></div>
 
-            <button className="relative p-2 text-gray-500 hover:text-white transition-colors">
+            <button className="relative p-2 text-gray-500 hover:text-white transition-colors cursor-pointer">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-vol-bg" />
             </button>
 
-            <div className="w-8 h-8 rounded-full bg-vol-accent cursor-pointer shadow-sm border border-vol-border flex items-center justify-center text-white text-[11px] font-bold">
-              {user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase() : "U"}
-            </div>
+            {/* Switch Role Button */}
+            <SwitchRoleButton currentRole="Organizer" />
+
+            {/* Profile Dropdown Menu */}
+            <ProfileDropdown currentRole="Organizer" />
           </div>
         </header>
 

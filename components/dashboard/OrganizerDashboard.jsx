@@ -12,6 +12,8 @@ import {
   MonitorPlay, LayoutTemplate, MessageCircle, Check, Share2, Heart, ArrowLeft
 } from 'lucide-react';
 import Sidebar from '@/components/general/Sidebar';
+import SwitchRoleButton from '@/components/general/SwitchRoleButton';
+import ProfileDropdown from '@/components/general/ProfileDropdown';
 
 function AutoWidthGrid(props) {
   const containerRef = React.useRef(null);
@@ -67,7 +69,6 @@ export default function OrganizerDashboard() {
   const [showCustomizePanel, setShowCustomizePanel] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState(2);
 
   const router = useRouter();
@@ -92,18 +93,6 @@ export default function OrganizerDashboard() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!isProfileMenuOpen) return;
-
-    const handleClickOutside = (event) => {
-      if (!event.target.closest('[data-profile-menu]')) {
-        setIsProfileMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isProfileMenuOpen]);
 
   const handleLayoutChange = (layout, allLayouts) => {
     setLayouts(allLayouts);
@@ -223,26 +212,11 @@ export default function OrganizerDashboard() {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-vol-warning border-2 border-vol-bg" />
             </button>
 
-            <div className="relative" data-profile-menu>
-              <div
-                onClick={() => setIsProfileMenuOpen(prev => !prev)}
-                className="w-8 h-8 rounded-full bg-vol-accent/20 border border-vol-accent2/30 flex items-center justify-center text-vol-accent2 font-semibold text-sm hover:bg-vol-accent/30 transition-colors cursor-pointer"
-              >
-                {user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase() : "OR"}
-              </div>
+            {/* Switch Role Button */}
+            <SwitchRoleButton currentRole="Organizer" />
 
-              {isProfileMenuOpen && (
-                <div className="absolute right-0 mt-3 w-48 bg-vol-card border border-vol-border rounded-2xl shadow-xl py-2 z-50">
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-300 hover:bg-vol-border/30 hover:text-white transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
+            {/* Profile Dropdown Menu */}
+            <ProfileDropdown currentRole="Organizer" />
           </div>
         </header>
 
@@ -404,11 +378,10 @@ function UpcomingEventsWidget({ selectedEventId, onSelectEvent }) {
               />
               <button
                 onClick={() => onSelectEvent?.(eventId)}
-                className={`w-full rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
-                  isSelected 
-                    ? 'border-vol-accent2/50 bg-vol-accent2/10 text-vol-accent2 shadow-sm' 
-                    : 'border-vol-border bg-vol-bg/60 text-gray-300 hover:bg-vol-border/40 hover:text-white'
-                }`}
+                className={`w-full rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${isSelected
+                  ? 'border-vol-accent2/50 bg-vol-accent2/10 text-vol-accent2 shadow-sm'
+                  : 'border-vol-border bg-vol-bg/60 text-gray-300 hover:bg-vol-border/40 hover:text-white'
+                  }`}
               >
                 {isSelected ? 'Selected Event' : 'Select Event'}
               </button>
@@ -425,20 +398,47 @@ function UpcomingEventsWidget({ selectedEventId, onSelectEvent }) {
 
 function VolunteerAssignmentsWidget({ selectedEventId }) {
   const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const getTasks = async () => {
+    if (!selectedEventId) {
+      setTasks([]);
+      return;
+    }
+    setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/tasks/${selectedEventId || 2}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/tasks/${selectedEventId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
+
       const data = await response.json();
+      let rawTasks = [];
       if (Array.isArray(data)) {
-        setTasks(data);
+        rawTasks = data;
+      } else if (data && Array.isArray(data.tasks)) {
+        rawTasks = data.tasks;
+      } else if (data && Array.isArray(data.data)) {
+        rawTasks = data.data;
       }
+
+      // Strictly filter tasks for the selected event only
+      const eventTasks = rawTasks.filter((task) => {
+        const taskEventId = task?.event_id ?? task?.eventId ?? task?.event?.id;
+        if (taskEventId === undefined || taskEventId === null) {
+          return true;
+        }
+        return String(taskEventId) === String(selectedEventId);
+      });
+
+      setTasks(eventTasks);
     } catch (error) {
-      console.error("Error fetching tasks:", error);
+      console.error("Error fetching tasks for event:", error);
+      setTasks([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -449,17 +449,32 @@ function VolunteerAssignmentsWidget({ selectedEventId }) {
   return (
     <Card title="Volunteer Tasks" action={<Badge color="emerald">Active ▾</Badge>}>
       <div className="flex justify-between text-xs text-gray-500 mb-1 px-1 shrink-0 font-medium">
-        <span>Assigned Tasks</span>
+        <span>Assigned Tasks {selectedEventId ? `(#${selectedEventId})` : ''}</span>
         <span>Status</span>
       </div>
       <div className="space-y-2 flex-1 overflow-y-auto custom-scrollbar">
-        {tasks.map((task) => (
-          <AssignmentItem key={task.id} name={task?.title} role={task?.status || "In Progress"} />
-        ))}
+        {loading ? (
+          <div className="flex items-center justify-center h-28 text-xs text-gray-400">
+            <div className="w-4 h-4 border-2 border-vol-accent2 border-t-transparent rounded-full animate-spin mr-2" />
+            Loading tasks...
+          </div>
+        ) : tasks.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-28 text-xs text-gray-500 text-center px-4">
+            <ClipboardList className="w-6 h-6 text-gray-600 mb-1" />
+            <span>No tasks assigned for this event</span>
+          </div>
+        ) : (
+          tasks.map((task) => (
+            <AssignmentItem key={task.id} name={task?.title} role={task?.status || "In Progress"} />
+          ))
+        )}
       </div>
-      <button className="w-full mt-2 py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent flex items-center justify-center gap-1.5 shrink-0">
+      <Link
+        href={selectedEventId ? `/directory/${selectedEventId}` : '/directory'}
+        className="w-full mt-2 py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent flex items-center justify-center gap-1.5 shrink-0"
+      >
         Manage Tasks <ChevronRight className="w-4 h-4" />
-      </button>
+      </Link>
     </Card>
   );
 }
@@ -633,7 +648,7 @@ function EventAnalyticsWidget() {
 
 function RecentRegistrationsWidget({ selectedEventId }) {
   const [registrations, setRegistrations] = useState([]);
-  
+
   const fetchRegistrations = async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/attendence/${selectedEventId || 2}`, {
@@ -780,10 +795,10 @@ function Badge({ children, color = 'slate' }) {
   const bg = color === 'emerald'
     ? 'bg-vol-success/10 text-vol-success border-vol-success/20'
     : color === 'cyan'
-    ? 'bg-vol-accent/15 text-vol-accent2 border-vol-accent/20'
-    : color === 'warning'
-    ? 'bg-vol-warning/10 text-vol-warning border-vol-warning/20'
-    : 'bg-vol-border/50 text-gray-300 border-vol-border hover:bg-vol-border hover:text-white';
+      ? 'bg-vol-accent/15 text-vol-accent2 border-vol-accent/20'
+      : color === 'warning'
+        ? 'bg-vol-warning/10 text-vol-warning border-vol-warning/20'
+        : 'bg-vol-border/50 text-gray-300 border-vol-border hover:bg-vol-border hover:text-white';
   return (
     <div className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all cursor-pointer ${bg}`}>
       {children}
@@ -793,11 +808,10 @@ function Badge({ children, color = 'slate' }) {
 
 function EventItem({ title, date, reg, vol, color, isActive }) {
   return (
-    <div className={`flex items-center gap-4 p-3 rounded-xl border transition-all duration-200 cursor-pointer relative overflow-hidden group shrink-0 ${
-      isActive 
-        ? 'bg-vol-accent/10 border-vol-accent2/30 shadow-sm' 
-        : 'bg-vol-bg/40 border-vol-border/60 hover:bg-vol-border/20 hover:border-vol-accent/30'
-    }`}>
+    <div className={`flex items-center gap-4 p-3 rounded-xl border transition-all duration-200 cursor-pointer relative overflow-hidden group shrink-0 ${isActive
+      ? 'bg-vol-accent/10 border-vol-accent2/30 shadow-sm'
+      : 'bg-vol-bg/40 border-vol-border/60 hover:bg-vol-border/20 hover:border-vol-accent/30'
+      }`}>
       <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-vol-accent2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full" />
       <div className={`w-12 h-12 rounded-lg ${color} shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-300 flex items-center justify-center text-white text-xs font-bold`}>
         <span>Event</span>
@@ -855,11 +869,10 @@ function CentralItem({ name, event, stat, color }) {
         <p className="text-gray-300 truncate text-xs">{event}</p>
       </div>
       <div className="col-span-3 text-right">
-        <span className={`inline-flex items-center gap-1.5 text-[10px] px-2.5 py-0.5 rounded-full font-medium border ${
-          isOnDuty 
-            ? 'bg-vol-success/10 text-vol-success border-vol-success/20' 
-            : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-        }`}>
+        <span className={`inline-flex items-center gap-1.5 text-[10px] px-2.5 py-0.5 rounded-full font-medium border ${isOnDuty
+          ? 'bg-vol-success/10 text-vol-success border-vol-success/20'
+          : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+          }`}>
           <div className={`w-1.5 h-1.5 rounded-full ${isOnDuty ? 'bg-vol-success' : 'bg-rose-400'}`} /> {stat}
         </span>
       </div>

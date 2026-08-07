@@ -23,28 +23,35 @@ export default function VolunteerDashboard() {
         <title>Volunteer Dashboard | EventFlow</title>
       </Head>
       <VolunteerLayout>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <UpcomingShifts />
-            
-            <div className="mb-6">
-              <VolunteerTaskList tasks={myTasks} onToggleTask={toggleTaskCompletion} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+          {/* Main 2-Column Section */}
+          <div className="lg:col-span-2 space-y-6 min-w-0">
+            <UpcomingShifts delay={0.05} />
+
+            {/* <VolunteerTaskList
+              tasks={myTasks}
+              onToggleTask={toggleTaskCompletion}
+              delay={0.1}
+            /> */}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+              {/* <Assignments className="h-full" delay={0.15} /> */}
+              <MyEvents className="h-full" delay={0.2} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Assignments />
-              <MyEvents />
-            </div>
-            <ImpactStats />
+            <ImpactStats delay={0.25} />
           </div>
-          <div className="space-y-6">
-            <QuickActions />
-            <Availability />
-            <Announcements />
-            <Badges />
+
+          {/* Right Sidebar Widgets */}
+          <div className="space-y-6 min-w-0">
+            <QuickActions delay={0.1} />
+            <Availability delay={0.15} />
+            <Announcements delay={0.2} />
+            <Badges delay={0.25} />
           </div>
         </div>
       </VolunteerLayout>
     </>
   );
 }
+

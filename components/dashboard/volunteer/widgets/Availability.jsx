@@ -1,5 +1,6 @@
 import React from 'react';
 import WidgetCard from './WidgetCard';
+import { Calendar, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
 
@@ -16,53 +17,61 @@ const itemVariants = {
   visible: (i) => ({
     opacity: 1,
     x: 0,
-    transition: { delay: i * 0.08 + 0.1, duration: 0.4, ease: [0.16, 1, 0.3, 1] }
+    transition: { delay: i * 0.06 + 0.1, duration: 0.35, ease: [0.16, 1, 0.3, 1] }
   })
 };
 
-export default function Availability() {
+export default function Availability({ className, delay = 0.2 }) {
   return (
     <WidgetCard 
-      title="Availability This Week" 
-      delay={0.08}
+      title={
+        <div className="flex items-center gap-2">
+          <Calendar size={18} className="text-vol-accent2" />
+          <span>Availability This Week</span>
+        </div>
+      } 
+      className={className}
+      delay={delay}
       action={
         <button className="text-xs bg-vol-border/50 hover:bg-vol-border text-gray-300 px-3 py-1 rounded-full transition-all border border-vol-border hover:border-vol-accent/30 hover:text-white">
           Edit
         </button>
       }
     >
-      <div className="flex-1 p-5 flex flex-col justify-center gap-4">
-        {schedule.map((slot, idx) => (
-          <motion.div
-            key={idx}
-            custom={idx}
-            initial="hidden"
-            animate="visible"
-            variants={itemVariants}
-            className="flex items-center justify-between group hover:bg-vol-border/10 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-default"
-          >
-            <span className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
-              {slot.day}
-            </span>
-            <div className="flex items-center gap-3">
-              <span className={clsx(
-                "text-sm font-medium transition-colors",
-                slot.available ? "text-gray-300" : "text-gray-500"
-              )}>
-                {slot.time}
+      <div className="flex-1 p-5 flex flex-col justify-between gap-3">
+        <div className="flex flex-col gap-2">
+          {schedule.map((slot, idx) => (
+            <motion.div
+              key={idx}
+              custom={idx}
+              initial="hidden"
+              animate="visible"
+              variants={itemVariants}
+              className="flex items-center justify-between p-2.5 rounded-xl bg-vol-bg/60 border border-vol-border/30 hover:bg-vol-border/20 hover:border-vol-accent/30 transition-all duration-200 group overflow-hidden"
+            >
+              <span className="text-xs font-medium text-gray-300 group-hover:text-white transition-colors truncate">
+                {slot.day}
               </span>
-              <div className={clsx(
-                "w-2 h-2 rounded-full transition-all",
-                slot.available
-                  ? "bg-vol-success animate-pulse-glow"
-                  : "bg-gray-600"
-              )} />
-            </div>
-          </motion.div>
-        ))}
+              <div className="flex items-center gap-2.5 shrink-0">
+                <span className={clsx(
+                  "text-xs font-medium transition-colors",
+                  slot.available ? "text-gray-300" : "text-gray-500 italic"
+                )}>
+                  {slot.time}
+                </span>
+                <div className={clsx(
+                  "w-2 h-2 rounded-full transition-all shrink-0",
+                  slot.available
+                    ? "bg-vol-success shadow-glow-accent"
+                    : "bg-gray-600"
+                )} />
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
 
-      <div className="p-4 pt-0">
+      <div className="p-5 pt-0 mt-auto">
         <motion.button
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
@@ -74,3 +83,4 @@ export default function Availability() {
     </WidgetCard>
   );
 }
+

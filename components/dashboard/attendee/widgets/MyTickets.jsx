@@ -3,8 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Ticket as TicketIcon, MapPin, CheckCircle2, Clock, ChevronLeft, ChevronRight, QrCode, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import QRCode from 'react-qr-code';
 import { useUserStore } from '@/store/userStore';
 import { getToken } from '@/lib/auth';
+import PassDetailsModal from '@/components/passes/PassDetailsModal';
 
 const PASS_COLOR_PALETTES = [
   {
@@ -128,6 +131,7 @@ function AnimatedCounter({ value, duration = 1.2 }) {
 }
 
 export default function MyTickets({ delay = 0 }) {
+  const router = useRouter();
   const { user, fetchUser } = useUserStore();
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -138,6 +142,8 @@ export default function MyTickets({ delay = 0 }) {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingText, setLoadingText] = useState('Fetching your passes...');
+  const [selectedPass, setSelectedPass] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getTickets = async () => {
     const userId = user?.id || user?._id || user?.user_id;
@@ -175,39 +181,53 @@ export default function MyTickets({ delay = 0 }) {
             
             const rawDate = pass.date || pass.event_date || eventObj.date || eventObj.event_date || pass.created_at;
             const rawTime = pass.time || pass.event_time || eventObj.time || eventObj.event_time;
-            const formattedDate = formatEventDate(rawDate, rawTime);
 
-            const eventLocation = pass.venue || pass.location || pass.event_venue || pass.event_location || eventObj.location || eventObj.venue || 'Main Auditorium';
+            let formattedDate = 'Upcoming';
+            if (rawDate) {
+              try {
+                const d = new Date(rawDate);
+                if (!isNaN(d.getTime())) {
+                  formattedDate = d.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  });
+                } else {
+                  formattedDate = String(rawDate);
+                }
+              } catch (e) {
+                formattedDate = String(rawDate);
+              }
+            }
+
+            const formattedLocation = pass.location || pass.venue || eventObj.location || eventObj.venue || 'PICT Campus Venue';
 
             return {
-              ...pass,
-              id: pass.id || pass.pass_id || pass.ticket_id || pass._id || `#EVF${1240 + idx}`,
-              eventTitle,
-              event: {
-                ...eventObj,
-                title: eventTitle,
-                date: formattedDate,
-                location: eventLocation,
-              },
+              id: pass.id || pass._id || `ticket-${idx + 1}`,
+              pass_uid: pass.pass_uid || '',
+              user_id: pass.user_id,
+              event_id: pass.event_id,
+              eventTitle: eventTitle,
+              category: eventObj.category || 'Event',
               date: formattedDate,
-              venue: eventLocation,
-              location: eventLocation,
-              status: pass.status || 'Confirmed',
-              gradient: pass.gradient || randomColor.gradient,
-              glowColor: pass.glowColor || randomColor.glowColor,
-              accentColor: pass.accentColor || randomColor.accentColor,
+              time: rawTime || '10:00 AM',
+              location: formattedLocation,
+              status: pass.status ? (pass.status.charAt(0).toUpperCase() + pass.status.slice(1)) : 'Confirmed',
+              rawPass: pass,
+              ...randomColor,
             };
           });
+
           setTickets(passesWithColors);
         } else {
           setTickets([]);
         }
       } else {
-        console.error("Failed to fetch passes:", response.statusText);
+        console.error('Failed to fetch passes:', response.statusText);
         setTickets([]);
       }
     } catch (error) {
-      console.error("Error fetching tickets:", error);
+      console.error('Error fetching passes from backend:', error);
       setTickets([]);
     } finally {
       setLoading(false);
@@ -215,42 +235,54 @@ export default function MyTickets({ delay = 0 }) {
   };
 
   useEffect(() => {
-    const token = getToken();
-    if (token && !user && fetchUser) {
-      fetchUser();
-    }
-  }, [user, fetchUser]);
-
-  useEffect(() => {
-    if (user) {
+    const userId = user?.id || user?._id || user?.user_id;
+    if (userId) {
       getTickets();
     } else {
-      const token = getToken();
-      if (!token) {
+      const storedToken = getToken();
+      if (!storedToken) {
         setLoading(false);
       }
     }
   }, [user]);
 
-  const updateScrollButtons = () => {
-    if (!scrollRef.current) return;
-    const { scrollLeft: sl, scrollWidth, clientWidth } = scrollRef.current;
-    setCanScrollLeft(sl > 5);
-    setCanScrollRight(sl < scrollWidth - clientWidth - 5);
+  const handleOpenPassModal = (passItem) => {
+    const fullPass = passItem.rawPass || passItem;
+    setSelectedPass(fullPass);
+    setIsModalOpen(true);
+  };
+
+  const handleClosePassModal = () => {
+    setIsModalOpen(false);
+    setSelectedPass(null);
+  };
+
+  const checkScrollability = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollLeft(scrollLeft > 10);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
   };
 
   useEffect(() => {
     const el = scrollRef.current;
-    if (!el) return;
-    el.addEventListener('scroll', updateScrollButtons);
-    updateScrollButtons();
-    return () => el.removeEventListener('scroll', updateScrollButtons);
+    if (el) {
+      checkScrollability();
+      el.addEventListener('scroll', checkScrollability);
+      window.addEventListener('resize', checkScrollability);
+      return () => {
+        el.removeEventListener('scroll', checkScrollability);
+        window.removeEventListener('resize', checkScrollability);
+      };
+    }
   }, [tickets]);
 
-  const scroll = (dir) => {
-    if (!scrollRef.current) return;
-    const cardWidth = scrollRef.current.firstElementChild?.offsetWidth || 360;
-    scrollRef.current.scrollBy({ left: dir * (cardWidth + 24), behavior: 'smooth' });
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = direction * 360;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
   };
 
   const handleMouseDown = (e) => {
@@ -258,45 +290,56 @@ export default function MyTickets({ delay = 0 }) {
     setStartX(e.pageX - scrollRef.current.offsetLeft);
     setScrollLeft(scrollRef.current.scrollLeft);
   };
-  const handleMouseUp = () => setIsDragging(false);
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
   const handleMouseMove = (e) => {
     if (!isDragging) return;
     e.preventDefault();
     const x = e.pageX - scrollRef.current.offsetLeft;
-    scrollRef.current.scrollLeft = scrollLeft - (x - startX) * 1.2;
+    const walk = (x - startX) * 1.5;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay }}
-      className="bg-vol-card rounded-2xl border border-vol-border overflow-hidden transition-all duration-300 hover:border-vol-accent/40 hover:shadow-card-lift group/widget"
+      className="rounded-2xl bg-vol-card border border-vol-border/60 overflow-hidden relative"
     >
+      {/* Glow Effects */}
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-vol-accent/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-vol-cyan/5 rounded-full blur-3xl pointer-events-none" />
+
       {/* Header */}
-      <div className="px-6 py-5 flex items-center justify-between border-b border-vol-border/30">
+      <div className="p-6 border-b border-vol-border/40 flex items-center justify-between flex-wrap gap-4 relative z-10">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-vol-accent/15 flex items-center justify-center text-vol-accent2">
+          <div className="w-10 h-10 rounded-xl bg-vol-accent/10 border border-vol-accent/20 flex items-center justify-center text-vol-accent2">
             <TicketIcon size={20} />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-white">My Tickets</h2>
-            <p className="text-xs text-gray-500">
+            <h2 className="text-lg font-bold text-white tracking-wide">My Passes & Tickets</h2>
+            <p className="text-xs text-gray-400">
               {loading ? (
-                <span className="flex items-center gap-1.5 text-vol-accent2">
-                  <Loader2 size={12} className="animate-spin" /> Loading passes...
-                </span>
+                <span>Checking active passes...</span>
               ) : (
                 <>
-                  <AnimatedCounter value={tickets.length} duration={0.8} /> active tickets
+                  <AnimatedCounter value={tickets.length} duration={0.8} /> active tickets • Click card to view QR
                 </>
               )}
             </p>
           </div>
         </div>
-        <button className="text-xs bg-vol-border/50 hover:bg-vol-border text-gray-300 px-4 py-1.5 rounded-full transition-all border border-vol-border hover:border-vol-accent/30 hover:text-white">
+        
+        <Link 
+          href="/passes"
+          className="text-xs bg-vol-border/50 hover:bg-vol-accent text-gray-300 hover:text-white px-4 py-1.5 rounded-full transition-all border border-vol-border hover:border-vol-accent/50 cursor-pointer shadow-sm"
+        >
           View All
-        </button>
+        </Link>
       </div>
 
       {/* Carousel Container */}
@@ -338,7 +381,7 @@ export default function MyTickets({ delay = 0 }) {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 10 }}
                   onClick={() => scroll(-1)}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-vol-card/90 border border-vol-border hover:border-vol-accent/50 backdrop-blur-md flex items-center justify-center text-gray-400 hover:text-white transition-all shadow-lg hover:shadow-glow-accent"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-vol-card/90 border border-vol-border hover:border-vol-accent/50 backdrop-blur-md flex items-center justify-center text-gray-400 hover:text-white transition-all shadow-lg hover:shadow-glow-accent cursor-pointer"
                 >
                   <ChevronLeft size={20} />
                 </motion.button>
@@ -353,7 +396,7 @@ export default function MyTickets({ delay = 0 }) {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
                   onClick={() => scroll(1)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-vol-card/90 border border-vol-border hover:border-vol-accent/50 backdrop-blur-md flex items-center justify-center text-gray-400 hover:text-white transition-all shadow-lg hover:shadow-glow-accent"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-vol-card/90 border border-vol-border hover:border-vol-accent/50 backdrop-blur-md flex items-center justify-center text-gray-400 hover:text-white transition-all shadow-lg hover:shadow-glow-accent cursor-pointer"
                 >
                   <ChevronRight size={20} />
                 </motion.button>
@@ -382,6 +425,7 @@ export default function MyTickets({ delay = 0 }) {
                     key={ticket.id || idx}
                     ticket={{ ...ticket, ...palette }}
                     index={idx}
+                    onSelectPass={handleOpenPassModal}
                   />
                 );
               })}
@@ -404,15 +448,23 @@ export default function MyTickets({ delay = 0 }) {
           </>
         )}
       </div>
+
+      {/* Dynamic Pass Details Modal */}
+      <PassDetailsModal
+        pass={selectedPass}
+        isOpen={isModalOpen}
+        onClose={handleClosePassModal}
+      />
     </motion.div>
   );
 }
 
-function TicketCard({ ticket, index }) {
-  const isConfirmed = ticket.status === 'Confirmed';
+function TicketCard({ ticket, index, onSelectPass }) {
+  const isConfirmed = ticket.status === 'Confirmed' || ticket.status === 'Generated' || ticket.status === 'generated';
   const displayTitle = ticket.eventTitle || (typeof ticket.event === 'string' ? ticket.event : ticket.event?.title) || 'Event Pass';
   const displayDate = ticket.date || ticket.event?.date || 'Upcoming';
   const displayLocation = ticket.location || ticket.venue || ticket.event?.location || ticket.event?.venue || 'Main Auditorium';
+  const passUid = ticket.pass_uid || `PASS-${ticket.id}`;
 
   return (
     <motion.div
@@ -425,11 +477,20 @@ function TicketCard({ ticket, index }) {
         rotateX: -1,
         transition: { duration: 0.3 }
       }}
-      className="min-w-[340px] max-w-[380px] flex-shrink-0 select-none"
+      onClick={() => onSelectPass && onSelectPass(ticket)}
+      className="min-w-[340px] max-w-[380px] flex-shrink-0 select-none cursor-pointer"
       style={{ perspective: '1200px' }}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelectPass && onSelectPass(ticket);
+        }
+      }}
     >
       <div
-        className="relative rounded-2xl overflow-hidden border border-vol-border/50 hover:border-vol-accent/40 transition-all duration-300 group"
+        className="relative rounded-2xl overflow-hidden border border-vol-border/50 hover:border-indigo-500/60 transition-all duration-300 group bg-vol-card shadow-lg"
         style={{ boxShadow: `0 20px 40px -15px ${ticket.glowColor}` }}
       >
         {/* Gradient Top Strip */}
@@ -452,10 +513,12 @@ function TicketCard({ ticket, index }) {
                 <TicketIcon size={20} style={{ color: ticket.accentColor }} />
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="font-bold text-white text-base group-hover:text-vol-accent2 transition-colors truncate" title={displayTitle}>
+                <h3 className="font-bold text-white text-base group-hover:text-cyan-300 transition-colors truncate" title={displayTitle}>
                   {displayTitle}
                 </h3>
-                <p className="text-[11px] text-gray-500 font-mono mt-0.5 truncate">Ticket {ticket.id}</p>
+                <p className="text-[11px] text-gray-400 font-mono mt-0.5 truncate tracking-wider">
+                  UID: <span className="text-cyan-400 font-semibold">{passUid}</span>
+                </p>
               </div>
             </div>
             <span className={clsx(
@@ -489,9 +552,18 @@ function TicketCard({ ticket, index }) {
               </div>
             </div>
 
-            {/* QR Code */}
-            <div className="w-14 h-14 bg-white rounded-lg p-1.5 flex items-center justify-center shadow-sm group-hover:shadow-glow-cyan transition-shadow duration-300 shrink-0">
-              <QrCode size={36} className="text-gray-800" />
+            {/* In-Memory Dynamic QR Code Preview */}
+            <div className="w-14 h-14 bg-white rounded-lg p-1.5 flex items-center justify-center shadow-sm group-hover:scale-105 transition-all duration-300 shrink-0">
+              {ticket.pass_uid ? (
+                <QRCode
+                  value={ticket.pass_uid}
+                  size={46}
+                  style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
+                  viewBox="0 0 46 46"
+                />
+              ) : (
+                <QrCode size={36} className="text-gray-800" />
+              )}
             </div>
           </div>
         </div>

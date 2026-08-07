@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import WidgetCard from './WidgetCard';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, Award, CalendarCheck, CheckCircle2, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, ResponsiveContainer, Cell } from 'recharts';
 import { motion } from 'framer-motion';
 
@@ -52,87 +52,89 @@ function AnimatedCounter({ value, suffix = '', decimals = 0, duration = 1.5 }) {
   );
 }
 
-export default function ImpactStats() {
+export default function ImpactStats({ className, delay = 0.1 }) {
   return (
-    <WidgetCard title="My Impact" delay={0.1}>
-      <div className="flex-1 p-5 flex flex-col justify-between">
+    <WidgetCard 
+      title={
+        <div className="flex items-center gap-2">
+          <TrendingUp size={18} className="text-vol-accent2" />
+          <span>My Impact</span>
+        </div>
+      } 
+      className={className}
+      delay={delay}
+    >
+      <div className="flex-1 p-5 flex flex-col justify-between gap-4">
+        {/* Main Stat: Hours Contributed */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="flex items-end justify-between border-b border-vol-border/30 pb-4 mb-4"
+          transition={{ delay: delay + 0.1, duration: 0.5 }}
+          className="flex items-end justify-between p-4 rounded-xl bg-vol-bg border border-vol-border/50"
         >
           <div>
-            <p className="text-sm text-gray-400 mb-1">Hours Contributed</p>
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-white leading-none">
+            <p className="text-xs text-gray-400 mb-1">Hours Contributed</p>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-3xl font-extrabold text-white leading-none tracking-tight">
                 <AnimatedCounter value={48.5} decimals={1} />
               </span>
-              <span className="text-sm text-gray-400">hours</span>
+              <span className="text-xs font-medium text-gray-400">hours</span>
             </div>
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8, duration: 0.4 }}
-              className="flex items-center gap-1 mt-2 text-vol-success text-xs font-medium"
-            >
+            <div className="flex items-center gap-1 mt-2 text-vol-success text-[11px] font-semibold">
               <ArrowUp size={12} />
-              <span>12% this month</span>
-            </motion.div>
+              <span>+12% this month</span>
+            </div>
           </div>
           
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="w-24 h-16"
-          >
+          <div className="w-24 h-14 relative shrink-0">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data}>
-                <Bar dataKey="value" radius={[2, 2, 0, 0]} animationDuration={1200} animationBegin={400}>
+              <BarChart data={data} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                <Bar dataKey="value" radius={[2, 2, 0, 0]} animationDuration={1000} animationBegin={300}>
                   {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={index === data.length - 1 ? '#8B5CF6' : '#4C1D95'} />
+                    <Cell key={`cell-${index}`} fill={index === data.length - 1 ? '#8B5CF6' : '#3730A3'} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </motion.div>
+          </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-4">
+        {/* Secondary Metrics: 2-Column Grid */}
+        <div className="grid grid-cols-2 gap-3 mt-auto">
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35, duration: 0.5 }}
-            className="border-b border-vol-border/30 pb-4"
+            transition={{ delay: delay + 0.2, duration: 0.4 }}
+            className="p-3.5 rounded-xl bg-vol-bg border border-vol-border/40 flex flex-col justify-between"
           >
-            <p className="text-sm text-gray-400 mb-1">Events Attended</p>
-            <span className="text-2xl font-bold text-white leading-none">
+            <div className="flex items-center justify-between gap-1 mb-2">
+              <span className="text-xs text-gray-400 truncate">Events</span>
+              <CalendarCheck size={14} className="text-vol-accent2 shrink-0" />
+            </div>
+            <div className="text-2xl font-bold text-white leading-none">
               <AnimatedCounter value={12} />
-            </span>
+            </div>
+            <span className="text-[10px] text-gray-500 mt-1">Attended</span>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
+            transition={{ delay: delay + 0.3, duration: 0.4 }}
+            className="p-3.5 rounded-xl bg-vol-bg border border-vol-border/40 flex flex-col justify-between"
           >
-            <p className="text-sm text-gray-400 mb-1">Check-ins Completed</p>
-            <span className="text-2xl font-bold text-white leading-none">
+            <div className="flex items-center justify-between gap-1 mb-2">
+              <span className="text-xs text-gray-400 truncate">Check-ins</span>
+              <CheckCircle2 size={14} className="text-vol-success shrink-0" />
+            </div>
+            <div className="text-2xl font-bold text-white leading-none">
               <AnimatedCounter value={36} />
-            </span>
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.2, duration: 0.4 }}
-              className="flex items-center gap-1 mt-2 text-vol-success text-xs font-medium"
-            >
-              <ArrowUp size={12} />
-              <span>8 this month</span>
-            </motion.div>
+            </div>
+            <span className="text-[10px] text-vol-success font-medium mt-1">+8 this month</span>
           </motion.div>
         </div>
       </div>
     </WidgetCard>
   );
 }
+

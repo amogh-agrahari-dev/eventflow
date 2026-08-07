@@ -6,13 +6,168 @@ import {
   Home, PlusSquare, History, Users, ClipboardList,
   MessageSquare, UserPlus, Bell, MapPin,
   Settings, BarChart2, Check, LayoutTemplate, MessageCircle, Menu,
-  Calendar, Clock, Image as ImageIcon, ArrowLeft, Share2, Heart
+  Calendar, Clock, Image as ImageIcon, ArrowLeft, Share2, Heart, Loader2
 } from 'lucide-react';
 import Logo from '@/components/general/Logo';
 import Sidebar from '@/components/general/Sidebar';
 import { Button } from '@/components/ui';
 import { useUserStore } from '@/store/userStore';
 import { getToken } from '@/lib/auth';
+import SwitchRoleButton from '@/components/general/SwitchRoleButton';
+import ProfileDropdown from '@/components/general/ProfileDropdown';
+
+function EventLoadingSkeleton({ isMobileMenuOpen, setIsMobileMenuOpen, isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed }) {
+  return (
+    <div className="flex h-screen bg-[#161B23] text-slate-300 font-sans overflow-hidden">
+      <Head>
+        <title>Loading Event... | EventFlow</title>
+      </Head>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <Sidebar isMobileMenuOpen={isMobileMenuOpen} isDesktopSidebarCollapsed={isDesktopSidebarCollapsed} />
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-[#161B23]">
+        {/* Top Header */}
+        <header className="h-[68px] flex items-center justify-between px-4 md:px-8 bg-[#161B23]/80 backdrop-blur-sm border-b border-[#1C202B] z-10 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <button
+              className="md:hidden text-slate-400 hover:text-white transition-colors"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <button
+              className="hidden md:block text-slate-400 hover:text-white transition-colors"
+              onClick={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <div className="h-6 w-32 bg-slate-800/80 rounded-md animate-pulse" />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <SwitchRoleButton currentRole="Organizer" />
+            <ProfileDropdown currentRole="Organizer" />
+          </div>
+        </header>
+
+        {/* Content Body with Shimmer Skeleton */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          {/* Cover Image Skeleton */}
+          <div className="h-64 md:h-80 w-full bg-gradient-to-br from-[#1F2533] via-[#161B23] to-[#12161F] relative flex flex-col items-center justify-center border-b border-[#2A303C]">
+            <div className="flex flex-col items-center gap-3">
+              <div className="relative">
+                <div className="w-14 h-14 rounded-2xl bg-[#6E56CF]/10 border border-[#6E56CF]/30 flex items-center justify-center shadow-lg shadow-[#6E56CF]/10">
+                  <Loader2 className="w-7 h-7 text-[#00E5FF] animate-spin" />
+                </div>
+                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#6E56CF] to-[#00E5FF] opacity-20 blur-sm animate-pulse" />
+              </div>
+              <span className="text-xs font-semibold text-slate-400 tracking-wider uppercase">Loading Event Details...</span>
+            </div>
+
+            <div className="absolute top-6 left-6">
+              <div className="h-9 w-32 bg-[#11141A]/80 rounded-full border border-[#2A303C]" />
+            </div>
+            <div className="absolute top-6 right-6 flex gap-3">
+              <div className="w-9 h-9 bg-[#11141A]/80 rounded-full border border-[#2A303C]" />
+              <div className="w-9 h-9 bg-[#11141A]/80 rounded-full border border-[#2A303C]" />
+            </div>
+          </div>
+
+          {/* Details Section */}
+          <div className="max-w-[1200px] mx-auto px-4 md:px-8 py-8 -mt-16 relative z-20">
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* Main Info Skeleton */}
+              <div className="flex-1">
+                <div className="bg-[#1A1F2B] border border-[#2A303C] rounded-2xl p-6 md:p-8 shadow-xl space-y-6">
+                  {/* Badges */}
+                  <div className="flex gap-2">
+                    <div className="h-6 w-20 bg-slate-800/80 rounded-lg animate-pulse" />
+                    <div className="h-6 w-16 bg-slate-800/80 rounded-lg animate-pulse" />
+                    <div className="h-6 w-20 bg-slate-800/80 rounded-lg animate-pulse" />
+                  </div>
+
+                  {/* Title */}
+                  <div className="space-y-2">
+                    <div className="h-9 w-3/4 bg-slate-800/80 rounded-xl animate-pulse" />
+                    <div className="h-6 w-1/2 bg-slate-800/60 rounded-lg animate-pulse" />
+                  </div>
+
+                  {/* Meta Cards Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    {[1, 2, 3].map((item) => (
+                      <div key={item} className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#11141A] border border-[#2A303C] animate-pulse shrink-0" />
+                        <div className="space-y-1.5 flex-1">
+                          <div className="h-4 w-16 bg-slate-800/80 rounded animate-pulse" />
+                          <div className="h-4 w-32 bg-slate-800/60 rounded animate-pulse" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <hr className="border-[#2A303C]" />
+
+                  {/* About Shimmer */}
+                  <div className="space-y-3 pt-2">
+                    <div className="h-5 w-40 bg-slate-800/80 rounded animate-pulse" />
+                    <div className="space-y-2">
+                      <div className="h-4 w-full bg-slate-800/50 rounded animate-pulse" />
+                      <div className="h-4 w-11/12 bg-slate-800/50 rounded animate-pulse" />
+                      <div className="h-4 w-4/5 bg-slate-800/50 rounded animate-pulse" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sidebar Registration Skeleton */}
+              <div className="w-full lg:w-80 shrink-0 space-y-6">
+                <div className="bg-[#1A1F2B] border border-[#2A303C] rounded-2xl p-6 shadow-xl space-y-6">
+                  <div className="h-5 w-36 bg-slate-800/80 rounded animate-pulse" />
+
+                  {/* Capacity Bar */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <div className="h-4 w-16 bg-slate-800/60 rounded animate-pulse" />
+                      <div className="h-4 w-16 bg-slate-800/60 rounded animate-pulse" />
+                    </div>
+                    <div className="h-2 w-full bg-[#0B0E14] rounded-full overflow-hidden">
+                      <div className="h-full w-1/3 bg-slate-700/60 rounded-full animate-pulse" />
+                    </div>
+                  </div>
+
+                  <hr className="border-[#2A303C]" />
+
+                  {/* Buttons */}
+                  <div className="space-y-3">
+                    <div className="h-11 w-full bg-[#6E56CF]/30 rounded-xl animate-pulse" />
+                    <div className="h-11 w-full bg-slate-800/80 rounded-xl animate-pulse" />
+                  </div>
+
+                  {/* Volunteers box */}
+                  <div className="p-4 rounded-xl bg-[#11141A] border border-[#2A303C] space-y-2">
+                    <div className="h-4 w-28 bg-slate-800/80 rounded animate-pulse" />
+                    <div className="h-3 w-full bg-slate-800/50 rounded animate-pulse" />
+                    <div className="h-3 w-4/5 bg-slate-800/50 rounded animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
 
 export default function EventDetailsPage() {
   const router = useRouter();
@@ -29,8 +184,10 @@ export default function EventDetailsPage() {
   }, [token, user, fetchUser]);
 
   const [event, setEvent] = React.useState(null);
+  const [loading, setLoading] = useState(true);
 
   const getEventById = async (eventId) => {
+    setLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/event/${eventId}`, {
         method: "GET",
@@ -38,13 +195,21 @@ export default function EventDetailsPage() {
           "Content-Type": "application/json",
         },
       });
-      const data = await response.json();
-      console.log(data);
-      setEvent(data);
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setEvent(data);
+      } else {
+        setEvent(null);
+      }
     } catch (error) {
       console.error("Error fetching event by ID:", error);
+      setEvent(null);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
+
   const registerVolunteer = async () => {
     if (!user) {
       console.error("User not logged in");
@@ -63,7 +228,7 @@ export default function EventDetailsPage() {
     } catch (error) {
       console.error("Error fetching event by ID:", error);
     }
-  }
+  };
 
   const [isRegisteringAttendee, setIsRegisteringAttendee] = useState(false);
   const [attendeeRegistered, setAttendeeRegistered] = useState(false);
@@ -165,6 +330,17 @@ export default function EventDetailsPage() {
     }
   }, [id]);
 
+  if (loading) {
+    return (
+      <EventLoadingSkeleton
+        isMobileMenuOpen={isMobileMenuOpen}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
+        isDesktopSidebarCollapsed={isDesktopSidebarCollapsed}
+        setIsDesktopSidebarCollapsed={setIsDesktopSidebarCollapsed}
+      />
+    );
+  }
+
   if (!event) {
     return (
       <div className="flex h-screen bg-[#161B23] text-white items-center justify-center flex-col">
@@ -219,30 +395,17 @@ export default function EventDetailsPage() {
             <h1 className="text-[22px] font-medium text-white truncate">Event Details</h1>
           </div>
 
-          <div className="flex items-center gap-4">
-            <button className="relative p-2 text-[#5A6B8A] hover:text-white transition-colors">
+          <div className="flex items-center gap-3">
+            <button className="relative p-2 text-[#5A6B8A] hover:text-white transition-colors cursor-pointer">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#F59E0B] rounded-full border-2 border-[#161B23]"></span>
             </button>
-            {user ? (
-              <div className="flex items-center gap-3">
-                <div className="flex flex-col items-end">
-                  <span className="text-sm font-medium text-white">{user.name || user.email}</span>
-                  <button onClick={() => { logout(); router.push('/auth/login'); }} className="text-xs text-[#5A6B8A] hover:text-rose-400 transition-colors">Logout</button>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#6E56CF] to-[#00E5FF] p-[2px] shadow-lg shadow-[#6E56CF]/20">
-                  <div className="w-full h-full bg-[#161B23] rounded-full flex items-center justify-center overflow-hidden">
-                    <span className="text-xs font-bold text-white">
-                      {(user.name || user.email || 'U').charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <Button onClick={() => router.push('/auth/login')} className="bg-[#6E56CF] hover:bg-[#5a46aa] text-white text-sm h-8 px-4 rounded-full">
-                Login
-              </Button>
-            )}
+
+            {/* Switch Role Button */}
+            <SwitchRoleButton currentRole="Organizer" />
+
+            {/* Profile Dropdown Menu */}
+            <ProfileDropdown currentRole="Organizer" />
           </div>
         </header>
 
