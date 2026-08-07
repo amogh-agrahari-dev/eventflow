@@ -69,7 +69,7 @@ export default function OrganizerDashboard() {
   const [showCustomizePanel, setShowCustomizePanel] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState(2);
+  const [selectedEventId, setSelectedEventId] = useState(null);
 
   const router = useRouter();
   const { user, fetchUser, logout } = useUserStore();
@@ -334,12 +334,22 @@ function UpcomingEventsWidget({ selectedEventId, onSelectEvent }) {
         },
       });
       const data = await response.json();
+      let eventsList = [];
       if (Array.isArray(data)) {
-        setUpcomingEvents(data.slice(0, 4));
+        eventsList = data;
       } else if (data && data.success && Array.isArray(data.events)) {
-        setUpcomingEvents(data.events.slice(0, 4));
+        eventsList = data.events;
       } else if (data && Array.isArray(data.data)) {
-        setUpcomingEvents(data.data.slice(0, 4));
+        eventsList = data.data;
+      }
+      setUpcomingEvents(eventsList.slice(0, 4));
+
+      // Auto-select first event if none currently selected
+      if (!selectedEventId && eventsList.length > 0) {
+        const firstEventId = eventsList[0]?.id ?? eventsList[0]?.event_id;
+        if (firstEventId) {
+          onSelectEvent?.(firstEventId);
+        }
       }
     } catch (error) {
       console.error("Error fetching upcoming events:", error);
@@ -362,36 +372,43 @@ function UpcomingEventsWidget({ selectedEventId, onSelectEvent }) {
   return (
     <Card title="Upcoming Events" action={<Badge>Preparing ▾</Badge>}>
       <div className="space-y-3 flex-1 overflow-y-auto custom-scrollbar">
-        {upcomingEvents?.map((event, i) => {
-          const eventId = event?.id ?? event?.event_id;
-          const isSelected = Number(selectedEventId) === Number(eventId);
+        {upcomingEvents?.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-28 text-xs text-gray-500 text-center px-4">
+            <CalendarDays className="w-6 h-6 text-gray-600 mb-1" />
+            <span>No events found</span>
+          </div>
+        ) : (
+          upcomingEvents?.map((event, i) => {
+            const eventId = event?.id ?? event?.event_id;
+            const isSelected = Number(selectedEventId) === Number(eventId);
 
-          return (
-            <div key={eventId || i} className="space-y-2">
-              <EventItem
-                title={event?.title}
-                date={formatDate(event?.start_time)}
-                reg={`${event?.max_attendees || 0} registered`}
-                vol={`${event?.volunteers_required || 0} volunteers`}
-                color={['bg-gradient-to-br from-indigo-500 to-purple-600', 'bg-gradient-to-br from-emerald-500 to-teal-700', 'bg-gradient-to-br from-orange-500 to-amber-700', 'bg-gradient-to-br from-pink-500 to-rose-700'][i % 4]}
-                isActive={isSelected}
-              />
-              <button
-                onClick={() => onSelectEvent?.(eventId)}
-                className={`w-full rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${isSelected
-                  ? 'border-vol-accent2/50 bg-vol-accent2/10 text-vol-accent2 shadow-sm'
-                  : 'border-vol-border bg-vol-bg/60 text-gray-300 hover:bg-vol-border/40 hover:text-white'
-                  }`}
-              >
-                {isSelected ? 'Selected Event' : 'Select Event'}
-              </button>
-            </div>
-          );
-        })}
+            return (
+              <div key={eventId || i} className="space-y-2">
+                <EventItem
+                  title={event?.title}
+                  date={formatDate(event?.start_time)}
+                  reg={`${event?.max_attendees || 0} registered`}
+                  vol={`${event?.volunteers_required || 0} volunteers`}
+                  color={['bg-gradient-to-br from-indigo-500 to-purple-600', 'bg-gradient-to-br from-emerald-500 to-teal-700', 'bg-gradient-to-br from-orange-500 to-amber-700', 'bg-gradient-to-br from-pink-500 to-rose-700'][i % 4]}
+                  isActive={isSelected}
+                />
+                <button
+                  onClick={() => onSelectEvent?.(eventId)}
+                  className={`w-full rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${isSelected
+                    ? 'border-vol-accent2/50 bg-vol-accent2/10 text-vol-accent2 shadow-sm'
+                    : 'border-vol-border bg-vol-bg/60 text-gray-300 hover:bg-vol-border/40 hover:text-white'
+                    }`}
+                >
+                  {isSelected ? 'Selected Event' : 'Select Event'}
+                </button>
+              </div>
+            );
+          })
+        )}
       </div>
-      <button className="w-full mt-2 py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent flex items-center justify-center gap-1.5 shrink-0">
+      <Link href="/eventsall" className="w-full mt-2 py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent flex items-center justify-center gap-1.5 shrink-0">
         View All Events <ChevronRight className="w-4 h-4" />
-      </button>
+      </Link>
     </Card>
   );
 }
@@ -407,29 +424,103 @@ function VolunteerAssignmentsWidget({ selectedEventId }) {
     }
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/tasks/${selectedEventId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const headers = {
+        "Content-Type": "application/json",
+      };
 
-      const data = await response.json();
-      let rawTasks = [];
-      if (Array.isArray(data)) {
-        rawTasks = data;
-      } else if (data && Array.isArray(data.tasks)) {
-        rawTasks = data.tasks;
-      } else if (data && Array.isArray(data.data)) {
-        rawTasks = data.data;
+      let allTasks = [];
+
+      // 1. Fetch Event details to get the volunteers list
+      try {
+        let eventData = null;
+        let eventRes = await fetch(`${baseUrl}/event/${selectedEventId}`, { method: "GET", headers });
+
+        if (!eventRes.ok && (eventRes.status === 404 || eventRes.status === 405)) {
+          const fallbackRes = await fetch(`${baseUrl}/events/${selectedEventId}`, { method: "GET", headers });
+          if (fallbackRes.ok) {
+            eventRes = fallbackRes;
+          }
+        }
+
+        if (eventRes.ok) {
+          eventData = await eventRes.json();
+        }
+
+        let volunteers = [];
+        if (eventData && Array.isArray(eventData.volunteers) && eventData.volunteers.length > 0) {
+          volunteers = eventData.volunteers;
+        } else {
+          // Fallback: fetch /{selectedEventId}/volunteers
+          const volRes = await fetch(`${baseUrl}/${selectedEventId}/volunteers`, { method: "GET", headers });
+          if (volRes.ok) {
+            const volData = await volRes.json();
+            if (Array.isArray(volData)) {
+              volunteers = volData;
+            } else if (volData && Array.isArray(volData.volunteers)) {
+              volunteers = volData.volunteers;
+            }
+          }
+        }
+
+        // Fetch user-specific tasks for each volunteer: /tasks/{user_id}/{event_id}
+        if (volunteers.length > 0) {
+          const taskPromises = volunteers.map(async (v) => {
+            const vUserId = typeof v === 'object' && v !== null ? (v.id ?? v.user_id ?? v.userId) : v;
+            if (!vUserId) return [];
+            try {
+              const res = await fetch(`${baseUrl}/tasks/${vUserId}/${selectedEventId}`, {
+                method: "GET",
+                headers,
+              });
+              if (res.ok) {
+                const data = await res.json();
+                return Array.isArray(data) ? data : [];
+              }
+            } catch (e) {
+              console.warn(`Failed to fetch tasks for volunteer ${vUserId} and event ${selectedEventId}:`, e);
+            }
+            return [];
+          });
+
+          const taskResults = await Promise.allSettled(taskPromises);
+          taskResults.forEach((r) => {
+            if (r.status === "fulfilled" && Array.isArray(r.value)) {
+              allTasks.push(...r.value);
+            }
+          });
+        }
+      } catch (err) {
+        console.warn("Could not fetch tasks via event volunteers:", err);
       }
 
-      // Strictly filter tasks for the selected event only
-      const eventTasks = rawTasks.filter((task) => {
-        const taskEventId = task?.event_id ?? task?.eventId ?? task?.event?.id;
-        if (taskEventId === undefined || taskEventId === null) {
-          return true;
+      // 2. Fallback: try direct /tasks/{selectedEventId} if volunteer endpoints returned no tasks
+      if (allTasks.length === 0) {
+        try {
+          const directRes = await fetch(`${baseUrl}/tasks/${selectedEventId}`, { method: "GET", headers });
+          if (directRes.ok) {
+            const directData = await directRes.json();
+            if (Array.isArray(directData)) {
+              allTasks = directData;
+            } else if (directData?.tasks && Array.isArray(directData.tasks)) {
+              allTasks = directData.tasks;
+            }
+          }
+        } catch (e) {
+          // Ignore fallback error
         }
+      }
+
+      // Deduplicate by task id and filter for selected event
+      const seenIds = new Set();
+      const eventTasks = allTasks.filter((task) => {
+        if (!task) return false;
+        const taskId = task.id ?? task.task_id;
+        if (taskId && seenIds.has(taskId)) return false;
+        if (taskId) seenIds.add(taskId);
+
+        const taskEventId = task.event_id ?? task.eventId ?? task?.event?.id;
+        if (taskEventId === undefined || taskEventId === null) return true;
         return String(taskEventId) === String(selectedEventId);
       });
 
@@ -449,11 +540,16 @@ function VolunteerAssignmentsWidget({ selectedEventId }) {
   return (
     <Card title="Volunteer Tasks" action={<Badge color="emerald">Active ▾</Badge>}>
       <div className="flex justify-between text-xs text-gray-500 mb-1 px-1 shrink-0 font-medium">
-        <span>Assigned Tasks {selectedEventId ? `(#${selectedEventId})` : ''}</span>
+        <span>Assigned Tasks {selectedEventId ? `(#${selectedEventId})` : '(Select an event)'}</span>
         <span>Status</span>
       </div>
       <div className="space-y-2 flex-1 overflow-y-auto custom-scrollbar">
-        {loading ? (
+        {!selectedEventId ? (
+          <div className="flex flex-col items-center justify-center h-28 text-xs text-gray-500 text-center px-4">
+            <ClipboardList className="w-6 h-6 text-gray-600 mb-1" />
+            <span>Select an event to view assigned tasks</span>
+          </div>
+        ) : loading ? (
           <div className="flex items-center justify-center h-28 text-xs text-gray-400">
             <div className="w-4 h-4 border-2 border-vol-accent2 border-t-transparent rounded-full animate-spin mr-2" />
             Loading tasks...
@@ -465,7 +561,7 @@ function VolunteerAssignmentsWidget({ selectedEventId }) {
           </div>
         ) : (
           tasks.map((task) => (
-            <AssignmentItem key={task.id} name={task?.title} role={task?.status || "In Progress"} />
+            <AssignmentItem key={task.id ?? task.task_id} name={task?.title} role={task?.status || "In Progress"} />
           ))
         )}
       </div>
@@ -536,20 +632,44 @@ function LiveCheckInWidget() {
 
 function VolunteerCentralWidget({ selectedEventId }) {
   const [volunteers, setVolunteers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const getVolunteers = async () => {
+    if (!selectedEventId) {
+      setVolunteers([]);
+      return;
+    }
+    setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/${selectedEventId || 2}/volunteers`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${baseUrl}/${selectedEventId}/volunteers`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setVolunteers(data);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setVolunteers(data);
+        } else if (data && Array.isArray(data.volunteers)) {
+          setVolunteers(data.volunteers);
+        }
+      } else {
+        // Fallback to /event/{id}
+        const eventRes = await fetch(`${baseUrl}/event/${selectedEventId}`);
+        if (eventRes.ok) {
+          const eventData = await eventRes.json();
+          if (Array.isArray(eventData.volunteers)) {
+            setVolunteers(eventData.volunteers);
+          }
+        }
       }
     } catch (error) {
       console.error("Error fetching volunteers:", error);
+      setVolunteers([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -565,23 +685,43 @@ function VolunteerCentralWidget({ selectedEventId }) {
         <span className="col-span-3 text-right">Status</span>
       </div>
       <div className="space-y-1.5 flex-1 overflow-y-auto custom-scrollbar">
-        {volunteers.map((volunteer, i) => (
-          <CentralItem
-            key={volunteer.id || i}
-            name={volunteer.name}
-            event={selectedEventId ? `Event #${selectedEventId}` : "Main Hall"}
-            stat={volunteer.status || "on-duty"}
-            color={volunteer.status === 'on-duty' ? 'bg-vol-success' : volunteer.status === 'inactive' ? 'bg-vol-warning' : 'bg-gray-500'}
-          />
-        ))}
+        {!selectedEventId ? (
+          <div className="flex flex-col items-center justify-center h-28 text-xs text-gray-500 text-center px-4">
+            <Users className="w-6 h-6 text-gray-600 mb-1" />
+            <span>Select an event to view volunteers</span>
+          </div>
+        ) : loading ? (
+          <div className="flex items-center justify-center h-28 text-xs text-gray-400">
+            <div className="w-4 h-4 border-2 border-vol-accent2 border-t-transparent rounded-full animate-spin mr-2" />
+            Loading volunteers...
+          </div>
+        ) : volunteers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-28 text-xs text-gray-500 text-center px-4">
+            <Users className="w-6 h-6 text-gray-600 mb-1" />
+            <span>No volunteers assigned to this event</span>
+          </div>
+        ) : (
+          volunteers.map((volunteer, i) => (
+            <CentralItem
+              key={volunteer.id || i}
+              name={volunteer.name}
+              event={selectedEventId ? `Event #${selectedEventId}` : "Main Hall"}
+              stat={volunteer.status || "on-duty"}
+              color={volunteer.status === 'on-duty' ? 'bg-vol-success' : volunteer.status === 'inactive' ? 'bg-vol-warning' : 'bg-gray-500'}
+            />
+          ))
+        )}
       </div>
       <div className="mt-2 flex gap-2 shrink-0">
         <button className="flex-1 py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent flex items-center justify-center gap-1.5">
           <MessageSquare className="w-4 h-4" /> Message
         </button>
-        <button className="flex-1 py-2.5 rounded-lg bg-vol-card hover:bg-vol-card/80 text-gray-300 border border-vol-border text-sm font-medium transition-all hover:text-white">
+        <Link
+          href={selectedEventId ? `/directory/${selectedEventId}` : '/directory'}
+          className="flex-1 py-2.5 rounded-lg bg-vol-card hover:bg-vol-card/80 text-gray-300 border border-vol-border text-sm font-medium transition-all hover:text-white flex items-center justify-center"
+        >
           Roster
-        </button>
+        </Link>
       </div>
     </Card>
   );
@@ -650,19 +790,28 @@ function RecentRegistrationsWidget({ selectedEventId }) {
   const [registrations, setRegistrations] = useState([]);
 
   const fetchRegistrations = async () => {
+    if (!selectedEventId) {
+      setRegistrations([]);
+      return;
+    }
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/attendence/${selectedEventId || 2}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/attendence/${selectedEventId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setRegistrations(data);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setRegistrations(data);
+        } else if (data && Array.isArray(data.attendees)) {
+          setRegistrations(data.attendees);
+        }
       }
     } catch (error) {
       console.error("Error fetching registrations:", error);
+      setRegistrations([]);
     }
   };
 
@@ -673,23 +822,35 @@ function RecentRegistrationsWidget({ selectedEventId }) {
   return (
     <Card title="Recent Registrations" action={<Badge color="emerald">Active ▾</Badge>}>
       <div className="space-y-2 flex-1 overflow-y-auto custom-scrollbar">
-        {registrations.map((reg, i) => (
-          <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-vol-border/20 transition-all group cursor-pointer border border-transparent hover:border-vol-border/30 relative">
-            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-vol-accent2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full" />
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-full bg-vol-accent/10 border border-vol-accent/20 flex items-center justify-center shrink-0 text-vol-accent2 group-hover:bg-vol-accent/20 transition-all">
-                <ClipboardList className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-white group-hover:text-vol-accent2 transition-colors truncate">{reg?.user?.name || "Attendee"}</p>
-                <div className="text-xs text-gray-400">{reg?.created_at ? new Date(reg?.created_at).toLocaleDateString() : "Recent"}</div>
-              </div>
-            </div>
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded border bg-vol-success/10 text-vol-success border-vol-success/20 shrink-0 ml-2">
-              {reg?.status || "Active"}
-            </span>
+        {!selectedEventId ? (
+          <div className="flex flex-col items-center justify-center h-28 text-xs text-gray-500 text-center px-4">
+            <ClipboardList className="w-6 h-6 text-gray-600 mb-1" />
+            <span>Select an event to view registrations</span>
           </div>
-        ))}
+        ) : registrations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-28 text-xs text-gray-500 text-center px-4">
+            <ClipboardList className="w-6 h-6 text-gray-600 mb-1" />
+            <span>No registrations found for this event</span>
+          </div>
+        ) : (
+          registrations.map((reg, i) => (
+            <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-vol-border/20 transition-all group cursor-pointer border border-transparent hover:border-vol-border/30 relative">
+              <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-vol-accent2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full" />
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-vol-accent/10 border border-vol-accent/20 flex items-center justify-center shrink-0 text-vol-accent2 group-hover:bg-vol-accent/20 transition-all">
+                  <ClipboardList className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-white group-hover:text-vol-accent2 transition-colors truncate">{reg?.user?.name || "Attendee"}</p>
+                  <div className="text-xs text-gray-400">{reg?.created_at ? new Date(reg?.created_at).toLocaleDateString() : "Recent"}</div>
+                </div>
+              </div>
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded border bg-vol-success/10 text-vol-success border-vol-success/20 shrink-0 ml-2">
+                {reg?.status || "Active"}
+              </span>
+            </div>
+          ))
+        )}
       </div>
       <button className="w-full mt-2 py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent flex items-center justify-center gap-1.5 shrink-0">
         All Registrations <ChevronRight className="w-4 h-4" />

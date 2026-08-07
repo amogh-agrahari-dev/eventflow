@@ -86,7 +86,7 @@ export default function QRScannerPage() {
             const response = await fetch(
                 `${apiUrl}/passes/${encodeURIComponent(trimmedUid)}`,
                 {
-                    method: "PUT",
+                    method: "PATCH",
                     headers: {
                         "Content-Type": "application/json",
                     },
