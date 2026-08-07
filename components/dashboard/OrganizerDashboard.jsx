@@ -9,8 +9,9 @@ import {
   Home, CalendarDays, PlusSquare, History, Users, ClipboardList,
   MessageSquare, UserPlus, LogOut, Search, Bell, Plus, MoreHorizontal,
   MapPin, CheckCircle2, ChevronRight, Settings, BarChart2, Briefcase, Mail, QrCode, X, SlidersHorizontal, Menu,
-  MonitorPlay, LayoutTemplate, MessageCircle, Check
+  MonitorPlay, LayoutTemplate, MessageCircle, Check, Share2, Heart, ArrowLeft
 } from 'lucide-react';
+import Sidebar from '@/components/general/Sidebar';
 
 function AutoWidthGrid(props) {
   const containerRef = React.useRef(null);
@@ -168,102 +169,7 @@ export default function OrganizerDashboard() {
       )}
 
       {/* 1. Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 bg-[#11141A] border-[#1C202B] flex flex-col shrink-0 overflow-hidden transform transition-all duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 w-[260px] border-r' : '-translate-x-full w-[260px] border-r'} ${isDesktopSidebarCollapsed ? 'md:w-0 md:border-r-0' : 'md:w-[260px] md:border-r'}`}>
-        <div className="w-[260px] h-full flex flex-col bg-[#11141A]">
-          {/* Brand / Logo Area */}
-          <div className="p-6 flex items-center gap-3 border-b border-[#1C202B]/60 shrink-0">
-            <Logo iconSize={32} />
-          </div>
-
-          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-2 space-y-6">
-            <div>
-              <div className="flex items-center gap-3 px-3 py-2 bg-[#2D3340]/40 text-[#00E5FF] border border-[#3A455A] rounded-lg cursor-pointer">
-                <Home className="w-[18px] h-[18px] text-[#00E5FF]" />
-                <span className="text-[13px] font-medium text-white flex-1">Dashboard</span>
-                <Check className="w-4 h-4 text-[#00E5FF]" />
-              </div>
-            </div>
-
-            <div>
-              <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">EVENT STUDIO</h3>
-              <div className="space-y-0.5">
-                <Link href="/events/add" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <PlusSquare className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Create New</span>
-                </Link>
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <LayoutTemplate className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Templates</span>
-                </Link>
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <History className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Past Events</span>
-                </Link>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">VOLUNTEER HUB</h3>
-              <div className="space-y-0.5">
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <Users className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Directory</span>
-                </Link>
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <ClipboardList className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Rosters</span>
-                </Link>
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <MessageSquare className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Feedback</span>
-                </Link>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">ATTENDEE MANAGEMENT</h3>
-              <div className="space-y-0.5">
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <UserPlus className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Registrations</span>
-                </Link>
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <Check className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Check-in Stations</span>
-                </Link>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">COMMUNICATIONS</h3>
-              <div className="space-y-0.5">
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <MessageCircle className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Messaging</span>
-                </Link>
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <Mail className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Email campaigns</span>
-                </Link>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">ANALYTICS PRO</h3>
-              <div className="space-y-0.5">
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <BarChart2 className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Custom Reports</span>
-                </Link>
-                <Link href="/settings" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <Settings className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">General Settings</span>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <Sidebar isMobileMenuOpen={isMobileMenuOpen} isDesktopSidebarCollapsed={isDesktopSidebarCollapsed} />
 
       {/* 2. Main Content Area */}
       <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-[#161B23]">

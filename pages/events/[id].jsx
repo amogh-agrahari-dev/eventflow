@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -9,17 +9,67 @@ import {
   Calendar, Clock, Image as ImageIcon, ArrowLeft, Share2, Heart
 } from 'lucide-react';
 import Logo from '@/components/general/Logo';
+import Sidebar from '@/components/general/Sidebar';
 import { Button } from '@/components/ui';
-import { MOCK_EVENTS } from '@/lib/mockEvents';
+import { useUserStore } from '@/store/userStore';
+import { getToken } from '@/lib/auth';
 
 export default function EventDetailsPage() {
   const router = useRouter();
   const { id } = router.query;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
+  const { user, fetchUser, logout } = useUserStore();
+  const token = getToken();
 
-  // Find event
-  const event = MOCK_EVENTS.find(e => e.id === Number(id));
+  useEffect(() => {
+    if (token && !user) {
+      fetchUser();
+    }
+  }, [token, user, fetchUser]);
+
+  const [event, setEvent] = React.useState(null);
+
+  const getEventById = async (eventId) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/event/${eventId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      console.log(data);
+      setEvent(data);
+    } catch (error) {
+      console.error("Error fetching event by ID:", error);
+    }
+  }
+  const registerVolunteer = async () => {
+    if (!user) {
+      console.error("User not logged in");
+      return;
+    }
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/${id}/volunteers/${user.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      console.log(data);
+      setEvent(data);
+    } catch (error) {
+      console.error("Error fetching event by ID:", error);
+    }
+  }
+
+  React.useEffect(() => {
+    if (id) {
+      getEventById(id);
+    }
+  }, [id]);
 
   if (!event) {
     return (
@@ -32,8 +82,10 @@ export default function EventDetailsPage() {
     );
   }
 
-  const isFull = event.registered >= event.maxAttendees;
-  const progressPercent = Math.min(100, Math.round((event.registered / event.maxAttendees) * 100));
+  const registered = event.registered || 0;
+  const isFull = registered >= event.max_attendees;
+  const progressPercent = Math.min(100, Math.round((registered / Math.max(event.max_attendees, 1)) * 100));
+  const isUserVolunteer = user && event.volunteers?.some(v => v.id === user.id);
 
   return (
     <div className="flex h-screen bg-[#161B23] text-slate-300 font-sans overflow-hidden selection:bg-[#6E56CF]/30">
@@ -50,72 +102,7 @@ export default function EventDetailsPage() {
       )}
 
       {/* 1. Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 bg-[#11141A] border-[#1C202B] flex flex-col shrink-0 overflow-hidden transform transition-all duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 w-[260px] border-r' : '-translate-x-full w-[260px] border-r'} ${isDesktopSidebarCollapsed ? 'md:w-0 md:border-r-0' : 'md:w-[260px] md:border-r'}`}>
-        <div className="w-[260px] h-full flex flex-col bg-[#11141A]">
-          <div className="p-6 flex items-center gap-3 border-b border-[#1C202B]/60 shrink-0">
-            <Logo iconSize={32} />
-          </div>
-
-          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-2 space-y-6 mt-4">
-            <div>
-              <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                <Home className="w-[18px] h-[18px]" />
-                <span className="text-[13px] font-medium flex-1">Dashboard</span>
-              </Link>
-            </div>
-
-            <div>
-              <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">EVENT STUDIO</h3>
-              <div className="space-y-0.5">
-                <Link href="/events/add" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <PlusSquare className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Create New</span>
-                </Link>
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <LayoutTemplate className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Templates</span>
-                </Link>
-                <Link href="/all-events" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <History className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">All Events</span>
-                </Link>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">VOLUNTEER HUB</h3>
-              <div className="space-y-0.5">
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <Users className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Directory</span>
-                </Link>
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <ClipboardList className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Rosters</span>
-                </Link>
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <MessageSquare className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Feedback</span>
-                </Link>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="px-3 text-[11px] font-semibold text-[#5A6B8A] uppercase tracking-wider mb-2">ANALYTICS PRO</h3>
-              <div className="space-y-0.5">
-                <Link href="#" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <BarChart2 className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">Custom Reports</span>
-                </Link>
-                <Link href="/settings" className="flex items-center gap-3 px-3 py-2 text-[#8F9BB3] hover:text-white transition-colors rounded-lg">
-                  <Settings className="w-[18px] h-[18px]" />
-                  <span className="text-[13px] font-medium">General Settings</span>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <Sidebar isMobileMenuOpen={isMobileMenuOpen} isDesktopSidebarCollapsed={isDesktopSidebarCollapsed} />
 
       {/* 2. Main Content Area */}
       <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-[#161B23]">
@@ -143,11 +130,25 @@ export default function EventDetailsPage() {
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#F59E0B] rounded-full border-2 border-[#161B23]"></span>
             </button>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#6E56CF] to-[#00E5FF] p-[2px] cursor-pointer shadow-lg shadow-[#6E56CF]/20">
-              <div className="w-full h-full bg-[#161B23] rounded-full flex items-center justify-center overflow-hidden">
-                <span className="text-xs font-bold text-white">OR</span>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col items-end">
+                  <span className="text-sm font-medium text-white">{user.name || user.email}</span>
+                  <button onClick={() => { logout(); router.push('/auth/login'); }} className="text-xs text-[#5A6B8A] hover:text-rose-400 transition-colors">Logout</button>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#6E56CF] to-[#00E5FF] p-[2px] shadow-lg shadow-[#6E56CF]/20">
+                  <div className="w-full h-full bg-[#161B23] rounded-full flex items-center justify-center overflow-hidden">
+                    <span className="text-xs font-bold text-white">
+                      {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <Button onClick={() => router.push('/auth/login')} className="bg-[#6E56CF] hover:bg-[#5a46aa] text-white text-sm h-8 px-4 rounded-full">
+                Login
+              </Button>
+            )}
           </div>
         </header>
 
@@ -155,8 +156,11 @@ export default function EventDetailsPage() {
         <div className="flex-1 overflow-y-auto custom-scrollbar">
 
           {/* Cover Image Area */}
-          <div className="h-64 md:h-80 w-full bg-gradient-to-br from-[#2D3340] to-[#1C202B] relative flex items-center justify-center border-b border-[#2A303C]">
-            <ImageIcon className="w-16 h-16 text-white/10" />
+          <div
+            className="h-64 md:h-80 w-full bg-gradient-to-br from-[#2D3340] to-[#1C202B] relative flex items-center justify-center border-b border-[#2A303C] bg-cover bg-center"
+            style={event.banner_url ? { backgroundImage: `url(${event.banner_url})` } : {}}
+          >
+            {!event.banner_url && <ImageIcon className="w-16 h-16 text-white/10" />}
 
             <div className="absolute top-6 left-6 flex items-center gap-3 z-10">
               <button
@@ -188,11 +192,11 @@ export default function EventDetailsPage() {
                     <span className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-[#6E56CF]/20 text-[#00E5FF] border border-[#6E56CF]/30">
                       {event.category}
                     </span>
-                    <span className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border ${event.type === 'Free' ? 'bg-[#10B981]/20 text-[#10B981] border-[#10B981]/30' : 'bg-[#F59E0B]/20 text-[#F59E0B] border-[#F59E0B]/30'}`}>
-                      {event.type}
+                    <span className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border ${event.is_free ? 'bg-[#10B981]/20 text-[#10B981] border-[#10B981]/30' : 'bg-[#F59E0B]/20 text-[#F59E0B] border-[#F59E0B]/30'}`}>
+                      {event.is_free ? 'Free' : 'Paid'}
                     </span>
-                    <span className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border ${event.format === 'Online' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-pink-500/20 text-pink-400 border-pink-500/30'}`}>
-                      {event.format}
+                    <span className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border ${event.format?.toLowerCase() === 'online' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-pink-500/20 text-pink-400 border-pink-500/30'}`}>
+                      {event.format ? event.format.charAt(0).toUpperCase() + event.format.slice(1).toLowerCase() : ''}
                     </span>
                   </div>
 
@@ -208,7 +212,7 @@ export default function EventDetailsPage() {
                       <div>
                         <h4 className="text-sm font-semibold text-white mb-1">Date</h4>
                         <p className="text-sm text-[#8F9BB3]">
-                          {new Date(event.startDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                          {new Date(event.start_time).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                         </p>
                       </div>
                     </div>
@@ -220,7 +224,7 @@ export default function EventDetailsPage() {
                       <div>
                         <h4 className="text-sm font-semibold text-white mb-1">Time</h4>
                         <p className="text-sm text-[#8F9BB3]">
-                          {new Date(event.startDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} - {new Date(event.endDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(event.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
                     </div>
@@ -261,7 +265,7 @@ export default function EventDetailsPage() {
                     <div className="flex justify-between items-end mb-2">
                       <span className="text-sm font-medium text-[#8F9BB3]">Capacity</span>
                       <span className={`text-sm font-bold ${isFull ? 'text-rose-400' : 'text-[#00E5FF]'}`}>
-                        {event.registered.toLocaleString()} / {event.maxAttendees.toLocaleString()}
+                        {registered.toLocaleString()} / {event.max_attendees?.toLocaleString() || 0}
                       </span>
                     </div>
                     <div className="h-2 w-full bg-[#0B0E14] rounded-full overflow-hidden">
@@ -281,9 +285,11 @@ export default function EventDetailsPage() {
 
                   <div className="space-y-3">
                     <Button
-                      className="w-full bg-[#6E56CF] hover:bg-[#5a46aa] text-white py-3 shadow-[0_0_15px_rgba(110,86,207,0.3)] transition-all font-semibold"
+                      onClick={registerVolunteer}
+                      disabled={isUserVolunteer}
+                      className={`w-full py-3 shadow-[0_0_15px_rgba(110,86,207,0.3)] transition-all font-semibold ${isUserVolunteer ? 'bg-[#2A303C] text-[#8F9BB3] opacity-70 cursor-not-allowed' : 'bg-[#6E56CF] hover:bg-[#5a46aa] text-white'}`}
                     >
-                      Register as Volunteer
+                      {isUserVolunteer ? 'Registered as Volunteer' : 'Register as Volunteer'}
                     </Button>
                     <Button
                       className="w-full bg-[#11141A] border border-[#00E5FF]/30 hover:bg-[#00E5FF]/10 text-[#00E5FF] py-3 transition-colors font-semibold"
@@ -298,8 +304,22 @@ export default function EventDetailsPage() {
                       <span className="text-sm font-semibold text-white">Volunteers Needed</span>
                     </div>
                     <p className="text-xs text-[#8F9BB3]">
-                      We are looking for {event.volunteersRequired} volunteers for this event. Perks include free merch and food.
+                      We are looking for {event.volunteers_required} volunteers for this event. Perks include free merch and food.
                     </p>
+
+                    {event.volunteers && event.volunteers.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-[#2A303C]">
+                        <span className="text-xs font-semibold text-[#8F9BB3] uppercase tracking-wider block mb-3">Current Volunteers</span>
+                        <div className="space-y-2">
+                          {event.volunteers.map((vol) => (
+                            <div key={vol.id} className="flex items-center justify-between text-sm bg-[#161B23] p-2 rounded-lg border border-[#2A303C]">
+                              <span className="text-white font-medium">{vol.name}</span>
+                              <span className="text-xs text-[#00E5FF] px-2 py-0.5 bg-[#00E5FF]/10 rounded-full">{vol.status}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
