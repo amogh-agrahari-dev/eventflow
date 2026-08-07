@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { X, Check, MapPin, AlertCircle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getToken } from '@/lib/auth';
 
 export default function AssignTaskModal({
   isOpen,
@@ -58,13 +57,9 @@ export default function AssignTaskModal({
     };
 
     try {
-      const token = getToken();
       const headers = {
         'Content-Type': 'application/json',
       };
-      if (token) {
-        headers['Authorization'] = `bearer ${token}`;
-      }
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/tasks/create`,

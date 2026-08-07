@@ -3,7 +3,7 @@ import { Menu, Search, Plus, Settings2, Bell } from 'lucide-react';
 import SwitchRoleButton from '@/components/general/SwitchRoleButton';
 import ProfileDropdown from '@/components/general/ProfileDropdown';
 
-export default function VolunteerHeader({ toggleSidebar }) {
+export default function VolunteerHeader({ toggleSidebar, title = "Volunteer Dashboard" }) {
   return (
     <header className="h-[72px] shrink-0 border-b border-vol-border/50 bg-vol-bg/95 backdrop-blur z-10 flex items-center justify-between px-6 sticky top-0">
       <div className="flex items-center gap-4">
@@ -13,7 +13,7 @@ export default function VolunteerHeader({ toggleSidebar }) {
         >
           <Menu size={20} />
         </button>
-        <h1 className="text-xl font-semibold text-white">Volunteer Dashboard</h1>
+        <h1 className="text-xl font-semibold text-white">{title}</h1>
       </div>
 
       <div className="flex items-center gap-2 md:gap-3 flex-1 justify-end min-w-0">

@@ -178,7 +178,7 @@ export default function PassesPage() {
 
             {/* Status Pills */}
             <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 custom-scrollbar">
-              {['all', 'generated', 'confirmed', 'checked-in'].map((status) => (
+              {['all', 'active', 'generated', 'confirmed'].map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}

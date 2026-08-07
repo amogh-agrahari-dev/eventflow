@@ -34,7 +34,7 @@ const menuSections = [
       { name: 'My Assignments', icon: ClipboardList, href: '#' },
       { name: 'My Schedule', icon: CalendarDays, href: '#' },
       { name: 'My Events', icon: CalendarRange, href: '#' },
-      { name: 'Check-in History', icon: History, href: '#' },
+      { name: 'Check-in History', icon: History, href: '/scanner' },
     ]
   },
   {

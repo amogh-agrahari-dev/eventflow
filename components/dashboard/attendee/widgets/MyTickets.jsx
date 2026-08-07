@@ -212,7 +212,7 @@ export default function MyTickets({ delay = 0 }) {
               date: formattedDate,
               time: rawTime || '10:00 AM',
               location: formattedLocation,
-              status: pass.status ? (pass.status.charAt(0).toUpperCase() + pass.status.slice(1)) : 'Confirmed',
+              status: pass.status ? (pass.status.charAt(0).toUpperCase() + pass.status.slice(1)) : 'Generated',
               rawPass: pass,
               ...randomColor,
             };
@@ -460,7 +460,8 @@ export default function MyTickets({ delay = 0 }) {
 }
 
 function TicketCard({ ticket, index, onSelectPass }) {
-  const isConfirmed = ticket.status === 'Confirmed' || ticket.status === 'Generated' || ticket.status === 'generated';
+  const statusStr = String(ticket.status || 'generated').toLowerCase();
+  const isActive = statusStr === 'active';
   const displayTitle = ticket.eventTitle || (typeof ticket.event === 'string' ? ticket.event : ticket.event?.title) || 'Event Pass';
   const displayDate = ticket.date || ticket.event?.date || 'Upcoming';
   const displayLocation = ticket.location || ticket.venue || ticket.event?.location || ticket.event?.venue || 'Main Auditorium';
@@ -522,12 +523,15 @@ function TicketCard({ ticket, index, onSelectPass }) {
               </div>
             </div>
             <span className={clsx(
-              "px-2.5 py-1 rounded-full text-[10px] font-semibold border flex items-center gap-1 shrink-0 mt-0.5",
-              isConfirmed
-                ? "bg-vol-success/10 text-vol-success border-vol-success/20"
-                : "bg-vol-warning/10 text-vol-warning border-vol-warning/20"
+              "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border flex items-center gap-1.5 shrink-0 mt-0.5",
+              isActive
+                ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                : "bg-amber-500/15 text-amber-300 border-amber-500/30"
             )}>
-              {isConfirmed && <CheckCircle2 size={11} />}
+              <span className={clsx(
+                "w-1.5 h-1.5 rounded-full",
+                isActive ? "bg-emerald-400" : "bg-amber-400"
+              )} />
               {ticket.status}
             </span>
           </div>

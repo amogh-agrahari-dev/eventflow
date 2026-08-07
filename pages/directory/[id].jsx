@@ -23,7 +23,6 @@ import {
 import Link from 'next/link';
 import { useTaskStore } from '@/store/taskStore';
 import AssignTaskModal from '@/components/dashboard/organizer/AssignTaskModal';
-import { getToken } from '@/lib/auth';
 
 export default function EventVolunteersDirectory() {
   const router = useRouter();
@@ -48,39 +47,85 @@ export default function EventVolunteersDirectory() {
     setError(null);
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const token = getToken();
       const headers = {
         'Content-Type': 'application/json',
       };
-      if (token) {
-        headers['Authorization'] = `bearer ${token}`;
-      }
 
-      // Fetch Event details & Event tasks in parallel
-      const [eventRes, tasksRes] = await Promise.allSettled([
-        fetch(`${baseUrl}/event/${id}`, { method: 'GET', headers }),
-        fetch(`${baseUrl}/tasks/${id}`, { method: 'GET', headers }),
-      ]);
+      // 1. Fetch Event details with fallback
+      let eventData = null;
+      let eventRes = await fetch(`${baseUrl}/event/${id}`, { method: 'GET', headers });
 
-      if (eventRes.status === 'fulfilled' && eventRes.value.ok) {
-        const eventData = await eventRes.value.json();
-        setEvent(eventData);
-      } else {
-        throw new Error('Event not found or failed to load');
-      }
-
-      if (tasksRes.status === 'fulfilled' && tasksRes.value.ok) {
-        const tasksData = await tasksRes.value.json();
-        if (Array.isArray(tasksData)) {
-          // Validate and filter tasks to match the current event_id
-          const validTasks = tasksData.filter((t) => {
-            const taskEventId = t.event_id ?? t.eventId;
-            if (taskEventId === undefined || taskEventId === null) return true;
-            return String(taskEventId) === String(id);
-          });
-          setTasksList(validTasks);
+      if (!eventRes.ok && (eventRes.status === 404 || eventRes.status === 405)) {
+        console.warn(`GET /event/${id} returned ${eventRes.status}, trying /events/${id}...`);
+        const fallbackRes = await fetch(`${baseUrl}/events/${id}`, { method: 'GET', headers });
+        if (fallbackRes.ok) {
+          eventRes = fallbackRes;
         }
       }
+
+      if (eventRes.ok) {
+        eventData = await eventRes.json();
+      } else {
+        throw new Error(`Failed to load event #${id} (Status: ${eventRes.status})`);
+      }
+
+      // If volunteers array is missing or empty on eventData, try /{id}/volunteers
+      if (!Array.isArray(eventData.volunteers) || eventData.volunteers.length === 0) {
+        try {
+          const volRes = await fetch(`${baseUrl}/${id}/volunteers`, { method: 'GET', headers });
+          if (volRes.ok) {
+            const volData = await volRes.json();
+            if (Array.isArray(volData)) {
+              eventData.volunteers = volData;
+            } else if (volData && Array.isArray(volData.volunteers)) {
+              eventData.volunteers = volData.volunteers;
+            }
+          }
+        } catch (vErr) {
+          console.warn(`Could not fetch volunteers from /${id}/volunteers:`, vErr);
+        }
+      }
+
+      setEvent(eventData);
+
+      // 2. Fetch user-specific tasks for this event for each volunteer: /tasks/{user_id}/{event_id}
+      let allTasks = [];
+      if (Array.isArray(eventData.volunteers) && eventData.volunteers.length > 0) {
+        const taskPromises = eventData.volunteers.map(async (v) => {
+          const vUserId = typeof v === 'object' && v !== null ? (v.id ?? v.user_id ?? v.userId) : v;
+          if (!vUserId) return [];
+          try {
+            const res = await fetch(`${baseUrl}/tasks/${vUserId}/${id}`, {
+              method: 'GET',
+              headers,
+            });
+            if (res.ok) {
+              const data = await res.json();
+              return Array.isArray(data) ? data : [];
+            } else {
+              console.warn(`GET /tasks/${vUserId}/${id} returned status:`, res.status);
+            }
+          } catch (e) {
+            console.warn(`Failed to fetch tasks for user ${vUserId} and event ${id}:`, e);
+          }
+          return [];
+        });
+
+        const taskResults = await Promise.allSettled(taskPromises);
+        taskResults.forEach((r) => {
+          if (r.status === 'fulfilled' && Array.isArray(r.value)) {
+            allTasks.push(...r.value);
+          }
+        });
+      }
+
+      // Filter and assign tasks matching current event_id
+      const validTasks = allTasks.filter((t) => {
+        const taskEventId = t.event_id ?? t.eventId;
+        if (taskEventId === undefined || taskEventId === null) return true;
+        return String(taskEventId) === String(id);
+      });
+      setTasksList(validTasks);
     } catch (err) {
       console.error('Error fetching event data in directory/[id]:', err);
       setError(err.message || 'Failed to load event details.');
@@ -364,11 +409,10 @@ export default function EventVolunteersDirectory() {
               <button
                 onClick={exportCSV}
                 disabled={volunteers.length === 0}
-                className={`flex items-center gap-2 bg-vol-card border border-vol-border px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  volunteers.length === 0
-                    ? 'opacity-50 cursor-not-allowed text-gray-500'
-                    : 'hover:bg-vol-border/30 text-gray-200 hover:text-white'
-                }`}
+                className={`flex items-center gap-2 bg-vol-card border border-vol-border px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${volunteers.length === 0
+                  ? 'opacity-50 cursor-not-allowed text-gray-500'
+                  : 'hover:bg-vol-border/30 text-gray-200 hover:text-white'
+                  }`}
               >
                 <Download size={16} /> Export Roster
               </button>
@@ -495,16 +539,15 @@ export default function EventVolunteersDirectory() {
                         volunteer.shift ||
                         (event.start_time
                           ? `${new Date(event.start_time).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })} - ${event.end_time
+                            ? new Date(event.end_time).toLocaleTimeString([], {
                               hour: '2-digit',
                               minute: '2-digit',
-                            })} - ${
-                              event.end_time
-                                ? new Date(event.end_time).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  })
-                                : 'End'
-                            }`
+                            })
+                            : 'End'
+                          }`
                           : 'Shift Active');
 
                       return (
@@ -612,33 +655,30 @@ export default function EventVolunteersDirectory() {
                                           >
                                             <div className="flex items-start gap-3">
                                               <div
-                                                className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
-                                                  importanceKey === 'high'
-                                                    ? 'bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.6)]'
-                                                    : importanceKey === 'medium'
+                                                className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${importanceKey === 'high'
+                                                  ? 'bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.6)]'
+                                                  : importanceKey === 'medium'
                                                     ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]'
                                                     : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]'
-                                                }`}
+                                                  }`}
                                               />
                                               <div>
                                                 <div className="flex items-center gap-2 flex-wrap">
                                                   <p
-                                                    className={`text-sm font-semibold ${
-                                                      isCompleted
-                                                        ? 'line-through text-gray-500'
-                                                        : 'text-gray-100'
-                                                    }`}
+                                                    className={`text-sm font-semibold ${isCompleted
+                                                      ? 'line-through text-gray-500'
+                                                      : 'text-gray-100'
+                                                      }`}
                                                   >
                                                     {task.title}
                                                   </p>
                                                   <span
-                                                    className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border ${
-                                                      importanceKey === 'high'
-                                                        ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                                                        : importanceKey === 'medium'
+                                                    className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border ${importanceKey === 'high'
+                                                      ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                                                      : importanceKey === 'medium'
                                                         ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                                                         : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                                    }`}
+                                                      }`}
                                                   >
                                                     {importanceKey}
                                                   </span>

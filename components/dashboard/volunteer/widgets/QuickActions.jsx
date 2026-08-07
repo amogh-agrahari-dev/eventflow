@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 const actions = [
-  { name: 'Check-in to an Event', icon: ScanLine, href: '/events' },
+  { name: 'Check-in to an Event', icon: ScanLine, href: '/scanner' },
   { name: 'Browse Open Roles', icon: Briefcase, href: '/events' },
   { name: 'Update Availability', icon: Calendar, href: '#availability' },
   { name: 'View My Profile', icon: User, href: '/profile' }

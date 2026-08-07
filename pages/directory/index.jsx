@@ -5,7 +5,6 @@ import { useRouter } from 'next/router';
 import OrganizerLayout from '@/components/dashboard/organizer/OrganizerLayout';
 import { Calendar, Users, MapPin, ChevronRight, Search, Loader2, Plus, AlertCircle, RefreshCw } from 'lucide-react';
 import { useUserStore } from '@/store/userStore';
-import { getToken } from '@/lib/auth';
 
 export default function VolunteerDirectoryHub() {
   const router = useRouter();
@@ -15,39 +14,29 @@ export default function VolunteerDirectoryHub() {
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
 
-  const token = getToken();
-
   useEffect(() => {
-    if (token && !user) {
+    if (!user) {
       fetchUser();
     }
-  }, [token, user, fetchUser]);
+  }, [user, fetchUser]);
 
-  const fetchOrganizedEvents = async () => {
-    const userId = user?.id || user?._id || user?.user_id;
+  const fetchOrganizedEvents = async (targetUserId) => {
+    const userId = targetUserId || user?.id || user?._id || user?.user_id;
     if (!userId) {
-      if (!getToken()) {
-        setIsLoading(false);
-      }
+      setIsLoading(false);
       return;
     }
 
     setIsLoading(true);
     setError(null);
     try {
-      const currentToken = getToken();
-      const headers = {
-        'Content-Type': 'application/json',
-      };
-      if (currentToken) {
-        headers['Authorization'] = `bearer ${currentToken}`;
-      }
-
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/events/${userId}`,
         {
           method: 'GET',
-          headers,
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
       );
 
@@ -76,12 +65,13 @@ export default function VolunteerDirectoryHub() {
   };
 
   useEffect(() => {
-    if (user?.id || user?._id || user?.user_id) {
-      fetchOrganizedEvents();
-    } else if (!token) {
+    const userId = user?.id || user?._id || user?.user_id;
+    if (userId) {
+      fetchOrganizedEvents(userId);
+    } else {
       setIsLoading(false);
     }
-  }, [user?.id, user?._id, user?.user_id]);
+  }, [user]);
 
   const handleEventClick = (eventId) => {
     router.push(`/directory/${eventId}`);
@@ -177,7 +167,7 @@ export default function VolunteerDirectoryHub() {
           )}
 
           {/* Empty State: Not logged in */}
-          {!isLoading && !error && !user && !token && (
+          {!isLoading && !error && !user && (
             <div className="bg-vol-card border border-vol-border rounded-2xl p-12 text-center max-w-lg mx-auto my-8">
               <Users className="w-12 h-12 text-gray-500 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">Login Required</h3>

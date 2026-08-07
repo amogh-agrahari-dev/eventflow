@@ -36,7 +36,8 @@ export default function PassCard({ pass, onClick, index = 0, className = '' }) {
   const timeFormatted = event.start_time ? formatFullDateTime(event.start_time) : 'Time TBD';
 
   const variant = COLOR_VARIANTS[index % COLOR_VARIANTS.length];
-  const isGenerated = status.toLowerCase() === 'generated' || status.toLowerCase() === 'confirmed';
+  const statusStr = (status || 'generated').toLowerCase();
+  const isActive = statusStr === 'active';
 
   return (
     <motion.div
@@ -90,12 +91,15 @@ export default function PassCard({ pass, onClick, index = 0, className = '' }) {
           </div>
 
           <span className={clsx(
-            "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shrink-0 flex items-center gap-1",
-            isGenerated 
+            "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shrink-0 flex items-center gap-1.5",
+            isActive 
               ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
               : "bg-amber-500/15 text-amber-300 border-amber-500/30"
           )}>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className={clsx(
+              "w-1.5 h-1.5 rounded-full",
+              isActive ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+            )} />
             {status}
           </span>
         </div>

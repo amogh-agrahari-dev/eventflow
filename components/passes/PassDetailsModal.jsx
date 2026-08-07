@@ -118,7 +118,8 @@ export default function PassDetailsModal({ pass, isOpen, onClose }) {
 
   const categoryName = event.category || 'Event';
   const statusName = pass.status || 'generated';
-  const isGenerated = statusName.toLowerCase() === 'generated' || statusName.toLowerCase() === 'confirmed';
+  const statusStr = statusName.toLowerCase();
+  const isActive = statusStr === 'active';
 
   return (
     <AnimatePresence>
@@ -190,12 +191,15 @@ export default function PassDetailsModal({ pass, isOpen, onClose }) {
                     {categoryName}
                   </span>
                   <span className={clsx(
-                    "px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border flex items-center gap-1",
-                    isGenerated
+                    "px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border flex items-center gap-1.5",
+                    isActive
                       ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
                       : "bg-amber-500/20 text-amber-300 border-amber-500/30"
                   )}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className={clsx(
+                      "w-1.5 h-1.5 rounded-full",
+                      isActive ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+                    )} />
                     {statusName}
                   </span>
                   {event.format && (
@@ -289,7 +293,16 @@ export default function PassDetailsModal({ pass, isOpen, onClose }) {
                 </div>
                 <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
                   <span className="text-[11px] text-slate-400 block mb-0.5">Status</span>
-                  <span className="text-sm font-semibold capitalize text-emerald-300">{pass.status}</span>
+                  <span className={clsx(
+                    "text-sm font-semibold capitalize flex items-center gap-1.5",
+                    isActive ? "text-emerald-400" : "text-amber-400"
+                  )}>
+                    <span className={clsx(
+                      "w-2 h-2 rounded-full",
+                      isActive ? "bg-emerald-400" : "bg-amber-400"
+                    )} />
+                    {pass.status || 'generated'}
+                  </span>
                 </div>
                 <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 col-span-2">
                   <span className="text-[11px] text-slate-400 block mb-0.5">Pass Issued At</span>
