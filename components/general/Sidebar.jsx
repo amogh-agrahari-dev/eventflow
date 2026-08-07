@@ -15,6 +15,7 @@ export default function Sidebar({ isMobileMenuOpen, isDesktopSidebarCollapsed })
   const isActive = (href) => {
     if (href === '#') return false;
     if (currentPath === href) return true;
+    if (currentPath.startsWith(href)) return true;
     // For /events/[id], /all-events would not match, which is correct.
     return false;
   };
@@ -37,7 +38,7 @@ export default function Sidebar({ isMobileMenuOpen, isDesktopSidebarCollapsed })
     {
       title: 'VOLUNTEER HUB',
       items: [
-        { name: 'Directory', icon: Users, href: '#' },
+        { name: 'Directory', icon: Users, href: '/directory' },
         { name: 'Rosters', icon: ClipboardList, href: '#' },
         { name: 'Feedback', icon: MessageSquare, href: '#' },
       ]

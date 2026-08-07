@@ -2,15 +2,21 @@ import React from 'react';
 import { Menu, Search, Plus, SlidersHorizontal, Bell } from 'lucide-react';
 import { useUserStore } from '@/store/userStore';
 
-export default function OrganizerHeader({ toggleSidebar, onCustomizeClick }) {
+export default function OrganizerHeader({ toggleSidebar, toggleMobileSidebar, onCustomizeClick }) {
   const { user } = useUserStore();
 
   return (
     <header className="h-[72px] shrink-0 border-b border-vol-border/50 bg-vol-bg/95 backdrop-blur z-10 flex items-center justify-between px-6 sticky top-0">
       <div className="flex items-center gap-4">
-        <button 
+        <button
+          className="md:hidden p-2 -ml-2 rounded-lg text-gray-400 hover:text-white hover:bg-vol-card transition-colors"
+          onClick={toggleMobileSidebar}
+        >
+          <Menu size={20} />
+        </button>
+        <button
+          className="hidden md:block p-2 -ml-2 rounded-lg text-gray-400 hover:text-white hover:bg-vol-card transition-colors"
           onClick={toggleSidebar}
-          className="p-2 -ml-2 rounded-lg text-gray-400 hover:text-white hover:bg-vol-card transition-colors"
         >
           <Menu size={20} />
         </button>
