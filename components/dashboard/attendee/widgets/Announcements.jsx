@@ -43,7 +43,7 @@ const itemVariants = {
   })
 };
 
-export default function Announcements({ delay = 0 }) {
+export default function Announcements({ delay = 0, className }) {
   const [expandedIdx, setExpandedIdx] = useState(null);
 
   const toggleExpand = (idx) => {
@@ -54,6 +54,7 @@ export default function Announcements({ delay = 0 }) {
     <WidgetCard 
       title="Announcements" 
       delay={delay}
+      className={className}
       action={
         <button className="text-xs bg-vol-border/50 hover:bg-vol-border text-gray-300 px-3 py-1 rounded-full transition-all border border-vol-border hover:border-vol-accent/30 hover:text-white">
           View All
@@ -123,7 +124,7 @@ export default function Announcements({ delay = 0 }) {
         })}
       </div>
 
-      <div className="p-4 pt-0 mt-auto">
+      <div className="p-5 pt-0 mt-auto">
         <motion.button
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}

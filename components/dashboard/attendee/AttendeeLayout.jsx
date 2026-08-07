@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AttendeeSidebar from './AttendeeSidebar';
 import AttendeeHeader from './AttendeeHeader';
 import { motion } from 'framer-motion';
+import { useUserStore } from '@/store/userStore';
+import { getToken } from '@/lib/auth';
 
 export default function AttendeeLayout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { user, fetchUser } = useUserStore();
+
+  useEffect(() => {
+    const token = getToken();
+    if (token && !user) {
+      fetchUser();
+    }
+  }, [user, fetchUser]);
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 

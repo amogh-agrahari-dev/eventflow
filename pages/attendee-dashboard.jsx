@@ -13,11 +13,14 @@ export default function AttendeeDashboard() {
         <title>Attendee Dashboard | EventFlow</title>
       </Head>
       <AttendeeLayout>
-        {/* Row 1: Three equal-width widgets */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-          <UpcomingEvents delay={0} />
-          <MyRegistrations delay={0.08} />
-          <Announcements delay={0.16} />
+        {/* Row 1: Upcoming Events & Announcements */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 mb-6 items-stretch">
+          <div className="md:col-span-2 lg:col-span-2 h-full flex flex-col">
+            <UpcomingEvents delay={0} className="h-full" />
+          </div>
+          <div className="md:col-span-1 lg:col-span-1 h-full flex flex-col">
+            <Announcements delay={0.16} className="h-full" />
+          </div>
         </div>
 
         {/* Row 2: My Tickets — hero widget, full width */}

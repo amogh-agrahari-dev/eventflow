@@ -65,6 +65,100 @@ export default function EventDetailsPage() {
     }
   }
 
+  const [isRegisteringAttendee, setIsRegisteringAttendee] = useState(false);
+  const [attendeeRegistered, setAttendeeRegistered] = useState(false);
+  const [registrationMessage, setRegistrationMessage] = useState('');
+
+  const registerAttendee = async () => {
+    const userId = user?.id || user?._id || user?.user_id;
+    if (!userId) {
+      router.push('/auth/login');
+      return;
+    }
+
+    const eventIdInt = parseInt(id, 10);
+    const userIdInt = parseInt(userId, 10);
+
+    if (isNaN(eventIdInt) || isNaN(userIdInt)) {
+      console.error("Invalid event_id or user_id for registration");
+      return;
+    }
+
+    setIsRegisteringAttendee(true);
+    setRegistrationMessage('');
+    try {
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `bearer ${token}`;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/pass/create`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          event_id: eventIdInt,
+          user_id: userIdInt,
+          status: "Created",
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Pass created successfully:", data);
+        setAttendeeRegistered(true);
+        setRegistrationMessage('Pass registered! View in My Tickets.');
+        if (id) {
+          getEventById(id);
+        }
+      } else {
+        const errData = await response.json().catch(() => null);
+        console.error("Failed to create pass:", errData || response.statusText);
+        setRegistrationMessage(errData?.detail || 'Failed to register.');
+      }
+    } catch (error) {
+      console.error("Error creating pass / registering as attendee:", error);
+      setRegistrationMessage('Network error occurred.');
+    } finally {
+      setIsRegisteringAttendee(false);
+    }
+  };
+
+  useEffect(() => {
+    const checkAttendeeRegistration = async () => {
+      const userId = user?.id || user?._id || user?.user_id;
+      if (!userId || !id) return;
+      try {
+        const token = getToken();
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `bearer ${token}`;
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/passes/${userId}`, {
+          headers,
+        });
+        if (response.ok) {
+          const passes = await response.json();
+          if (Array.isArray(passes)) {
+            const hasPass = passes.some((p) => {
+              const pEventId = p.event_id || p.eventId || p.event?.id || p.event?._id;
+              return String(pEventId) === String(id);
+            });
+            if (hasPass) {
+              setAttendeeRegistered(true);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error checking existing passes:", err);
+      }
+    };
+
+    if (user && id) {
+      checkAttendeeRegistration();
+    }
+  }, [user, id]);
+
   React.useEffect(() => {
     if (id) {
       getEventById(id);
@@ -292,10 +386,28 @@ export default function EventDetailsPage() {
                       {isUserVolunteer ? 'Registered as Volunteer' : 'Register as Volunteer'}
                     </Button>
                     <Button
-                      className="w-full bg-[#11141A] border border-[#00E5FF]/30 hover:bg-[#00E5FF]/10 text-[#00E5FF] py-3 transition-colors font-semibold"
+                      onClick={registerAttendee}
+                      disabled={isRegisteringAttendee || attendeeRegistered || isFull}
+                      className={`w-full py-3 transition-all font-semibold ${attendeeRegistered
+                          ? 'bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 cursor-default'
+                          : isFull
+                            ? 'bg-[#11141A] border border-[#2A303C] text-[#5A6B8A] opacity-60 cursor-not-allowed'
+                            : 'bg-[#11141A] border border-[#00E5FF]/30 hover:bg-[#00E5FF]/10 text-[#00E5FF]'
+                        }`}
                     >
-                      Register as Attendee
+                      {isRegisteringAttendee
+                        ? 'Registering...'
+                        : attendeeRegistered
+                          ? 'Registered as Attendee ✓'
+                          : isFull
+                            ? 'Sold Out'
+                            : 'Register as Attendee'}
                     </Button>
+                    {registrationMessage && (
+                      <p className={`text-xs text-center font-medium mt-1 ${attendeeRegistered ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {registrationMessage}
+                      </p>
+                    )}
                   </div>
 
                   <div className="mt-6 p-4 rounded-xl bg-[#11141A] border border-[#2A303C]">
