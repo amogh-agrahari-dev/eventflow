@@ -13,12 +13,21 @@ import {
   MessageSquare,
   User,
   Settings,
-  HelpCircle
+  HelpCircle,
+  Check
 } from 'lucide-react';
 import clsx from 'clsx';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import Logo from '@/components/general/Logo';
 
 const menuSections = [
+  {
+    title: null,
+    items: [
+      { name: 'Dashboard', icon: LayoutDashboard, href: '/volunteer-dashboard' }
+    ]
+  },
   {
     title: 'VOLUNTEER HUB',
     items: [
@@ -53,6 +62,16 @@ const menuSections = [
 ];
 
 export default function VolunteerSidebar({ isCollapsed }) {
+  const router = useRouter();
+  const currentPath = router.pathname;
+
+  const isActive = (href) => {
+    if (href === '#') return false;
+    if (currentPath === href) return true;
+    if (currentPath.startsWith(href) && href !== '/') return true;
+    return false;
+  };
+
   return (
     <motion.aside
       initial={false}
@@ -60,32 +79,43 @@ export default function VolunteerSidebar({ isCollapsed }) {
       transition={{ duration: 0.3, ease: 'easeInOut' }}
       className="h-screen bg-vol-bg border-r border-vol-border flex flex-col hidden md:flex sticky top-0 overflow-y-auto overflow-x-hidden"
     >
-      <div className="p-4 flex items-center h-[72px] shrink-0 border-b border-vol-border/50">
-        <div className="flex items-center gap-3 text-white font-bold text-xl px-2">
-          <div className="w-8 h-8 rounded bg-vol-accent flex items-center justify-center shrink-0">
-            <span className="text-sm">EV</span>
-          </div>
-          {!isCollapsed && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="whitespace-nowrap">EventFlow</motion.span>}
-        </div>
+      <div className="h-[72px] px-6 flex items-center border-b border-vol-border/50 shrink-0">
+        {isCollapsed ? (
+          <Logo iconSize={28} textClassName="hidden" />
+        ) : (
+          <Logo iconSize={28} />
+        )}
       </div>
 
       <div className="flex-1 py-6 flex flex-col gap-6">
-        <div className="px-4">
-          <Link href="#" className={clsx("flex items-center gap-3 px-3 py-2.5 rounded-lg bg-vol-card border border-vol-border text-white transition-colors", isCollapsed && "justify-center")}>
-            <LayoutDashboard size={20} className="shrink-0 text-vol-success" />
-            {!isCollapsed && <span className="font-medium whitespace-nowrap">Dashboard</span>}
-          </Link>
-        </div>
-
         {menuSections.map((section, idx) => (
           <div key={idx} className="px-4 flex flex-col gap-2">
-            {!isCollapsed && (
+            {section.title && !isCollapsed && (
               <h3 className="text-xs font-semibold text-gray-500 tracking-wider px-3 mb-1 whitespace-nowrap">
                 {section.title}
               </h3>
             )}
             {section.items.map((item, itemIdx) => {
               const Icon = item.icon;
+              const active = isActive(item.href);
+
+              if (active) {
+                return (
+                  <div
+                    key={itemIdx}
+                    title={isCollapsed ? item.name : undefined}
+                    className={clsx(
+                      "flex items-center gap-3 px-3 py-2.5 bg-vol-card border border-vol-border text-white rounded-lg cursor-pointer shadow-sm transition-all",
+                      isCollapsed && "justify-center"
+                    )}
+                  >
+                    <Icon size={20} className="shrink-0 text-vol-accent2" />
+                    {!isCollapsed && <span className="text-sm font-medium whitespace-nowrap flex-1">{item.name}</span>}
+                    {!isCollapsed && <Check size={16} className="text-vol-accent2 shrink-0" />}
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={itemIdx}
@@ -98,7 +128,7 @@ export default function VolunteerSidebar({ isCollapsed }) {
                 >
                   <Icon size={20} className="shrink-0 group-hover:text-vol-accent2 transition-colors" />
                   {!isCollapsed && (
-                    <span className="font-medium whitespace-nowrap flex-1">{item.name}</span>
+                    <span className="text-sm font-medium whitespace-nowrap flex-1">{item.name}</span>
                   )}
                   {!isCollapsed && item.badge && (
                     <span className="w-5 h-5 rounded-full bg-vol-accent flex items-center justify-center text-[10px] text-white font-bold shrink-0">
