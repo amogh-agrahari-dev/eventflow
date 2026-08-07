@@ -24,7 +24,7 @@ const menuSections = [
   {
     title: 'DISCOVER',
     items: [
-      { name: 'Browse Events', icon: Search, href: '/all-events' },
+      { name: 'Browse Events', icon: Search, href: '/all-events?role=attendee' },
       { name: 'My Registrations', icon: CalendarCheck, href: '/passes' },
       { name: 'My Tickets', icon: Ticket, href: '/passes' },
       { name: 'Wishlisted Events', icon: Heart, href: '#' },

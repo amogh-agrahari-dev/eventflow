@@ -552,10 +552,10 @@ export default function EventDetailsPage() {
                       onClick={registerAttendee}
                       disabled={isRegisteringAttendee || attendeeRegistered || isFull}
                       className={`w-full py-3 transition-all font-semibold ${attendeeRegistered
-                          ? 'bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 cursor-default'
-                          : isFull
-                            ? 'bg-[#11141A] border border-[#2A303C] text-[#5A6B8A] opacity-60 cursor-not-allowed'
-                            : 'bg-[#11141A] border border-[#00E5FF]/30 hover:bg-[#00E5FF]/10 text-[#00E5FF]'
+                        ? 'bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 cursor-default'
+                        : isFull
+                          ? 'bg-[#11141A] border border-[#2A303C] text-[#5A6B8A] opacity-60 cursor-not-allowed'
+                          : 'bg-[#11141A] border border-[#00E5FF]/30 hover:bg-[#00E5FF]/10 text-[#00E5FF]'
                         }`}
                     >
                       {isRegisteringAttendee

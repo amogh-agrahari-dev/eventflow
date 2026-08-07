@@ -94,7 +94,6 @@ export default function RegisterPage() {
               maxLength={100}
               onChange={update("name")}
               placeholder="Aditi Sharma"
-              className="bg-[#11141A] border-[#2A3140] text-white focus-visible:ring-[#00E5FF]/50 focus-visible:border-[#00E5FF]/50 placeholder:text-[#5A6B8A]"
             />
           </div>
 
@@ -108,7 +107,6 @@ export default function RegisterPage() {
               maxLength={255}
               onChange={update("email")}
               placeholder="you@college.edu"
-              className="bg-[#11141A] border-[#2A3140] text-white focus-visible:ring-[#00E5FF]/50 focus-visible:border-[#00E5FF]/50 placeholder:text-[#5A6B8A]"
             />
           </div>
 
@@ -123,7 +121,6 @@ export default function RegisterPage() {
                 maxLength={72}
                 onChange={update("password")}
                 placeholder="8+ characters"
-                className="bg-[#11141A] border-[#2A3140] text-white focus-visible:ring-[#00E5FF]/50 focus-visible:border-[#00E5FF]/50 placeholder:text-[#5A6B8A]"
               />
             </div>
             <div className="space-y-2">
@@ -136,7 +133,6 @@ export default function RegisterPage() {
                 maxLength={72}
                 onChange={update("confirm")}
                 placeholder="Repeat password"
-                className="bg-[#11141A] border-[#2A3140] text-white focus-visible:ring-[#00E5FF]/50 focus-visible:border-[#00E5FF]/50 placeholder:text-[#5A6B8A]"
               />
             </div>
           </div>

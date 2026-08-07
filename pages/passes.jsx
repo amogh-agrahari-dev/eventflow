@@ -153,7 +153,7 @@ export default function PassesPage() {
                 </button>
 
                 <button
-                  onClick={() => router.push('/all-events')}
+                  onClick={() => router.push('/all-events?role=attendee')}
                   className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white flex items-center gap-2 transition-all shadow-lg shadow-indigo-600/25 cursor-pointer"
                 >
                   <Sparkles size={14} />
@@ -219,7 +219,7 @@ export default function PassesPage() {
                   : 'You have not registered for any events yet. Explore open events across campus and get your dynamic QR entry passes!'}
               </p>
               <button
-                onClick={() => router.push('/all-events')}
+                onClick={() => router.push('/all-events?role=attendee')}
                 className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all shadow-lg shadow-indigo-600/30 cursor-pointer flex items-center gap-2"
               >
                 <Sparkles size={14} />

@@ -162,7 +162,7 @@ export default function UpcomingEvents({ delay = 0, className }) {
     if (eventId) {
       router.push(`/events/${eventId}`);
     } else {
-      router.push('/all-events');
+      router.push('/all-events?role=attendee');
     }
   };
 
@@ -173,7 +173,7 @@ export default function UpcomingEvents({ delay = 0, className }) {
       className={className}
       action={
         <Link
-          href="/all-events"
+          href="/all-events?role=attendee"
           className="text-xs bg-vol-border/50 hover:bg-vol-border text-gray-300 px-3 py-1 rounded-full transition-all border border-vol-border hover:border-vol-accent/30 hover:text-white inline-block"
         >
           View All
@@ -196,7 +196,7 @@ export default function UpcomingEvents({ delay = 0, className }) {
               You have not registered for any upcoming events yet.
             </p>
             <Link
-              href="/all-events"
+              href="/all-events?role=attendee"
               className="px-3 py-1.5 text-[11px] rounded-lg bg-vol-accent/15 hover:bg-vol-accent/25 text-vol-accent2 border border-vol-accent/30 font-medium transition-all"
             >
               Browse Events
@@ -276,7 +276,7 @@ export default function UpcomingEvents({ delay = 0, className }) {
         <motion.button
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => router.push('/all-events')}
+          onClick={() => router.push('/all-events?role=attendee')}
           className="w-full py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent"
         >
           Browse All Events

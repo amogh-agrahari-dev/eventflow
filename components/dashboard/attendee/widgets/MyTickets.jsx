@@ -178,7 +178,7 @@ export default function MyTickets({ delay = 0 }) {
             const eventTitle = typeof pass.event === 'string'
               ? pass.event
               : (pass.event?.title || pass.event?.name || pass.event_name || pass.event_title || pass.title || 'Event Pass');
-            
+
             const rawDate = pass.date || pass.event_date || eventObj.date || eventObj.event_date || pass.created_at;
             const rawTime = pass.time || pass.event_time || eventObj.time || eventObj.event_time;
 
@@ -333,8 +333,8 @@ export default function MyTickets({ delay = 0 }) {
             </p>
           </div>
         </div>
-        
-        <Link 
+
+        <Link
           href="/passes"
           className="text-xs bg-vol-border/50 hover:bg-vol-accent text-gray-300 hover:text-white px-4 py-1.5 rounded-full transition-all border border-vol-border hover:border-vol-accent/50 cursor-pointer shadow-sm"
         >
@@ -365,7 +365,7 @@ export default function MyTickets({ delay = 0 }) {
               You don&apos;t have any active passes right now. Browse events to register and get your digital passes!
             </p>
             <Link
-              href="/all-events"
+              href="/all-events?role=attendee"
               className="px-4 py-2 text-xs rounded-lg bg-vol-accent/15 hover:bg-vol-accent/25 text-vol-accent2 border border-vol-accent/30 font-medium transition-all"
             >
               Browse Events

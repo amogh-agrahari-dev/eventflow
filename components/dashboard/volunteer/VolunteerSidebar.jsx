@@ -40,7 +40,7 @@ const menuSections = [
   {
     title: 'OPPORTUNITIES',
     items: [
-      { name: 'Browse Events', icon: Search, href: '#' },
+      { name: 'Browse Events', icon: Search, href: '/all-events?role=volunteer' },
       { name: 'Available Shifts', icon: Clock, href: '#' },
       { name: 'Open Roles', icon: Briefcase, href: '#' },
     ]

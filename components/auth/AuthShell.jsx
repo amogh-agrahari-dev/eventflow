@@ -11,7 +11,7 @@ const highlights = [
 
 export function AuthShell({ eyebrow, title, subtitle, children, footer }) {
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white flex flex-col relative overflow-hidden font-sans">
+    <div className="h-screen bg-[#0B0F19] text-white flex flex-col relative overflow-y-auto custom-scrollbar font-sans dark">
       {/* Ambient Background Elements */}
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none" />
       <div className="absolute top-1/4 -left-64 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />

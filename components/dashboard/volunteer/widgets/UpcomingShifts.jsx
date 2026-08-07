@@ -270,7 +270,7 @@ export default function UpcomingShifts({ className, delay = 0 }) {
                   You don&apos;t have any active volunteer tasks assigned yet. Check back soon or explore open opportunities.
                 </p>
                 <button
-                  onClick={() => router.push('/all-events')}
+                  onClick={() => router.push('/all-events?role=volunteer')}
                   className="px-4 py-2 rounded-lg bg-vol-accent/15 hover:bg-vol-accent/25 text-vol-accent2 border border-vol-accent/30 text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shadow-glow-accent"
                 >
                   <Sparkles size={14} />
@@ -381,7 +381,7 @@ export default function UpcomingShifts({ className, delay = 0 }) {
         <motion.button
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => router.push('/all-events')}
+          onClick={() => router.push('/all-events?role=volunteer')}
           className="w-full py-2.5 rounded-lg bg-vol-accent/10 hover:bg-vol-accent/20 text-vol-accent2 font-medium text-sm transition-all border border-vol-accent/20 hover:border-vol-accent/40 hover:shadow-glow-accent cursor-pointer flex items-center justify-center gap-1.5"
         >
           <span>Explore All Opportunities</span>

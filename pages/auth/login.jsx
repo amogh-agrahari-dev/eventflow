@@ -97,7 +97,6 @@ export default function LoginPage() {
               value={email}
               maxLength={255}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-[#11141A] border-[#2A3140] text-white focus-visible:ring-[#00E5FF]/50 focus-visible:border-[#00E5FF]/50 placeholder:text-[#5A6B8A]"
             />
           </div>
 
@@ -116,12 +115,11 @@ export default function LoginPage() {
               value={password}
               maxLength={72}
               onChange={(e) => setPassword(e.target.value)}
-              className="bg-[#11141A] border-[#2A3140] text-white focus-visible:ring-[#00E5FF]/50 focus-visible:border-[#00E5FF]/50 placeholder:text-[#5A6B8A]"
             />
           </div>
 
           <label className="flex items-center gap-2 text-sm text-[#8F9BB3]">
-            <Checkbox id="remember" className="border-[#2A3140] bg-[#11141A]" />
+            <Checkbox id="remember" />
             Keep me signed in on this device
           </label>
 
