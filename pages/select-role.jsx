@@ -89,7 +89,7 @@ export default function SelectRolePage() {
         <meta name="description" content="Switch between Organizer, Volunteer, and Attendee roles seamlessly in EventFlow." />
       </Head>
 
-      <div className="min-h-screen bg-[#06090F] text-white flex flex-col relative overflow-hidden selection:bg-[#6E56CF]/40">
+      <div className="h-screen bg-[#06090F] text-white flex flex-col relative overflow-y-auto overflow-x-hidden custom-scrollbar selection:bg-[#6E56CF]/40">
         {/* Subtle Background Gradients & Tech Grid */}
         <div
           className="absolute inset-0 pointer-events-none opacity-20"
