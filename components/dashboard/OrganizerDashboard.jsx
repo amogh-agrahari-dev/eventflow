@@ -252,7 +252,7 @@ export default function OrganizerDashboard() {
               <Menu size={20} />
             </button>
             <h1 className="text-base sm:text-lg md:text-xl font-semibold text-white tracking-tight truncate">
-              {user?.name ? `${user.name}'s Dashboard` : "Organizer Dashboard"}
+              Organizer Dashboard
             </h1>
           </div>
 
