@@ -5,7 +5,8 @@ import { useRouter } from 'next/router';
 import { 
   Home, PlusSquare, History, Users, ClipboardList, 
   MessageSquare, UserPlus, Search, Bell, 
-  MapPin, Settings, BarChart2, Check, LayoutTemplate, MessageCircle, Menu, Calendar, Clock, Image as ImageIcon
+  MapPin, Settings, BarChart2, Check, LayoutTemplate, MessageCircle, Menu, Calendar, Clock, Image as ImageIcon,
+  AlertCircle, RefreshCw, Loader2
 } from 'lucide-react';
 import Logo from '@/components/general/Logo';
 import Sidebar from '@/components/general/Sidebar';
@@ -29,43 +30,44 @@ export default function AllEventsPage() {
   const [sortBy, setSortBy] = useState('Newest First');
   
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [events, setEvents] = useState([]);
 
-  const [events, setEvents] = React.useState([]);
-      const getEvents = async () => {
-          try {
-              const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/events/all`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-              const data = await response.json();
-              console.log(data)
-              if (Array.isArray(data)) {
-                  setEvents(data);
-              } else if (data && data.success && Array.isArray(data.events)) {
-                  setEvents(data.events);
-              } else if (data && Array.isArray(data.data)) {
-                  setEvents(data.data);
-              }
-          } catch (error) {
-              console.error("Error fetching events:", error);
-          }
+  const getEvents = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/events/all`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch events (${response.status})`);
       }
-  
-      React.useEffect(() => {
-          getEvents();
-          console.log(events);
-          
-      }, []);
-  
 
-  // Simulate network request
-  useEffect(() => {
-    const timer = setTimeout(() => {
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setEvents(data);
+      } else if (data && data.success && Array.isArray(data.events)) {
+        setEvents(data.events);
+      } else if (data && Array.isArray(data.data)) {
+        setEvents(data.data);
+      } else {
+        setEvents([]);
+      }
+    } catch (err) {
+      console.error("Error fetching events:", err);
+      setError(err.message || "Failed to load events. Please check your connection.");
+    } finally {
       setIsLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
+    }
+  };
+
+  useEffect(() => {
+    getEvents();
   }, []);
 
   const publishedEvents = useMemo(() => {
@@ -188,18 +190,30 @@ export default function AllEventsPage() {
 
             {/* Event Grid */}
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...Array(8)].map((_, i) => (
-                  <div key={i} className="bg-vol-card border border-vol-border rounded-2xl p-5 h-[320px] animate-pulse flex flex-col">
-                    <div className="w-full h-32 bg-vol-border rounded-xl mb-4"></div>
-                    <div className="h-5 w-3/4 bg-vol-border rounded mb-2"></div>
-                    <div className="h-4 w-1/2 bg-vol-border rounded mb-6"></div>
-                    <div className="flex gap-2 mt-auto">
-                      <div className="h-8 w-20 bg-vol-border rounded-full"></div>
-                      <div className="h-8 w-20 bg-vol-border rounded-full"></div>
-                    </div>
-                  </div>
-                ))}
+              <div>
+                <div className="flex items-center gap-2 text-xs text-vol-accent2 font-medium mb-4 animate-pulse">
+                  <Loader2 className="w-4 h-4 animate-spin text-vol-accent" />
+                  <span>Loading published events...</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {[...Array(8)].map((_, i) => (
+                    <EventCardSkeleton key={i} />
+                  ))}
+                </div>
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-vol-card border border-rose-500/20 rounded-2xl">
+                <div className="w-14 h-14 bg-rose-500/10 border border-rose-500/20 rounded-full flex items-center justify-center mb-4 text-rose-400">
+                  <AlertCircle className="w-7 h-7" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Unable to Load Events</h3>
+                <p className="text-gray-400 text-sm max-w-md mb-6">{error}</p>
+                <Button 
+                  onClick={getEvents}
+                  className="bg-vol-accent hover:bg-vol-accent/80 text-white flex items-center gap-2"
+                >
+                  <RefreshCw className="w-4 h-4" /> Try Again
+                </Button>
               </div>
             ) : filteredAndSortedEvents.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center bg-vol-card border border-vol-border rounded-2xl border-dashed">
@@ -423,3 +437,65 @@ function EventCard({ event }) {
     </Link>
   );
 }
+
+function EventCardSkeleton() {
+  return (
+    <div className="bg-vol-card border border-vol-border rounded-2xl overflow-hidden animate-pulse flex flex-col h-full">
+      {/* Banner Skeleton */}
+      <div className="h-32 bg-slate-800/40 relative p-4 flex items-start justify-between border-b border-vol-border/40">
+        <div className="flex gap-2">
+          <div className="h-5 w-16 bg-slate-700/50 rounded-md"></div>
+          <div className="h-5 w-12 bg-slate-700/50 rounded-md"></div>
+        </div>
+        <div className="h-5 w-14 bg-slate-700/50 rounded-md"></div>
+      </div>
+
+      {/* Body Skeleton */}
+      <div className="p-5 flex-1 flex flex-col">
+        {/* Title */}
+        <div className="space-y-2 mb-3">
+          <div className="h-5 bg-slate-700/60 rounded-md w-3/4"></div>
+          <div className="h-4 bg-slate-700/40 rounded-md w-1/2"></div>
+        </div>
+
+        {/* Info Icons + Text */}
+        <div className="space-y-2.5 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded bg-slate-700/50 shrink-0"></div>
+            <div className="h-3.5 w-28 bg-slate-700/40 rounded"></div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded bg-slate-700/50 shrink-0"></div>
+            <div className="h-3.5 w-20 bg-slate-700/40 rounded"></div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded bg-slate-700/50 shrink-0"></div>
+            <div className="h-3.5 w-36 bg-slate-700/40 rounded"></div>
+          </div>
+        </div>
+
+        {/* Description */}
+        <div className="space-y-2 mb-6 flex-1">
+          <div className="h-3 bg-slate-700/40 rounded w-full"></div>
+          <div className="h-3 bg-slate-700/30 rounded w-4/5"></div>
+        </div>
+
+        {/* Registration & Capacity */}
+        <div className="mt-auto pt-2">
+          <div className="flex justify-between items-center mb-2">
+            <div className="h-3 w-16 bg-slate-700/40 rounded"></div>
+            <div className="h-3 w-14 bg-slate-700/50 rounded"></div>
+          </div>
+          <div className="h-1.5 w-full bg-vol-bg rounded-full overflow-hidden">
+            <div className="h-full bg-slate-700/60 rounded-full w-1/3"></div>
+          </div>
+          <div className="flex justify-between items-center mt-3 pt-3 border-t border-vol-border">
+            <div className="h-3 w-20 bg-slate-700/40 rounded"></div>
+            <div className="h-3 w-12 bg-slate-700/50 rounded"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+

@@ -42,9 +42,6 @@ export default function PassesPage() {
     setLoading(true);
     try {
       const headers = { 'Content-Type': 'application/json' };
-      if (token) {
-        headers['Authorization'] = `bearer ${token}`;
-      }
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/passes/${userId}`,

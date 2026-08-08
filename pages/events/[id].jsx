@@ -185,6 +185,29 @@ export default function EventDetailsPage() {
 
   const [event, setEvent] = React.useState(null);
   const [loading, setLoading] = useState(true);
+  const [passesCount, setPassesCount] = useState(0);
+
+  const getPassesByEvent = async (eventId) => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${baseUrl}/passes/event/${eventId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setPassesCount(data.length);
+          console.log(data)
+        } else if (data && Array.isArray(data.passes)) {
+          setPassesCount(data.passes.length);
+        } else if (data && Array.isArray(data.data)) {
+          setPassesCount(data.data.length);
+        } else {
+          setPassesCount(0);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching passes for event:", error);
+    }
+  };
 
   const getEventById = async (eventId) => {
     setLoading(true);
@@ -252,13 +275,9 @@ export default function EventDetailsPage() {
     setIsRegisteringAttendee(true);
     setRegistrationMessage('');
     try {
-      const token = getToken();
       const headers = {
         'Content-Type': 'application/json',
       };
-      if (token) {
-        headers['Authorization'] = `bearer ${token}`;
-      }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/pass/create`, {
         method: "POST",
@@ -277,6 +296,7 @@ export default function EventDetailsPage() {
         setRegistrationMessage('Pass registered! View in My Tickets.');
         if (id) {
           getEventById(id);
+          getPassesByEvent(id);
         }
       } else {
         const errData = await response.json().catch(() => null);
@@ -296,9 +316,7 @@ export default function EventDetailsPage() {
       const userId = user?.id || user?._id || user?.user_id;
       if (!userId || !id) return;
       try {
-        const token = getToken();
         const headers = { 'Content-Type': 'application/json' };
-        if (token) headers['Authorization'] = `bearer ${token}`;
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/passes/${userId}`, {
           headers,
         });
@@ -327,6 +345,7 @@ export default function EventDetailsPage() {
   React.useEffect(() => {
     if (id) {
       getEventById(id);
+      getPassesByEvent(id);
     }
   }, [id]);
 
@@ -352,7 +371,7 @@ export default function EventDetailsPage() {
     );
   }
 
-  const registered = event.registered || 0;
+  const registered = passesCount;
   const isFull = registered >= event.max_attendees;
   const progressPercent = Math.min(100, Math.round((registered / Math.max(event.max_attendees, 1)) * 100));
   const isUserVolunteer = user && event.volunteers?.some(v => v.id === user.id);
@@ -522,7 +541,7 @@ export default function EventDetailsPage() {
                     <div className="flex justify-between items-end mb-2">
                       <span className="text-sm font-medium text-[#8F9BB3]">Capacity</span>
                       <span className={`text-sm font-bold ${isFull ? 'text-rose-400' : 'text-[#00E5FF]'}`}>
-                        {registered.toLocaleString()} / {event.max_attendees?.toLocaleString() || 0}
+                        {passesCount.toLocaleString()} / {event.max_attendees?.toLocaleString() || 0}
                       </span>
                     </div>
                     <div className="h-2 w-full bg-[#0B0E14] rounded-full overflow-hidden">

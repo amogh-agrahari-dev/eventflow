@@ -85,21 +85,6 @@ const features = [
 ];
 
 export default function LandingPage() {
-  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbW9naEBleGFtcGxlLmNvbSIsImV4cCI6MTc4NTYwMjgyOH0.IZLs92iQcWTrOK8fInLL6TU8otwomlBJ8VCMhbvGnRQ";
-  function protected1() {
-    fetch('http://localhost:8000/users/me', {
-      headers: {
-        'Authorization': `bearer ${token}`
-      }
-    })
-      .then(response => response.json())
-      .then(data => console.log(data))
-      .catch(error => console.error('Error:', error));
-  }
-  useEffect(() => {
-    protected1();
-  }, []);
-
   return (
     <div className="dark h-screen overflow-hidden bg-background text-foreground selection:bg-primary/30 font-sans flex flex-col relative">
       <Head>

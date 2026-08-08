@@ -156,13 +156,9 @@ export default function MyTickets({ delay = 0 }) {
     setLoadingText('Loading your passes from server...');
 
     try {
-      const token = getToken();
       const headers = {
         'Content-Type': 'application/json',
       };
-      if (token) {
-        headers['Authorization'] = `bearer ${token}`;
-      }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/passes/${userId}`, {
         headers,
