@@ -11,7 +11,7 @@ const highlights = [
 
 export function AuthShell({ eyebrow, title, subtitle, children, footer }) {
   return (
-    <div className="h-screen bg-[#0B0F19] text-white flex flex-col relative overflow-y-auto custom-scrollbar font-sans dark">
+    <div className="min-h-screen bg-[#0B0F19] text-white flex flex-col relative overflow-y-auto custom-scrollbar font-sans dark">
       {/* Ambient Background Elements */}
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none" />
       <div className="absolute top-1/4 -left-64 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
@@ -50,12 +50,12 @@ export function AuthShell({ eyebrow, title, subtitle, children, footer }) {
       </div>
 
       {/* Top Navigation */}
-      <nav className="w-full h-20 flex items-center px-8 sm:px-12 relative z-20">
-        <Logo className="transition-opacity hover:opacity-80" iconSize={32} />
+      <nav className="w-full h-16 sm:h-20 flex items-center px-4 sm:px-8 lg:px-12 relative z-20 shrink-0">
+        <Logo className="transition-opacity hover:opacity-80" iconSize={28} />
       </nav>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-12 py-12 relative z-10">
+      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-12 py-6 sm:py-10 relative z-10">
         <div className="w-full max-w-[1200px] grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           
           {/* Left Panel - Information */}
@@ -63,36 +63,36 @@ export function AuthShell({ eyebrow, title, subtitle, children, footer }) {
             {/* Glow behind the panel */}
             <div className="absolute -inset-1 bg-gradient-to-r from-[#8C52FF] to-[#00E5FF] rounded-[2rem] blur-xl opacity-20"></div>
             
-            <div className="relative bg-[#11141A]/60 backdrop-blur-xl border border-[#8C52FF]/30 p-10 sm:p-14 rounded-[2rem] shadow-[0_0_40px_rgba(140,82,255,0.15)]">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight mb-6">
+            <div className="relative bg-[#11141A]/60 backdrop-blur-xl border border-[#8C52FF]/30 p-8 sm:p-12 lg:p-14 rounded-[2rem] shadow-[0_0_40px_rgba(140,82,255,0.15)]">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-[1.15] tracking-tight mb-6">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#A070FF] to-[#8C52FF]">One portal</span> for every<br />
                 event, volunteer <span className="text-white">and check-in.</span>
               </h1>
               
-              <p className="text-[#8F9BB3] text-lg mb-10 leading-relaxed max-w-[90%]">
+              <p className="text-[#8F9BB3] text-base sm:text-lg mb-8 sm:mb-10 leading-relaxed max-w-[90%]">
                 Replace scattered spreadsheets and WhatsApp threads with role-based dashboards for organizers, volunteers and attendees.
               </p>
               
-              <ul className="space-y-6">
+              <ul className="space-y-4 sm:space-y-6">
                 {highlights.map(({ icon: Icon, label }, i) => (
                   <li key={label} className="flex items-center gap-4 text-white/90">
-                    <div className="w-10 h-10 rounded-lg bg-[#1C202B] border border-[#2A3140] flex items-center justify-center shadow-[0_0_10px_rgba(140,82,255,0.2)]">
+                    <div className="w-10 h-10 rounded-lg bg-[#1C202B] border border-[#2A3140] flex items-center justify-center shadow-[0_0_10px_rgba(140,82,255,0.2)] shrink-0">
                       <Icon className="w-5 h-5 text-[#00E5FF]" />
                     </div>
-                    <span className="text-[15px] font-medium">{label}</span>
+                    <span className="text-sm sm:text-[15px] font-medium">{label}</span>
                   </li>
                 ))}
               </ul>
             </div>
             
-            <div className="mt-6 text-sm text-[#5A6B8A] tracking-wider uppercase pl-4">
+            <div className="mt-6 text-xs sm:text-sm text-[#5A6B8A] tracking-wider uppercase pl-4">
               Centralized event & volunteer management
             </div>
           </div>
 
           {/* Right Panel - Form */}
           <div className="relative order-1 lg:order-2 w-full max-w-[480px] mx-auto">
-            <div className="bg-[#161B23]/70 backdrop-blur-xl border border-white/10 p-8 sm:p-12 rounded-[2rem] shadow-2xl relative">
+            <div className="bg-[#161B23]/85 backdrop-blur-xl border border-white/10 p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2rem] shadow-2xl relative">
               
               {/* Optional ambient badge attached to the form panel */}
               <div className="absolute -right-6 top-24 bg-[#11141A]/80 backdrop-blur-md border border-white/10 p-3 rounded-xl shadow-[0_0_20px_rgba(140,82,255,0.15)] animate-float hidden xl:block">
@@ -102,18 +102,18 @@ export function AuthShell({ eyebrow, title, subtitle, children, footer }) {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8F9BB3] mb-2">
                 {eyebrow}
               </p>
-              <h2 className="text-3xl font-bold tracking-tight text-white mb-3">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2 sm:mb-3">
                 {title}
               </h2>
-              <p className="text-sm text-[#8F9BB3] mb-8 leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#8F9BB3] mb-6 sm:mb-8 leading-relaxed">
                 {subtitle}
               </p>
               
-              <div className="mt-8">
+              <div>
                 {children}
               </div>
               
-              <div className="mt-8 text-sm text-[#8F9BB3] flex items-center gap-1">
+              <div className="mt-6 sm:mt-8 text-xs sm:text-sm text-[#8F9BB3] flex items-center gap-1">
                 {footer}
               </div>
             </div>

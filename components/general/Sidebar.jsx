@@ -10,16 +10,21 @@ import {
 import Logo from '@/components/general/Logo';
 import clsx from 'clsx';
 
-export default function Sidebar({ isMobileMenuOpen, isDesktopSidebarCollapsed }) {
+export default function Sidebar({ isMobileMenuOpen, isDesktopSidebarCollapsed, onCloseMobileMenu }) {
   const router = useRouter();
   const currentPath = router.pathname;
 
   const isActive = (href) => {
     if (href === '#') return false;
     if (currentPath === href) return true;
-    if (currentPath.startsWith(href)) return true;
-    // For /events/[id], /all-events would not match, which is correct.
+    if (currentPath.startsWith(href) && href !== '/') return true;
     return false;
+  };
+
+  const handleLinkClick = () => {
+    if (onCloseMobileMenu) {
+      onCloseMobileMenu();
+    }
   };
 
   const MENU_SECTIONS = [
@@ -75,24 +80,33 @@ export default function Sidebar({ isMobileMenuOpen, isDesktopSidebarCollapsed })
       transition={{ duration: 0.3, ease: 'easeInOut' }}
       className={clsx(
         "fixed inset-y-0 left-0 z-50 bg-vol-bg border-vol-border/60 flex flex-col shrink-0 overflow-y-auto overflow-x-hidden transform transition-transform duration-300 md:relative md:translate-x-0 border-r",
-        isMobileMenuOpen ? "translate-x-0 w-[260px] md:w-auto" : "-translate-x-full w-[260px] md:translate-x-0 md:w-auto"
+        isMobileMenuOpen ? "translate-x-0 w-[280px] max-w-[85vw] md:w-auto shadow-2xl" : "-translate-x-full w-[280px] md:translate-x-0 md:w-auto"
       )}
     >
       <div className="w-full h-full flex flex-col bg-vol-bg">
         {/* Brand / Logo Area */}
-        <div className="h-[72px] px-6 flex items-center border-b border-vol-border/50 shrink-0">
+        <div className="h-16 md:h-[72px] px-5 sm:px-6 flex items-center justify-between border-b border-vol-border/50 shrink-0">
           {isDesktopSidebarCollapsed ? (
             <Logo iconSize={28} textClassName="hidden" />
           ) : (
             <Logo iconSize={28} />
           )}
+
+          {/* Close button inside mobile sidebar */}
+          <button
+            onClick={onCloseMobileMenu}
+            className="md:hidden p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-vol-card transition-colors touch-manipulation"
+            aria-label="Close sidebar"
+          >
+            <span className="text-xl leading-none">✕</span>
+          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-4 space-y-6">
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-3 sm:px-4 py-4 space-y-5">
           {MENU_SECTIONS.map((section, idx) => (
             <div key={idx}>
               {section.title && !isDesktopSidebarCollapsed && (
-                <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 whitespace-nowrap">
+                <h3 className="px-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2 whitespace-nowrap">
                   {section.title}
                 </h3>
               )}
@@ -105,9 +119,10 @@ export default function Sidebar({ isMobileMenuOpen, isDesktopSidebarCollapsed })
                     return (
                       <div
                         key={itemIdx}
+                        onClick={handleLinkClick}
                         title={isDesktopSidebarCollapsed ? item.name : undefined}
                         className={clsx(
-                          "flex items-center gap-3 px-3 py-2.5 bg-vol-card border border-vol-border text-white rounded-lg cursor-pointer shadow-sm transition-all",
+                          "flex items-center gap-3 px-3 py-2.5 min-h-[44px] bg-vol-card border border-vol-border text-white rounded-xl cursor-pointer shadow-sm transition-all",
                           isDesktopSidebarCollapsed && "justify-center"
                         )}
                       >
@@ -122,9 +137,10 @@ export default function Sidebar({ isMobileMenuOpen, isDesktopSidebarCollapsed })
                     <Link
                       key={itemIdx}
                       href={item.href}
+                      onClick={handleLinkClick}
                       title={isDesktopSidebarCollapsed ? item.name : undefined}
                       className={clsx(
-                        "flex items-center gap-3 px-3 py-2 text-gray-400 hover:text-white hover:bg-vol-card transition-all duration-200 rounded-lg group",
+                        "flex items-center gap-3 px-3 py-2.5 min-h-[44px] text-gray-400 hover:text-white hover:bg-vol-card transition-all duration-200 rounded-xl group touch-manipulation",
                         isDesktopSidebarCollapsed && "justify-center"
                       )}
                     >
@@ -138,8 +154,12 @@ export default function Sidebar({ isMobileMenuOpen, isDesktopSidebarCollapsed })
           ))}
         </div>
 
-        <div className="p-4 mt-auto">
-          <Link href="#" className={clsx("flex items-center gap-3 p-3 rounded-xl bg-vol-card border border-vol-border text-gray-300 hover:text-white hover:border-vol-accent2/50 transition-all", isDesktopSidebarCollapsed && "justify-center")}>
+        <div className="p-4 mt-auto border-t border-vol-border/40">
+          <Link 
+            href="#" 
+            onClick={handleLinkClick}
+            className={clsx("flex items-center gap-3 p-3 rounded-xl bg-vol-card border border-vol-border text-gray-300 hover:text-white hover:border-vol-accent2/50 transition-all min-h-[44px] touch-manipulation", isDesktopSidebarCollapsed && "justify-center")}
+          >
             <div className="w-8 h-8 rounded-full bg-vol-accent/10 flex items-center justify-center shrink-0">
               <HelpCircle size={18} className="text-vol-accent2" />
             </div>

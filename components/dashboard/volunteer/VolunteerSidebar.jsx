@@ -61,7 +61,7 @@ const menuSections = [
   }
 ];
 
-export default function VolunteerSidebar({ isCollapsed }) {
+export default function VolunteerSidebar({ isCollapsed, isMobileMenuOpen, onCloseMobileMenu }) {
   const router = useRouter();
   const currentPath = router.pathname;
 
@@ -72,26 +72,44 @@ export default function VolunteerSidebar({ isCollapsed }) {
     return false;
   };
 
+  const handleLinkClick = () => {
+    if (onCloseMobileMenu) {
+      onCloseMobileMenu();
+    }
+  };
+
   return (
     <motion.aside
       initial={false}
       animate={{ width: isCollapsed ? 80 : 260 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="h-screen bg-vol-bg border-r border-vol-border flex flex-col hidden md:flex sticky top-0 overflow-y-auto overflow-x-hidden"
+      className={clsx(
+        "fixed inset-y-0 left-0 z-50 bg-vol-bg border-vol-border/60 flex flex-col shrink-0 overflow-y-auto overflow-x-hidden transform transition-transform duration-300 md:relative md:translate-x-0 border-r",
+        isMobileMenuOpen ? "translate-x-0 w-[280px] max-w-[85vw] md:w-auto shadow-2xl" : "-translate-x-full w-[280px] md:translate-x-0 md:w-auto"
+      )}
     >
-      <div className="h-[72px] px-6 flex items-center border-b border-vol-border/50 shrink-0">
+      <div className="h-16 md:h-[72px] px-5 sm:px-6 flex items-center justify-between border-b border-vol-border/50 shrink-0">
         {isCollapsed ? (
           <Logo iconSize={28} textClassName="hidden" />
         ) : (
           <Logo iconSize={28} />
         )}
+
+        {/* Close button on mobile */}
+        <button
+          onClick={onCloseMobileMenu}
+          className="md:hidden p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-vol-card transition-colors touch-manipulation"
+          aria-label="Close sidebar"
+        >
+          <span className="text-xl leading-none">✕</span>
+        </button>
       </div>
 
-      <div className="flex-1 py-6 flex flex-col gap-6">
+      <div className="flex-1 py-4 px-3 sm:px-4 flex flex-col gap-5 overflow-y-auto custom-scrollbar">
         {menuSections.map((section, idx) => (
-          <div key={idx} className="px-4 flex flex-col gap-2">
+          <div key={idx} className="flex flex-col gap-1.5">
             {section.title && !isCollapsed && (
-              <h3 className="text-xs font-semibold text-gray-500 tracking-wider px-3 mb-1 whitespace-nowrap">
+              <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-3 mb-1 whitespace-nowrap">
                 {section.title}
               </h3>
             )}
@@ -103,9 +121,10 @@ export default function VolunteerSidebar({ isCollapsed }) {
                 return (
                   <div
                     key={itemIdx}
+                    onClick={handleLinkClick}
                     title={isCollapsed ? item.name : undefined}
                     className={clsx(
-                      "flex items-center gap-3 px-3 py-2.5 bg-vol-card border border-vol-border text-white rounded-lg cursor-pointer shadow-sm transition-all",
+                      "flex items-center gap-3 px-3 py-2.5 min-h-[44px] bg-vol-card border border-vol-border text-white rounded-xl cursor-pointer shadow-sm transition-all",
                       isCollapsed && "justify-center"
                     )}
                   >
@@ -120,8 +139,9 @@ export default function VolunteerSidebar({ isCollapsed }) {
                 <Link
                   key={itemIdx}
                   href={item.href}
+                  onClick={handleLinkClick}
                   className={clsx(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-vol-card transition-colors group relative",
+                    "flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-xl text-gray-400 hover:text-white hover:bg-vol-card transition-colors group relative touch-manipulation",
                     isCollapsed && "justify-center"
                   )}
                   title={isCollapsed ? item.name : undefined}
@@ -142,8 +162,12 @@ export default function VolunteerSidebar({ isCollapsed }) {
         ))}
       </div>
 
-      <div className="p-4 mt-auto">
-        <Link href="#" className={clsx("flex items-center gap-3 p-3 rounded-xl bg-vol-card border border-vol-border text-gray-300 hover:text-white hover:border-vol-accent2/50 transition-all", isCollapsed && "justify-center")}>
+      <div className="p-4 mt-auto border-t border-vol-border/40">
+        <Link 
+          href="#" 
+          onClick={handleLinkClick}
+          className={clsx("flex items-center gap-3 p-3 rounded-xl bg-vol-card border border-vol-border text-gray-300 hover:text-white hover:border-vol-accent2/50 transition-all min-h-[44px] touch-manipulation", isCollapsed && "justify-center")}
+        >
           <div className="w-8 h-8 rounded-full bg-vol-accent/10 flex items-center justify-center shrink-0">
             <HelpCircle size={18} className="text-vol-accent2" />
           </div>

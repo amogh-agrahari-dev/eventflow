@@ -46,6 +46,8 @@ import {
 import { useUserStore } from "@/store/userStore";
 import SwitchRoleButton from '@/components/general/SwitchRoleButton';
 import ProfileDropdown from '@/components/general/ProfileDropdown';
+import MobileBottomNav from '@/components/general/MobileBottomNav';
+
 export default function AddEventPage() {
   const [livePerformance, setLivePerformance] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -123,8 +125,6 @@ export default function AddEventPage() {
 
   const formatDateTime = (value) => {
     if (!value) return null;
-    // If the input is from datetime-local (YYYY-MM-DDTHH:mm), append seconds.
-    // This ensures it is treated as a naive datetime by the backend.
     return value.length === 16 ? `${value}:00` : value;
   };
 
@@ -148,82 +148,86 @@ export default function AddEventPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          organizer_id: user?.id || 1,
           title: eventTitle,
           description: eventDescription,
-          category: eventCategory || "Technical",
-          location: eventLocation,
+          category: eventCategory,
+          format: eventFormat,
+          is_free: isFree,
+          volunteers_required: parseInt(volunteersRequired, 10),
+          max_attendees: parseInt(maxAttendees, 10),
           start_time: formatDateTime(startDate),
           end_time: formatDateTime(endDate),
-          is_free: isFree,
-          format: eventFormat,
-          max_attendees: Number(maxAttendees) || 100,
-          volunteers_required: Number(volunteersRequired) || 5,
-          banner_url: uploadedImageUrl || null,
+          location: eventLocation,
+          banner_url: uploadedImageUrl,
+          live_performance: livePerformance,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.detail || data.message || "Event creation failed. Please try again.");
-        return;
+        throw new Error(data.detail || "Failed to create event");
       }
 
       toast.success("Event created successfully!");
-    } catch (error) {
-      toast.error(error.message || "Event creation failed. Please try again.");
+      router.push("/all-events");
+    } catch (err) {
+      toast.error(err.message || "An unexpected error occurred");
     }
   };
 
   return (
-    <div className="h-screen bg-vol-bg text-slate-200 font-sans flex flex-col md:flex-row overflow-hidden">
+    <div className="flex h-screen bg-vol-bg text-slate-300 font-sans overflow-hidden selection:bg-vol-accent/30">
       <Head>
-        <title>Create New Event | EventFlow</title>
+        <title>Create Event | EventFlow</title>
       </Head>
 
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <Sidebar isMobileMenuOpen={isMobileMenuOpen} isDesktopSidebarCollapsed={isDesktopSidebarCollapsed} />
+      <Sidebar 
+        isMobileMenuOpen={isMobileMenuOpen} 
+        isDesktopSidebarCollapsed={isDesktopSidebarCollapsed} 
+        onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
+      />
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-vol-bg relative">
+      <main className="flex-1 flex flex-col min-w-0 bg-vol-bg relative pb-16 md:pb-0">
         {/* Top Header */}
-        <header className="flex items-center justify-between px-4 md:px-8 py-5 border-b border-vol-border bg-vol-bg/80 backdrop-blur-sm z-10 flex-shrink-0 h-[68px]">
-          <div className="flex items-center gap-3">
+        <header className="flex items-center justify-between px-4 md:px-8 border-b border-vol-border bg-vol-bg/95 backdrop-blur-sm z-10 flex-shrink-0 h-16 md:h-[72px]">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
-              className="md:hidden text-slate-400 hover:text-white transition-colors"
+              className="md:hidden p-2 -ml-1 text-slate-400 hover:text-white hover:bg-vol-card rounded-lg transition-colors touch-manipulation"
               onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
             >
               <Menu className="w-5 h-5" />
             </button>
             <button
-              className="hidden md:block text-slate-400 hover:text-white transition-colors"
+              className="hidden md:block p-2 -ml-2 text-slate-400 hover:text-white hover:bg-vol-card rounded-lg transition-colors"
               onClick={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
+              aria-label="Toggle sidebar"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-[22px] font-medium text-white truncate">Create New Event</h1>
+            <h1 className="text-base sm:text-lg md:text-xl font-medium text-white truncate">Create New Event</h1>
           </div>
-          <div className="flex items-center gap-4">
-            <button className="px-5 py-2 rounded-full text-sm font-medium text-slate-300 border border-vol-border hover:bg-vol-border transition-colors">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+            <button 
+              type="button" 
+              onClick={() => router.back()}
+              className="hidden sm:inline-flex px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium text-slate-300 border border-vol-border hover:bg-vol-border transition-colors touch-manipulation"
+            >
               Cancel
             </button>
-            <button className="px-5 py-2 rounded-full text-sm font-medium text-white bg-vol-accent hover:bg-[#5a46aa] transition-colors flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Create Event
-            </button>
 
-            <div className="w-px h-6 bg-vol-border mx-1"></div>
-
-            <button className="relative p-2 text-gray-500 hover:text-white transition-colors cursor-pointer">
+            <button aria-label="Notifications" className="relative p-2 text-gray-400 hover:text-white hover:bg-vol-card rounded-full transition-colors cursor-pointer touch-manipulation">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-vol-bg" />
             </button>
@@ -237,8 +241,8 @@ export default function AddEventPage() {
         </header>
 
         {/* Scrollable Form Content */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 pb-32 md:pb-32 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 max-w-[1400px] mx-auto pb-6">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 md:p-8 pb-32 md:pb-36 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 max-w-[1400px] mx-auto pb-6">
 
             {/* Column 1: Event Details, Date & Location */}
             <div className="flex flex-col gap-6">
@@ -552,15 +556,18 @@ export default function AddEventPage() {
           </div>
         </div>
 
-        {/* Fixed Bottom Actions (Sticky in the middle bottom of main content area) */}
-        <form onSubmit={handleSubmit} className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-vol-card/95 backdrop-blur-md px-6 py-4 rounded-2xl border border-vol-border/80 shadow-2xl z-20">
-          <button type="button" className="px-8 py-2.5 rounded-lg text-sm font-medium text-slate-300 border border-vol-border bg-vol-bg hover:bg-vol-border transition-colors min-w-[150px]">
+        {/* Fixed Bottom Actions */}
+        <form onSubmit={handleSubmit} className="fixed md:absolute bottom-16 md:bottom-6 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 flex items-center justify-between md:justify-center gap-3 bg-vol-card/95 backdrop-blur-md p-3 sm:px-6 sm:py-4 rounded-2xl border border-vol-border/80 shadow-2xl z-20">
+          <button type="button" onClick={() => router.push('/all-events')} className="flex-1 md:flex-initial px-4 sm:px-8 py-2.5 rounded-lg text-xs sm:text-sm font-medium text-slate-300 border border-vol-border bg-vol-bg hover:bg-vol-border transition-colors touch-manipulation min-h-[42px]">
             Save as Draft
           </button>
-          <button type="submit" className="px-8 py-2.5 rounded-lg text-sm font-medium text-white bg-vol-accent hover:bg-[#5a46aa] transition-colors shadow-[0_0_15px_rgba(79,70,229,0.3)] min-w-[150px]">
+          <button type="submit" className="flex-1 md:flex-initial px-4 sm:px-8 py-2.5 rounded-lg text-xs sm:text-sm font-medium text-white bg-vol-accent hover:bg-[#5a46aa] transition-colors shadow-[0_0_15px_rgba(79,70,229,0.3)] touch-manipulation min-h-[42px]">
             Publish Event
           </button>
         </form>
+
+        {/* Mobile Bottom Navigation */}
+        <MobileBottomNav role="organizer" />
       </main>
     </div>
   );

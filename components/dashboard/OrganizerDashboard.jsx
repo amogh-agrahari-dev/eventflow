@@ -15,23 +15,52 @@ import Sidebar from '@/components/general/Sidebar';
 import SwitchRoleButton from '@/components/general/SwitchRoleButton';
 import ProfileDropdown from '@/components/general/ProfileDropdown';
 
+import MobileBottomNav from '@/components/general/MobileBottomNav';
+
 function AutoWidthGrid(props) {
   const containerRef = React.useRef(null);
   const [width, setWidth] = useState(1200);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const w = containerRef.current.clientWidth;
+        if (w > 0) {
+          setWidth(w);
+          setIsMobile(w < 768);
+        }
+      }
+    };
+
+    updateDimensions();
+
     const observer = new ResizeObserver(entries => {
       for (let entry of entries) {
-        setWidth(entry.contentRect.width);
+        if (entry.contentRect.width > 0) {
+          setWidth(entry.contentRect.width);
+          setIsMobile(entry.contentRect.width < 768);
+        }
       }
     });
+
     if (containerRef.current) observer.observe(containerRef.current);
-    return () => observer.disconnect();
+    window.addEventListener('resize', updateDimensions);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateDimensions);
+    };
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full h-full">
-      <ResponsiveGridLayout width={width} {...props} />
+    <div ref={containerRef} className="w-full min-w-0">
+      <ResponsiveGridLayout 
+        width={width} 
+        isDraggable={!isMobile}
+        isResizable={!isMobile}
+        {...props} 
+      />
     </div>
   );
 }
@@ -62,9 +91,47 @@ const DEFAULT_LAYOUT = [
   { i: 'live-checkin', x: 6, y: 7, w: 3, h: 4, minW: 2, minH: 3 }
 ];
 
+const generateInitialLayouts = () => {
+  const md = [
+    { i: 'upcoming-events', x: 0, y: 0, w: 4, h: 4, minW: 2, minH: 3 },
+    { i: 'volunteer-assignments', x: 4, y: 0, w: 4, h: 4, minW: 2, minH: 3 },
+    { i: 'live-performance', x: 0, y: 4, w: 4, h: 4, minW: 2, minH: 3 },
+    { i: 'volunteer-central', x: 4, y: 4, w: 4, h: 4, minW: 2, minH: 3 },
+    { i: 'event-analytics', x: 0, y: 8, w: 8, h: 4, minW: 4, minH: 3 },
+    { i: 'recent-registrations', x: 0, y: 12, w: 4, h: 3, minW: 2, minH: 3 },
+    { i: 'team-members', x: 4, y: 12, w: 4, h: 3, minW: 2, minH: 3 },
+    { i: 'recent-activities', x: 0, y: 15, w: 4, h: 4, minW: 2, minH: 3 },
+    { i: 'calendar', x: 4, y: 15, w: 4, h: 4, minW: 2, minH: 3 },
+    { i: 'live-checkin', x: 0, y: 19, w: 8, h: 4, minW: 2, minH: 3 }
+  ];
+  const sm = [
+    { i: 'upcoming-events', x: 0, y: 0, w: 3, h: 4, minW: 2, minH: 3 },
+    { i: 'volunteer-assignments', x: 3, y: 0, w: 3, h: 4, minW: 2, minH: 3 },
+    { i: 'live-performance', x: 0, y: 4, w: 3, h: 4, minW: 2, minH: 3 },
+    { i: 'volunteer-central', x: 3, y: 4, w: 3, h: 4, minW: 2, minH: 3 },
+    { i: 'event-analytics', x: 0, y: 8, w: 6, h: 4, minW: 3, minH: 3 },
+    { i: 'recent-registrations', x: 0, y: 12, w: 3, h: 3, minW: 2, minH: 3 },
+    { i: 'team-members', x: 3, y: 12, w: 3, h: 3, minW: 2, minH: 3 },
+    { i: 'recent-activities', x: 0, y: 15, w: 3, h: 4, minW: 2, minH: 3 },
+    { i: 'calendar', x: 3, y: 15, w: 3, h: 4, minW: 2, minH: 3 },
+    { i: 'live-checkin', x: 0, y: 19, w: 6, h: 4, minW: 2, minH: 3 }
+  ];
+  const singleCol = WIDGETS.map((w, idx) => ({
+    i: w.id,
+    x: 0,
+    y: idx * 4,
+    w: 1,
+    h: 4,
+    minW: 1,
+    minH: 3
+  }));
+
+  return { lg: DEFAULT_LAYOUT, md, sm, xs: singleCol, xxs: singleCol };
+};
+
 export default function OrganizerDashboard() {
   const [isMounted, setIsMounted] = useState(false);
-  const [layouts, setLayouts] = useState({ lg: DEFAULT_LAYOUT });
+  const [layouts, setLayouts] = useState(generateInitialLayouts());
   const [visibleWidgets, setVisibleWidgets] = useState(new Set(WIDGETS.map(w => w.id)));
   const [showCustomizePanel, setShowCustomizePanel] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -129,7 +196,8 @@ export default function OrganizerDashboard() {
   };
 
   const resetDashboard = () => {
-    setLayouts({ lg: DEFAULT_LAYOUT });
+    const initial = generateInitialLayouts();
+    setLayouts(initial);
     setVisibleWidgets(new Set(WIDGETS.map(w => w.id)));
     localStorage.removeItem('organizer_layout');
     localStorage.removeItem('organizer_visible');
@@ -137,7 +205,6 @@ export default function OrganizerDashboard() {
 
   const handleLogout = () => {
     logout();
-    setIsProfileMenuOpen(false);
     router.push('/auth/login');
   };
 
@@ -158,42 +225,48 @@ export default function OrganizerDashboard() {
       )}
 
       {/* 1. Sidebar */}
-      <Sidebar isMobileMenuOpen={isMobileMenuOpen} isDesktopSidebarCollapsed={isDesktopSidebarCollapsed} />
+      <Sidebar 
+        isMobileMenuOpen={isMobileMenuOpen} 
+        isDesktopSidebarCollapsed={isDesktopSidebarCollapsed}
+        onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
+      />
 
       {/* 2. Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-vol-bg">
+      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-vol-bg pb-16 md:pb-0">
 
         {/* Top Header */}
-        <header className="h-[72px] shrink-0 border-b border-vol-border/50 bg-vol-bg/95 backdrop-blur z-10 flex items-center justify-between px-6 sticky top-0">
-          <div className="flex items-center gap-4">
+        <header className="h-16 md:h-[72px] shrink-0 border-b border-vol-border/50 bg-vol-bg/95 backdrop-blur z-10 flex items-center justify-between px-4 md:px-6 sticky top-0">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
-              className="md:hidden p-2 -ml-2 rounded-lg text-gray-400 hover:text-white hover:bg-vol-card transition-colors"
+              className="md:hidden p-2 -ml-1 rounded-lg text-gray-400 hover:text-white hover:bg-vol-card transition-colors touch-manipulation"
               onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open sidebar"
             >
               <Menu size={20} />
             </button>
             <button
               className="hidden md:block p-2 -ml-2 rounded-lg text-gray-400 hover:text-white hover:bg-vol-card transition-colors"
               onClick={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
+              aria-label="Toggle sidebar"
             >
               <Menu size={20} />
             </button>
-            <h1 className="text-xl font-semibold text-white tracking-tight truncate">
+            <h1 className="text-base sm:text-lg md:text-xl font-semibold text-white tracking-tight truncate">
               {user?.name ? `${user.name}'s Dashboard` : "Organizer Dashboard"}
             </h1>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="relative hidden md:block">
+          <div className="flex items-center gap-1.5 sm:gap-3 justify-end shrink-0">
+            <div className="relative hidden lg:block">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search events, tasks..."
-                className="w-64 bg-vol-card border border-vol-border rounded-full py-2 pl-9 pr-4 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-vol-accent2/50 transition-colors"
+                className="w-48 xl:w-64 bg-vol-card border border-vol-border rounded-full py-1.5 pl-9 pr-4 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-vol-accent2/50 transition-colors"
               />
             </div>
 
-            <button className="flex items-center gap-2 bg-vol-accent hover:bg-vol-accent2 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-glow-lg">
+            <button className="hidden sm:flex items-center gap-2 bg-vol-accent hover:bg-vol-accent2 text-white px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors shadow-glow-lg">
               <Plus size={16} />
               <span>Quick-Add</span>
             </button>
@@ -201,14 +274,17 @@ export default function OrganizerDashboard() {
             {/* Customize Dashboard Button */}
             <button
               onClick={() => setShowCustomizePanel(true)}
-              className="flex items-center gap-2 bg-vol-card hover:bg-vol-card/80 border border-vol-border text-gray-200 px-4 py-2 rounded-full text-sm font-medium transition-colors hidden sm:flex"
+              className="hidden sm:flex items-center gap-2 bg-vol-card hover:bg-vol-card/80 border border-vol-border text-gray-200 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors"
             >
               <SlidersHorizontal size={16} />
               <span>Customize</span>
             </button>
 
-            <button className="relative p-2 rounded-full text-gray-400 hover:text-white hover:bg-vol-card transition-colors">
-              <Bell size={20} />
+            <button 
+              aria-label="Notifications" 
+              className="relative p-2 rounded-full text-gray-400 hover:text-white hover:bg-vol-card transition-colors touch-manipulation"
+            >
+              <Bell size={18} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-vol-warning border-2 border-vol-bg" />
             </button>
 
@@ -221,22 +297,20 @@ export default function OrganizerDashboard() {
         </header>
 
         {/* Dashboard Grid Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 custom-scrollbar scroll-smooth relative flex flex-col">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 custom-scrollbar scroll-smooth relative flex flex-col">
           <AutoWidthGrid
             className="layout"
             layouts={layouts}
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-            cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+            cols={{ lg: 12, md: 8, sm: 6, xs: 1, xxs: 1 }}
             rowHeight={95}
             onLayoutChange={handleLayoutChange}
             draggableHandle=".drag-handle"
-            margin={[24, 24]}
-            isResizable={true}
-            isDraggable={true}
+            margin={[16, 16]}
             resizeHandles={['s', 'w', 'e', 'n', 'sw', 'nw', 'se', 'ne']}
           >
             {DEFAULT_LAYOUT.filter(l => visibleWidgets.has(l.i)).map(l => (
-              <div key={l.i} className="flex flex-col h-full w-full bg-transparent">
+              <div key={l.i} className="flex flex-col h-full w-full min-w-0 bg-transparent">
                 {renderWidget(l.i, selectedEventId, setSelectedEventId)}
               </div>
             ))}
@@ -249,7 +323,7 @@ export default function OrganizerDashboard() {
         )}
 
         {/* Customize Panel */}
-        <div className={`fixed top-0 right-0 h-full w-80 md:w-96 bg-vol-card border-l border-vol-border shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${showCustomizePanel ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`fixed top-0 right-0 h-full w-full sm:w-80 md:w-96 max-w-full bg-vol-card border-l border-vol-border shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${showCustomizePanel ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="flex items-center justify-between p-5 border-b border-vol-border/40">
             <h2 className="text-base font-semibold text-white">Customize Layout</h2>
             <button onClick={() => setShowCustomizePanel(false)} className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-vol-border/30 transition-colors">
@@ -264,7 +338,7 @@ export default function OrganizerDashboard() {
               <label
                 key={widget.id}
                 onClick={(e) => { e.preventDefault(); toggleWidget(widget.id); }}
-                className="flex items-center justify-between p-3.5 rounded-xl border border-vol-border bg-vol-bg/60 hover:bg-vol-border/20 cursor-pointer transition-all group"
+                className="flex items-center justify-between p-3.5 rounded-xl border border-vol-border bg-vol-bg/60 hover:bg-vol-border/20 cursor-pointer transition-all group touch-manipulation min-h-[44px]"
               >
                 <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">{widget.title}</span>
                 <div className={`w-10 h-5 rounded-full transition-colors relative ${visibleWidgets.has(widget.id) ? 'bg-vol-success' : 'bg-vol-border'}`}>
@@ -277,12 +351,15 @@ export default function OrganizerDashboard() {
           <div className="p-5 border-t border-vol-border/40">
             <button
               onClick={resetDashboard}
-              className="w-full bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all border border-rose-500/20"
+              className="w-full bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all border border-rose-500/20 touch-manipulation min-h-[44px]"
             >
               Reset to Default Layout
             </button>
           </div>
         </div>
+
+        {/* Mobile Bottom Navigation */}
+        <MobileBottomNav role="organizer" />
       </main>
     </div>
   );

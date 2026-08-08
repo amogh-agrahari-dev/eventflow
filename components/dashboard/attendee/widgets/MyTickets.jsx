@@ -475,7 +475,7 @@ function TicketCard({ ticket, index, onSelectPass }) {
         transition: { duration: 0.3 }
       }}
       onClick={() => onSelectPass && onSelectPass(ticket)}
-      className="min-w-[340px] max-w-[380px] flex-shrink-0 select-none cursor-pointer"
+      className="min-w-[280px] sm:min-w-[340px] max-w-[380px] w-[82vw] sm:w-auto flex-shrink-0 select-none cursor-pointer"
       style={{ perspective: '1200px' }}
       role="button"
       tabIndex={0}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from '@/components/general/Sidebar';
 import OrganizerHeader from './OrganizerHeader';
+import MobileBottomNav from '@/components/general/MobileBottomNav';
 import { motion } from 'framer-motion';
 
 export default function OrganizerLayout({ children, onCustomizeClick }) {
@@ -27,9 +28,13 @@ export default function OrganizerLayout({ children, onCustomizeClick }) {
         />
       )}
 
-      <Sidebar isMobileMenuOpen={isMobileMenuOpen} isDesktopSidebarCollapsed={isDesktopSidebarCollapsed} />
+      <Sidebar 
+        isMobileMenuOpen={isMobileMenuOpen} 
+        isDesktopSidebarCollapsed={isDesktopSidebarCollapsed} 
+        onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
+      />
       
-      <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden relative pb-16 md:pb-0">
         <OrganizerHeader toggleSidebar={toggleSidebar} toggleMobileSidebar={toggleMobileSidebar} onCustomizeClick={onCustomizeClick} />
         
         <main className="flex-1 flex flex-col overflow-hidden relative">
@@ -43,6 +48,9 @@ export default function OrganizerLayout({ children, onCustomizeClick }) {
           </motion.div>
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav role="organizer" />
     </div>
   );
 }

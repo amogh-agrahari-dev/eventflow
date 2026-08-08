@@ -69,9 +69,43 @@ export default function SettingsDashboard() {
   ];
 
   return (
-    <div className="h-full flex bg-[#161B23]">
-      {/* Sidebar */}
-      <aside className="w-64 flex-shrink-0 border-r border-[#1C202B] bg-[#161B23]/95 flex flex-col h-full overflow-y-auto custom-scrollbar">
+    <div className="h-full flex flex-col md:flex-row bg-[#161B23]">
+      {/* Mobile Top Header & Tabs Bar */}
+      <div className="md:hidden border-b border-[#1C202B] bg-[#161B23]/95 shrink-0">
+        <div className="p-4 flex items-center justify-between">
+          <Link href="/organiser-dashboard" className="flex items-center gap-2 text-[#8F9BB3] hover:text-white transition-colors text-xs font-medium">
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Link>
+          <h1 className="text-base font-bold text-white tracking-tight">Settings</h1>
+          <div className="w-8" />
+        </div>
+        
+        {/* Horizontal scrollable tab pills on mobile */}
+        <div className="flex gap-2 px-3 pb-3 overflow-x-auto custom-scrollbar no-scrollbar">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg whitespace-nowrap text-xs font-medium shrink-0 transition-colors touch-manipulation min-h-[36px] ${
+                  isActive
+                    ? item.isDanger ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/30'
+                    : item.isDanger ? 'text-red-400/70 bg-red-500/5' : 'text-[#8F9BB3] bg-white/5 hover:text-white'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-64 flex-shrink-0 border-r border-[#1C202B] bg-[#161B23]/95 flex-col h-full overflow-y-auto custom-scrollbar">
         <div className="p-4 border-b border-[#1C202B]">
           <Link href="/organiser-dashboard" className="flex items-center gap-2 text-[#8F9BB3] hover:text-white transition-colors text-sm font-medium">
             <ArrowLeft className="w-4 h-4" />
@@ -103,23 +137,23 @@ export default function SettingsDashboard() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
+      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0">
         {/* Unsaved Changes Banner */}
         {isDirty && (
-          <div className="bg-[#8B5CF6]/20 border-b border-[#8B5CF6]/30 px-6 py-3 flex items-center justify-between animate-in slide-in-from-top-2">
-            <p className="text-sm text-white font-medium">You have unsaved changes.</p>
-            <div className="flex gap-3">
-              <Button variant="ghost" className="h-8 px-3 text-white hover:bg-white/10" onClick={() => setIsDirty(false)}>
+          <div className="bg-[#8B5CF6]/20 border-b border-[#8B5CF6]/30 px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between animate-in slide-in-from-top-2">
+            <p className="text-xs sm:text-sm text-white font-medium">You have unsaved changes.</p>
+            <div className="flex gap-2 sm:gap-3">
+              <Button variant="ghost" className="h-7 sm:h-8 px-2.5 sm:px-3 text-xs sm:text-sm text-white hover:bg-white/10" onClick={() => setIsDirty(false)}>
                 Cancel
               </Button>
-              <Button className="h-8 px-4 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white" onClick={() => setIsDirty(false)}>
-                Save Changes
+              <Button className="h-7 sm:h-8 px-3 sm:px-4 text-xs sm:text-sm bg-[#8B5CF6] hover:bg-[#7C3AED] text-white" onClick={() => setIsDirty(false)}>
+                Save
               </Button>
             </div>
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-8 lg:p-12">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 md:p-8 lg:p-12">
           <div className="max-w-3xl">
             
             {/* 1. Profile Settings */}

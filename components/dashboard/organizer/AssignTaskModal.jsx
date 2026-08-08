@@ -111,12 +111,12 @@ export default function AssignTaskModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="bg-vol-card border border-vol-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden"
+          className="bg-vol-card border border-vol-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         >
           <div className="flex items-center justify-between p-5 border-b border-vol-border/60">
             <div>
@@ -142,7 +142,7 @@ export default function AssignTaskModal({
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto custom-scrollbar flex-1">
             {/* Task Title */}
             <div>
               <label className="block text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">

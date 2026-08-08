@@ -16,6 +16,8 @@ import ProfileDropdown from '@/components/general/ProfileDropdown';
 import AttendeeLayout from '@/components/dashboard/attendee/AttendeeLayout';
 import VolunteerLayout from '@/components/dashboard/volunteer/VolunteerLayout';
 
+import MobileBottomNav from '@/components/general/MobileBottomNav';
+
 export default function AllEventsPage() {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -129,24 +131,24 @@ export default function AllEventsPage() {
   const isAttendee = router.query.role === 'attendee';
 
   const pageContent = (
-    <div className="max-w-[1400px] mx-auto space-y-6">
+    <div className="max-w-[1400px] mx-auto space-y-5 sm:space-y-6">
             
             {/* Search and Filters Bar */}
-            <div className="bg-vol-card border border-vol-border rounded-2xl p-4 flex flex-col gap-4 sticky top-0 z-20 shadow-lg shadow-black/20 backdrop-blur-xl">
-              <div className="flex flex-col md:flex-row gap-4 items-center">
-                <div className="relative flex-1 w-full">
+            <div className="bg-vol-card border border-vol-border rounded-2xl p-3 sm:p-4 flex flex-col gap-3 sm:gap-4 sticky top-0 z-20 shadow-lg shadow-black/20 backdrop-blur-xl">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
+                <div className="relative flex-1 w-full min-w-0">
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input 
                     type="text"
                     placeholder="Search events by title, category, or location..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-vol-bg/50 border border-vol-border rounded-full py-2 pl-10 pr-4 text-[13px] text-white focus:outline-none focus:border-vol-accent/50 transition-colors placeholder:text-gray-400"
+                    className="w-full bg-vol-bg/50 border border-vol-border rounded-full py-2 pl-9 pr-4 text-xs sm:text-[13px] text-white focus:outline-none focus:border-vol-accent/50 transition-colors placeholder:text-gray-400"
                   />
                 </div>
-                <div className="flex gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 custom-scrollbar">
+                <div className="flex gap-2 sm:gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 custom-scrollbar shrink-0">
                   <select 
-                    className="bg-vol-bg border border-vol-border text-sm text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-vol-accent/50 transition-colors shrink-0"
+                    className="bg-vol-bg border border-vol-border text-xs sm:text-sm text-slate-200 rounded-lg px-3 py-1.5 sm:py-2 focus:outline-none focus:border-vol-accent/50 transition-colors shrink-0 cursor-pointer min-h-[38px]"
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                   >
@@ -160,7 +162,7 @@ export default function AllEventsPage() {
                 </div>
               </div>
               
-              <div className="flex gap-3 flex-wrap items-center">
+              <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-1 custom-scrollbar items-center">
                 <FilterDropdown 
                   label="Category" 
                   value={categoryFilter}
@@ -195,7 +197,7 @@ export default function AllEventsPage() {
                   <Loader2 className="w-4 h-4 animate-spin text-vol-accent" />
                   <span>Loading published events...</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {[...Array(8)].map((_, i) => (
                     <EventCardSkeleton key={i} />
                   ))}
@@ -210,22 +212,22 @@ export default function AllEventsPage() {
                 <p className="text-gray-400 text-sm max-w-md mb-6">{error}</p>
                 <Button 
                   onClick={getEvents}
-                  className="bg-vol-accent hover:bg-vol-accent/80 text-white flex items-center gap-2"
+                  className="bg-vol-accent hover:bg-vol-accent/80 text-white flex items-center gap-2 touch-manipulation min-h-[44px]"
                 >
                   <RefreshCw className="w-4 h-4" /> Try Again
                 </Button>
               </div>
             ) : filteredAndSortedEvents.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center bg-vol-card border border-vol-border rounded-2xl border-dashed">
-                <div className="w-16 h-16 bg-vol-border/50 rounded-full flex items-center justify-center mb-4">
-                  <Calendar className="w-8 h-8 text-gray-400" />
+              <div className="flex flex-col items-center justify-center py-16 sm:py-20 px-4 text-center bg-vol-card border border-vol-border rounded-2xl border-dashed">
+                <div className="w-14 sm:w-16 h-14 sm:h-16 bg-vol-border/50 rounded-full flex items-center justify-center mb-4">
+                  <Calendar className="w-7 sm:w-8 h-7 sm:h-8 text-gray-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">No events found</h3>
-                <p className="text-gray-400 max-w-md">
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">No events found</h3>
+                <p className="text-gray-400 text-xs sm:text-sm max-w-md">
                   No published events match your current filters. Try adjusting your search criteria or clear filters to see more results.
                 </p>
                 <Button 
-                  className="mt-6 bg-vol-accent hover:bg-vol-accent/80 text-white"
+                  className="mt-6 bg-vol-accent hover:bg-vol-accent/80 text-white touch-manipulation min-h-[44px]"
                   onClick={() => {
                     setSearchQuery('');
                     setCategoryFilter('All');
@@ -238,7 +240,7 @@ export default function AllEventsPage() {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {filteredAndSortedEvents.map(event => (
                   <EventCard key={event.id} event={event} />
                 ))}
@@ -285,37 +287,46 @@ export default function AllEventsPage() {
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden" 
           onClick={() => setIsMobileMenuOpen(false)} 
         />
       )}
 
       {/* 1. Sidebar */}
-      <Sidebar isMobileMenuOpen={isMobileMenuOpen} isDesktopSidebarCollapsed={isDesktopSidebarCollapsed} />
+      <Sidebar 
+        isMobileMenuOpen={isMobileMenuOpen} 
+        isDesktopSidebarCollapsed={isDesktopSidebarCollapsed}
+        onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
+      />
 
       {/* 2. Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-vol-bg">
+      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-vol-bg pb-16 md:pb-0">
         
         {/* Top Header */}
-        <header className="h-[68px] flex items-center justify-between px-4 md:px-8 bg-vol-bg/80 backdrop-blur-sm border-b border-vol-border z-10 flex-shrink-0">
-          <div className="flex items-center gap-3">
+        <header className="h-16 md:h-[72px] flex items-center justify-between px-4 md:px-8 bg-vol-bg/95 backdrop-blur-sm border-b border-vol-border z-10 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button 
-              className="md:hidden text-slate-400 hover:text-white transition-colors"
+              className="md:hidden p-2 -ml-1 text-slate-400 hover:text-white hover:bg-vol-card rounded-lg transition-colors touch-manipulation"
               onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
             >
               <Menu className="w-5 h-5" />
             </button>
             <button 
-              className="hidden md:block text-slate-400 hover:text-white transition-colors"
+              className="hidden md:block p-2 -ml-2 text-slate-400 hover:text-white hover:bg-vol-card rounded-lg transition-colors"
               onClick={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
+              aria-label="Toggle sidebar"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-[22px] font-medium text-white truncate">All Published Events</h1>
+            <h1 className="text-base sm:text-lg md:text-xl font-medium text-white truncate">All Published Events</h1>
           </div>
           
-          <div className="flex items-center gap-3">
-            <button className="relative p-2 text-gray-400 hover:text-white transition-colors cursor-pointer">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <button 
+              aria-label="Notifications" 
+              className="relative p-2 text-gray-400 hover:text-white hover:bg-vol-card rounded-full transition-colors cursor-pointer touch-manipulation"
+            >
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full border-2 border-vol-bg"></span>
             </button>
@@ -329,9 +340,12 @@ export default function AllEventsPage() {
         </header>
 
         {/* Content Body */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 md:p-8">
           {pageContent}
         </div>
+
+        {/* Mobile Bottom Navigation */}
+        <MobileBottomNav role="organizer" />
       </main>
     </div>
   );

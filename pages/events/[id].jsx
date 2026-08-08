@@ -15,6 +15,7 @@ import { useUserStore } from '@/store/userStore';
 import { getToken } from '@/lib/auth';
 import SwitchRoleButton from '@/components/general/SwitchRoleButton';
 import ProfileDropdown from '@/components/general/ProfileDropdown';
+import MobileBottomNav from '@/components/general/MobileBottomNav';
 
 function EventLoadingSkeleton({ isMobileMenuOpen, setIsMobileMenuOpen, isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed }) {
   return (
@@ -26,35 +27,41 @@ function EventLoadingSkeleton({ isMobileMenuOpen, setIsMobileMenuOpen, isDesktop
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <Sidebar isMobileMenuOpen={isMobileMenuOpen} isDesktopSidebarCollapsed={isDesktopSidebarCollapsed} />
+      <Sidebar 
+        isMobileMenuOpen={isMobileMenuOpen} 
+        isDesktopSidebarCollapsed={isDesktopSidebarCollapsed}
+        onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
+      />
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-[#161B23]">
+      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-[#161B23] pb-16 md:pb-0">
         {/* Top Header */}
-        <header className="h-[68px] flex items-center justify-between px-4 md:px-8 bg-[#161B23]/80 backdrop-blur-sm border-b border-[#1C202B] z-10 flex-shrink-0">
-          <div className="flex items-center gap-3">
+        <header className="h-16 md:h-[72px] flex items-center justify-between px-4 md:px-8 bg-[#161B23]/95 backdrop-blur-sm border-b border-[#1C202B] z-10 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
-              className="md:hidden text-slate-400 hover:text-white transition-colors"
+              className="md:hidden p-2 -ml-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors touch-manipulation"
               onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
             >
               <Menu className="w-5 h-5" />
             </button>
             <button
-              className="hidden md:block text-slate-400 hover:text-white transition-colors"
+              className="hidden md:block p-2 -ml-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
               onClick={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
+              aria-label="Toggle sidebar"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div className="h-6 w-32 bg-slate-800/80 rounded-md animate-pulse" />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <SwitchRoleButton currentRole="Organizer" />
             <ProfileDropdown currentRole="Organizer" />
           </div>
@@ -385,37 +392,42 @@ export default function EventDetailsPage() {
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
-      {/* 1. Sidebar */}
-      <Sidebar isMobileMenuOpen={isMobileMenuOpen} isDesktopSidebarCollapsed={isDesktopSidebarCollapsed} />
+      {/* Sidebar */}
+      <Sidebar 
+        isMobileMenuOpen={isMobileMenuOpen} 
+        isDesktopSidebarCollapsed={isDesktopSidebarCollapsed}
+        onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
+      />
 
-      {/* 2. Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-[#161B23]">
-
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col overflow-hidden relative min-w-0 bg-[#161B23] pb-16 md:pb-0">
         {/* Top Header */}
-        <header className="h-[68px] flex items-center justify-between px-4 md:px-8 bg-[#161B23]/80 backdrop-blur-sm border-b border-[#1C202B] z-10 flex-shrink-0">
-          <div className="flex items-center gap-3">
+        <header className="h-16 md:h-[72px] flex items-center justify-between px-4 md:px-8 bg-[#161B23]/95 backdrop-blur-sm border-b border-[#1C202B] z-10 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
-              className="md:hidden text-slate-400 hover:text-white transition-colors"
+              className="md:hidden p-2 -ml-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors touch-manipulation"
               onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
             >
               <Menu className="w-5 h-5" />
             </button>
             <button
-              className="hidden md:block text-slate-400 hover:text-white transition-colors"
+              className="hidden md:block p-2 -ml-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
               onClick={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
+              aria-label="Toggle sidebar"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-[22px] font-medium text-white truncate">Event Details</h1>
+            <h1 className="text-base sm:text-lg md:text-xl font-medium text-white truncate">Event Details</h1>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button className="relative p-2 text-[#5A6B8A] hover:text-white transition-colors cursor-pointer">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <button aria-label="Notifications" className="relative p-2 text-[#5A6B8A] hover:text-white hover:bg-slate-800 rounded-full transition-colors cursor-pointer touch-manipulation">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#F59E0B] rounded-full border-2 border-[#161B23]"></span>
             </button>
@@ -623,6 +635,9 @@ export default function EventDetailsPage() {
           </div>
 
         </div>
+
+        {/* Mobile Bottom Navigation */}
+        <MobileBottomNav role="organizer" />
       </main>
     </div>
   );
