@@ -67,6 +67,7 @@ export default function AddEventPage() {
   const [isFree, setIsFree] = useState(true);
   const [volunteersRequired, setVolunteersRequired] = useState(5);
   const [maxAttendees, setMaxAttendees] = useState(100);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const { user, fetchUser } = useUserStore();
   const token = getToken();
@@ -125,6 +126,16 @@ export default function AddEventPage() {
 
   const formatDateTime = (value) => {
     if (!value) return null;
+    try {
+      const d = new Date(value);
+      if (!isNaN(d.getTime())) {
+        // Return clean ISO string or YYYY-MM-DDTHH:MM:SS
+        const iso = d.toISOString();
+        return iso;
+      }
+    } catch {
+      // Fallback
+    }
     return value.length === 16 ? `${value}:00` : value;
   };
 
@@ -141,38 +152,83 @@ export default function AddEventPage() {
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
+      // Resolve current user / organizer ID
+      let activeUserId = user?.id || user?._id || user?.user_id;
+      if (!activeUserId) {
+        try {
+          const fetched = await fetchUser();
+          activeUserId = fetched?.id || fetched?._id || fetched?.user_id;
+        } catch (e) {
+          console.warn("fetchUser failed in add.jsx", e);
+        }
+      }
+
+      if (!activeUserId) {
+        try {
+          const storedUser = localStorage.getItem("user");
+          if (storedUser) {
+            const parsed = JSON.parse(storedUser);
+            activeUserId = parsed?.id || parsed?._id || parsed?.user_id;
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      if (!activeUserId) {
+        throw new Error("Unable to identify logged in organizer. Please sign in again.");
+      }
+
+      const defaultFallbackBanner = "https://res.cloudinary.com/iwmgtq54/image/upload/v1785993593/eventflow/events/cover-not-found.jpg";
+      const finalBannerUrl = uploadedImageUrl?.trim() || defaultFallbackBanner;
+
+      const payload = {
+        title: eventTitle.trim(),
+        description: eventDescription?.trim() || null,
+        category: eventCategory || "Technical",
+        format: (eventFormat || "online").toLowerCase(),
+        is_free: Boolean(isFree),
+        volunteers_required: parseInt(volunteersRequired, 10) || 5,
+        max_attendees: parseInt(maxAttendees, 10) || 100,
+        start_time: formatDateTime(startDate),
+        end_time: formatDateTime(endDate),
+        location: eventLocation?.trim() || null,
+        banner_url: finalBannerUrl,
+        organizer_id: Number(activeUserId),
+      };
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/events/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          title: eventTitle,
-          description: eventDescription,
-          category: eventCategory,
-          format: eventFormat,
-          is_free: isFree,
-          volunteers_required: parseInt(volunteersRequired, 10),
-          max_attendees: parseInt(maxAttendees, 10),
-          start_time: formatDateTime(startDate),
-          end_time: formatDateTime(endDate),
-          location: eventLocation,
-          banner_url: uploadedImageUrl,
-          live_performance: livePerformance,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || "Failed to create event");
+        let errorMsg = "Failed to create event";
+        if (Array.isArray(data?.detail)) {
+          errorMsg = data.detail.map(d => `${d.loc ? d.loc.slice(1).join('.') : ''}: ${d.msg}`).join(', ');
+        } else if (typeof data?.detail === 'string') {
+          errorMsg = data.detail;
+        } else if (data?.message) {
+          errorMsg = data.message;
+        }
+        throw new Error(errorMsg);
       }
 
       toast.success("Event created successfully!");
       router.push("/all-events");
     } catch (err) {
+      console.error("Event creation error:", err);
       toast.error(err.message || "An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -191,9 +247,9 @@ export default function AddEventPage() {
       )}
 
       {/* Sidebar */}
-      <Sidebar 
-        isMobileMenuOpen={isMobileMenuOpen} 
-        isDesktopSidebarCollapsed={isDesktopSidebarCollapsed} 
+      <Sidebar
+        isMobileMenuOpen={isMobileMenuOpen}
+        isDesktopSidebarCollapsed={isDesktopSidebarCollapsed}
         onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
       />
 
@@ -219,8 +275,8 @@ export default function AddEventPage() {
             <h1 className="text-base sm:text-lg md:text-xl font-medium text-white truncate">Create New Event</h1>
           </div>
           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => router.back()}
               className="hidden sm:inline-flex px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium text-slate-300 border border-vol-border hover:bg-vol-border transition-colors touch-manipulation"
             >
@@ -561,8 +617,8 @@ export default function AddEventPage() {
           <button type="button" onClick={() => router.push('/all-events')} className="flex-1 md:flex-initial px-4 sm:px-8 py-2.5 rounded-lg text-xs sm:text-sm font-medium text-slate-300 border border-vol-border bg-vol-bg hover:bg-vol-border transition-colors touch-manipulation min-h-[42px]">
             Save as Draft
           </button>
-          <button type="submit" className="flex-1 md:flex-initial px-4 sm:px-8 py-2.5 rounded-lg text-xs sm:text-sm font-medium text-white bg-vol-accent hover:bg-[#5a46aa] transition-colors shadow-[0_0_15px_rgba(79,70,229,0.3)] touch-manipulation min-h-[42px]">
-            Publish Event
+          <button type="submit" disabled={isSubmitting} className="flex-1 md:flex-initial px-4 sm:px-8 py-2.5 rounded-lg text-xs sm:text-sm font-medium text-white bg-vol-accent hover:bg-[#5a46aa] transition-colors shadow-[0_0_15px_rgba(79,70,229,0.3)] touch-manipulation min-h-[42px] disabled:opacity-50 disabled:cursor-not-allowed">
+            {isSubmitting ? "Creating..." : "Publish Event"}
           </button>
         </form>
 
